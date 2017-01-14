@@ -3,7 +3,9 @@
         <md-toolbar class="md-dense">
             <h2 id="toolbar-title" class="md-title">ibt2</h2>
             <span v-if="loggedInUser.username">
-                Logged in: {{ loggedInUser.username }}
+                <span id="logged-in">
+                    Logged in: {{ loggedInUser.username }}
+                </span>
                 <md-button class="md-icon-button" @click="logout()">
                     <md-icon>exit_to_app</md-icon>
                 </md-button>
@@ -12,10 +14,12 @@
                 <md-button v-show="!showLoginForm" class="md-icon-button" @click="focusToLoginForm()">
                     <md-icon>power_settings_new</md-icon>
                 </md-button>
-                <span v-show="showLoginForm">
-                    <md-input-container id="login-form" md-inline>
-                        <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />
-                        <md-input ref="passwordInput" @keyup.enter.native="login()" v-model="password" placeholder="password" md-line />
+                <span v-show="showLoginForm" id="login-form">
+                    <md-input-container id="username-input" class="login-input" md-inline>
+                        <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />&nbsp;
+                    </md-input-container>
+                    <md-input-container id="password-input" class="login-input" md-inline>
+                        <md-input ref="passwordInput" @keyup.enter.native="login()" v-model="password" placeholder="password" type="password" md-line />
                     </md-input-container>
                 </span>
             </span>
@@ -204,7 +208,30 @@ export default {
     flex: 1;
 }
 
-#login-form {
+.login-input {
     width: 200px;
+    margin: 0px 0px 0px;
+    padding-top: 0px;
+    padding-left: 4px;
+    min-height: 24px;
+    line-height: 0px;
+    margin-right: 20px;
+    background-color: white;
+}
+
+#username-input {
+    display: inline;
+    float: left;
+}
+
+#password-input {
+    display: inline;
+    float: right;
+}
+
+#logged-in {
+    position: relative;
+    top: 10px;
+
 }
 </style>
