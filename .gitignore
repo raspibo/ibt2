@@ -6,4 +6,3 @@ ssl/*.pem
 *.py[cod]
 *.so
 .editorconfig
-.babelrc
