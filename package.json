@@ -6,18 +6,22 @@
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
-    "pydev": "python ibt2.py --debug --db_name=ibt2_test",
-    "watch": "watch 'npm run build' src/",
+    "devserver": "python ibt2.py --debug --db_name=ibt2_test",
+    "server": "python ibt2.py --debug",
     "build": "node build/build.js"
   },
   "dependencies": {
     "babel": "^6.5.2",
     "jquery": "^3.1.1",
-    "material-ui-vue": "^0.1.4",
+    "material-design-icons": "^3.0.1",
     "materialize-css": "^0.97.8",
-    "vue": "^2.1.6",
+    "roboto-fontface": "^0.6.0",
+    "vue": "^2.1.8",
+    "vue-focus": "^2.1.0",
     "vue-loader": "^10.0.2",
+    "vue-material": "^0.6.3",
     "vue-resource": "^1.0.3",
+    "vue-router": "^2.1.1",
     "vuejs-datepicker": "^0.4.27"
   },
   "devDependencies": {
@@ -39,9 +43,9 @@
     "html-webpack-plugin": "^2.8.1",
     "http-proxy-middleware": "^0.17.2",
     "json-loader": "^0.5.4",
-    "semver": "^5.3.0",
     "opn": "^4.0.2",
     "ora": "^0.3.0",
+    "semver": "^5.3.0",
     "shelljs": "^0.7.4",
     "url-loader": "^0.5.7",
     "vue-loader": "^10.0.0",
