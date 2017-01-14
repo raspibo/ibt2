@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""I'll Be There 2 (ibt2) - an oversimplified attendees registration system.
+"""I'll Be There, 2 (ibt2) - an oversimplified attendees registration system.
 
-Copyright 2016 Davide Alberani <da@erlug.linux.it>
-               RaspiBO <info@raspibo.org>
+Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>
+                    RaspiBO <info@raspibo.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,13 +33,7 @@ from tornado import gen, escape
 import utils
 import monco
 
-ENCODING = 'utf-8'
-PROCESS_TIMEOUT = 60
-
 API_VERSION = '1.0'
-
-re_env_key = re.compile('[^A-Z_]+')
-re_slashes = re.compile(r'//+')
 
 
 class BaseException(Exception):
@@ -62,18 +56,6 @@ class InputException(BaseException):
 
 class BaseHandler(tornado.web.RequestHandler):
     """Base class for request handlers."""
-    permissions = {
-        'day|read': True,
-        'day:groups|read': True,
-        'day:groups|create': True,
-        'day:groups|update': True,
-        'day:groups-all|read': True,
-        'day:groups-all|create': True,
-        'days|read': True,
-        'days|create': True,
-        'users|create': True
-    }
-
     # Cache currently connected users.
     _users_cache = {}
 
@@ -136,43 +118,19 @@ class BaseHandler(tornado.web.RequestHandler):
 
     @property
     def current_user_info(self):
-        """Information about the current user, including their permissions."""
+        """Information about the current user."""
         current_user = self.current_user
         if current_user in self._users_cache:
             return self._users_cache[current_user]
-        permissions = set([k for (k, v) in self.permissions.iteritems() if v is True])
-        user_info = {'permissions': permissions}
+        user_info = {}
         if current_user:
             user_info['username'] = current_user
             res = self.db.query('users', {'username': current_user})
             if res:
                 user = res[0]
                 user_info = user
-                permissions.update(set(user.get('permissions') or []))
-                user_info['permissions'] = permissions
         self._users_cache[current_user] = user_info
         return user_info
-
-    def has_permission(self, permission):
-        """Check permissions of the current user.
-
-        :param permission: the permission to check
-        :type permission: str
-
-        :returns: True if the user is allowed to perform the action or False
-        :rtype: bool
-        """
-        user_info = self.current_user_info or {}
-        user_permissions = user_info.get('permissions') or []
-        global_permission = '%s|all' % permission.split('|')[0]
-        if 'admin|all' in user_permissions or global_permission in user_permissions or permission in user_permissions:
-            return True
-        collection_permission = self.permissions.get(permission)
-        if isinstance(collection_permission, bool):
-            return collection_permission
-        if callable(collection_permission):
-            return collection_permission(permission)
-        return False
 
     def user_authorized(self, username, password):
         """Check if a combination of username/password is valid.
@@ -288,112 +246,6 @@ class CollectionHandler(BaseHandler):
             data = filter_method(data)
         return data
 
-    @gen.coroutine
-    def get(self, id_=None, resource=None, resource_id=None, acl=True, **kwargs):
-        if resource:
-            # Handle access to sub-resources.
-            permission = '%s:%s%s|read' % (self.document, resource, '-all' if resource_id is None else '')
-            if acl and not self.has_permission(permission):
-                return self.build_error(status=401, message='insufficient permissions: %s' % permission)
-            handler = getattr(self, 'handle_get_%s' % resource, None)
-            if callable(handler):
-                output = handler(id_, resource_id, **kwargs) or {}
-                output = self.apply_filter(output, 'get_%s' % resource)
-                self.write(output)
-                return
-            return self.build_error(status=404, message='unable to access resource: %s' % resource)
-        if id_ is not None:
-            # read a single document
-            permission = '%s|read' % self.document
-            if acl and not self.has_permission(permission):
-                return self.build_error(status=401, message='insufficient permissions: %s' % permission)
-            handler = getattr(self, 'handle_get', None)
-            if callable(handler):
-                output = handler(id_, **kwargs) or {}
-            else:
-                output = self.db.get(self.collection, id_)
-            output = self.apply_filter(output, 'get')
-            self.write(output)
-        else:
-            # return an object containing the list of all objects in the collection.
-            # Please, never return JSON lists that are not encapsulated into an object,
-            # to avoid XSS vulnerabilities.
-            permission = '%s|read' % self.collection
-            if acl and not self.has_permission(permission):
-                return self.build_error(status=401, message='insufficient permissions: %s' % permission)
-            output = {self.collection: self.db.query(self.collection, self.arguments)}
-            output = self.apply_filter(output, 'get_all')
-            self.write(output)
-
-    @gen.coroutine
-    def post(self, id_=None, resource=None, resource_id=None, **kwargs):
-        data = escape.json_decode(self.request.body or '{}')
-        self._clean_dict(data)
-        method = self.request.method.lower()
-        crud_method = 'create' if method == 'post' else 'update'
-        now = datetime.datetime.now()
-        user_info = self.current_user_info
-        user_id = user_info.get('_id')
-        if crud_method == 'create':
-            data['created_by'] = user_id
-            data['created_at'] = now
-        data['updated_by'] = user_id
-        data['updated_at'] = now
-        if resource:
-            permission = '%s:%s%s|%s' % (self.document, resource, '-all' if resource_id is None else '', crud_method)
-            if not self.has_permission(permission):
-                return self.build_error(status=401, message='insufficient permissions: %s' % permission)
-            # Handle access to sub-resources.
-            handler = getattr(self, 'handle_%s_%s' % (method, resource), None)
-            if handler and callable(handler):
-                data = self.apply_filter(data, 'input_%s_%s' % (method, resource))
-                output = handler(id_, resource_id, data, **kwargs)
-                output = self.apply_filter(output, 'get_%s' % resource)
-                self.write(output)
-                return
-            return self.build_error(status=404, message='unable to access resource: %s' % resource)
-        if id_ is not None:
-            permission = '%s|%s' % (self.document, crud_method)
-            if not self.has_permission(permission):
-                return self.build_error(status=401, message='insufficient permissions: %s' % permission)
-            data = self.apply_filter(data, 'input_%s' % method)
-            merged, newData = self.db.update(self.collection, id_, data)
-            newData = self.apply_filter(newData, method)
-        else:
-            permission = '%s|%s' % (self.collection, crud_method)
-            if not self.has_permission(permission):
-                return self.build_error(status=401, message='insufficient permissions: %s' % permission)
-            data = self.apply_filter(data, 'input_%s_all' % method)
-            newData = self.db.add(self.collection, data)
-            newData = self.apply_filter(newData, '%s_all' % method)
-        self.write(newData)
-
-    # PUT (update an existing document) is handled by the POST (create a new document) method;
-    # in subclasses you can always separate sub-resources handlers like handle_post_tickets and handle_put_tickets
-    put = post
-
-    @gen.coroutine
-    def delete(self, id_=None, resource=None, resource_id=None, **kwargs):
-        if resource:
-            # Handle access to sub-resources.
-            permission = '%s:%s%s|delete' % (self.document, resource, '-all' if resource_id is None else '')
-            if not self.has_permission(permission):
-                return self.build_error(status=401, message='insufficient permissions: %s' % permission)
-            method = getattr(self, 'handle_delete_%s' % resource, None)
-            if method and callable(method):
-                output = method(id_, resource_id, **kwargs)
-                self.write(output)
-                return
-            return self.build_error(status=404, message='unable to access resource: %s' % resource)
-        if id_ is not None:
-            permission = '%s|delete' % self.document
-            if not self.has_permission(permission):
-                return self.build_error(status=401, message='insufficient permissions: %s' % permission)
-            howMany = self.db.delete(self.collection, id_)
-        else:
-            self.write({'success': False})
-        self.write({'success': True})
-
 
 class AttendeesHandler(CollectionHandler):
     document = 'attendee'
@@ -426,6 +278,8 @@ class AttendeesHandler(CollectionHandler):
     def put(self, id_, **kwargs):
         data = escape.json_decode(self.request.body or '{}')
         self._clean_dict(data)
+        if '_id' in data:
+            del data['_id']
         user_info = self.current_user_info
         user_id = user_info.get('_id')
         now = datetime.datetime.now()
@@ -450,7 +304,6 @@ class DaysHandler(CollectionHandler):
     def _summarize(self, days):
         res = []
         for day in days:
-            print day['day'], [x['group'] for x in day.get('groups')]
             res.append({'day': day['day'], 'groups_count': len(day.get('groups', []))})
         return res
 
@@ -479,14 +332,26 @@ class DaysHandler(CollectionHandler):
                 elif end.count('-') == 1:
                     end += '-31'
                 params['day'].update({'$lte': end})
-        res = self.db.query('attendees', params)
+        results = self.db.query('attendees', params)
         days = []
-        for d, dayItems in itertools.groupby(sorted(res, key=itemgetter('day')), key=itemgetter('day')):
-            dayData = {'day': d, 'groups': []}
-            for group, attendees in itertools.groupby(sorted(dayItems, key=itemgetter('group')), key=itemgetter('group')):
-                attendees = sorted(attendees, key=itemgetter('_id'))
-                dayData['groups'].append({'group': group, 'attendees': attendees})
-            days.append(dayData)
+        dayData = {}
+        try:
+            sortedDays = []
+            for result in results:
+                if not ('day' in result and 'group' in result and 'name' in result):
+                    self.logger.warn('unable to parse entry; dayData: %s', dayData)
+                    continue
+                sortedDays.append(result)
+            sortedDays = sorted(sortedDays, key=itemgetter('day'))
+            for d, dayItems in itertools.groupby(sortedDays, key=itemgetter('day')):
+                dayData = {'day': d, 'groups': []}
+                for group, attendees in itertools.groupby(sorted(dayItems, key=itemgetter('group')),
+                                                          key=itemgetter('group')):
+                    attendees = sorted(attendees, key=itemgetter('_id'))
+                    dayData['groups'].append({'group': group, 'attendees': attendees})
+                days.append(dayData)
+        except Exception as e:
+            self.logger.warn('unable to parse entry; dayData: %s', dayData)
         if summary:
             days = self._summarize(days)
         if not day:
@@ -517,9 +382,6 @@ class UsersHandler(CollectionHandler):
 
     @gen.coroutine
     def get(self, id_=None, resource=None, resource_id=None, acl=True, **kwargs):
-        if id_ is not None:
-            if (self.has_permission('user|read') or str(self.current_user_info.get('_id')) == id_):
-                acl = False
         super(UsersHandler, self).get(id_, resource, resource_id, acl=acl, **kwargs)
 
     def filter_input_post_all(self, data):
@@ -555,7 +417,7 @@ class UsersHandler(CollectionHandler):
         if id_ is None:
             return self.build_error(status=404, message='unable to access the resource')
         if str(self.current_user_info.get('_id')) != id_:
-            return self.build_error(status=401, message='insufficient permissions: user|update or current user')
+            return self.build_error(status=401, message='insufficient permissions: current user')
         super(UsersHandler, self).put(id_, resource, resource_id, **kwargs)
 
 
@@ -566,6 +428,16 @@ class SettingsHandler(BaseHandler):
         query = self.arguments_tobool()
         settings = self.db.query('settings', query)
         self.write({'settings': settings})
+
+
+class CurrentUserHandler(BaseHandler):
+    """Handle requests for information about the logged in user."""
+    @gen.coroutine
+    def get(self, **kwargs):
+        user_info = self.current_user_info or {}
+        if 'password' in user_info:
+            del user_info['password']
+        self.write(user_info)
 
 
 class LoginHandler(RootHandler):
@@ -598,7 +470,10 @@ class LoginHandler(RootHandler):
             username = user['username']
             logging.info('successful login for user %s' % username)
             self.set_secure_cookie("user", username)
-            self.write({'error': False, 'message': 'successful login'})
+            user_info = self.current_user_info
+            if 'password' in user_info:
+                del user_info['password']
+            self.write(user_info)
             return
         logging.info('login failed for user %s' % username)
         self.set_status(401)
@@ -669,6 +544,7 @@ def run():
 
     _days_path = r"/days/?(?P<day>[\d_-]+)?"
     _attendees_path = r"/days/(?P<day_id>[\d_-]+)/groups/(?P<group_id>[\w\d_\ -]+)/attendees/?(?P<attendee_id>[\w\d_\ -]+)?"
+    _current_user_path = r"/users/current/?"
     _users_path = r"/users/?(?P<id_>[\w\d_-]+)?/?(?P<resource>[\w\d_-]+)?/?(?P<resource_id>[\w\d_-]+)?"
     _attendees_path = r"/attendees/?(?P<id_>[\w\d_-]+)?"
     application = tornado.web.Application([
@@ -676,6 +552,8 @@ def run():
             (r'/v%s%s' % (API_VERSION, _attendees_path), AttendeesHandler, init_params),
             (_days_path, DaysHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _days_path), DaysHandler, init_params),
+            (_current_user_path, CurrentUserHandler, init_params),
+            (r'/v%s%s' % (API_VERSION, _current_user_path), CurrentUserHandler, init_params),
             (_users_path, UsersHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _users_path), UsersHandler, init_params),
             (r"/(?:index.html)?", RootHandler, init_params),
