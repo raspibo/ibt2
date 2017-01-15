@@ -1,29 +1,5 @@
 <template>
-    <div id="app">
-        <md-toolbar class="md-dense">
-            <h2 id="toolbar-title" class="md-title">ibt2</h2>
-            <span v-if="loggedInUser.username">
-                <span id="logged-in">
-                    Logged in: {{ loggedInUser.username }}
-                </span>
-                <md-button class="md-icon-button" @click="logout()">
-                    <md-icon>exit_to_app</md-icon>
-                </md-button>
-            </span>
-            <span v-else>
-                <md-button v-show="!showLoginForm" class="md-icon-button" @click="focusToLoginForm()">
-                    <md-icon>power_settings_new</md-icon>
-                </md-button>
-                <span v-show="showLoginForm" id="login-form">
-                    <md-input-container id="username-input" class="login-input" md-inline>
-                        <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />&nbsp;
-                    </md-input-container>
-                    <md-input-container id="password-input" class="login-input" md-inline>
-                        <md-input ref="passwordInput" @keyup.enter.native="login()" v-model="password" placeholder="password" type="password" md-line />
-                    </md-input-container>
-                </span>
-            </span>
-        </md-toolbar>
+    <div id="main-attendees">
         <md-layout md-gutter md-row>
             <md-layout md-column md-flex="20" md-gutter>
                 <datepicker id="datepicker" :value="date" :inline="true" @selected="getDay"></datepicker>
@@ -47,11 +23,7 @@ export default {
         return {
             date: null, // a Date object representing the selected date
             day: {},
-            daysSummary: {},
-            username: '',
-            password: '',
-            showLoginForm: false,
-            loggedInUser: {username: ''}
+            daysSummary: {}
         }
     },
 
@@ -64,7 +36,6 @@ export default {
     },
 
     mounted: function() {
-        this.getUserInfo();
         var [year, month, day] = (this.$route.params.day || '').split('-');
         year = parseInt(year);
         month = parseInt(month) - 1;
@@ -79,16 +50,6 @@ export default {
     },
 
     methods: {
-        focusToLoginForm() {
-            this.showLoginForm = true;
-            var that = this;
-            setTimeout(function() { that.$refs.usernameInput.$el.focus(); }, 400);
-        },
-
-        focusToPassword() {
-            this.$refs.passwordInput.$el.focus();
-        },
-
         reload() {
             var ym = this.dateToString(this.date, true);
             this.getSummary({start: ym, end: ym});
@@ -144,40 +105,6 @@ export default {
                 }
                 this.day = dayData;
             });
-        },
-
-        login() {
-            this.loginUrl.save({username: this.username, password: this.password}).then((response) => {
-                return response.json();
-            }, (response) => {
-                alert('login: failed to get resource');
-            }).then((data) => {
-                this.showLoginForm = false;
-                this.getUserInfo();
-            });
-        },
-
-        logout() {
-            this.logoutUrl.get().then((response) => {
-                return response.json();
-            }, (response) => {
-                alert('logout: failed to get resource');
-            }).then((json) => {
-                this.loggedInUser = {};
-            });
-        },
-
-        getUserInfo(callback) {
-            this.currentUserUrl.get().then((response) => {
-                return response.json();
-            }, (response) => {
-                alert('getUserInfo: failed to get resource');
-            }).then((data) => {
-                this.loggedInUser = data || {};
-                if (callback) {
-                    callback(this.loggedInUser);
-                }
-            });
         }
     },
 
@@ -188,7 +115,7 @@ export default {
 </script>
 
 <style>
-#app {
+#main-attendees {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -217,21 +144,5 @@ export default {
     line-height: 0px;
     margin-right: 20px;
     background-color: white;
-}
-
-#username-input {
-    display: inline;
-    float: left;
-}
-
-#password-input {
-    display: inline;
-    float: right;
-}
-
-#logged-in {
-    position: relative;
-    top: 10px;
-
 }
 </style>
