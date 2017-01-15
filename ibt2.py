@@ -113,7 +113,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     @property
     def current_user(self):
-        """Retrieve current user name from the secure cookie."""
+        """Retrieve current user ID from the secure cookie."""
         return self.get_secure_cookie("user")
 
     @property
@@ -124,10 +124,9 @@ class BaseHandler(tornado.web.RequestHandler):
             return self._users_cache[current_user]
         user_info = {}
         if current_user:
-            user_info['username'] = current_user
-            res = self.db.query('users', {'username': current_user})
-            if res:
-                user = res[0]
+            user_info['_id'] = current_user
+            user = self.db.getOne('users', {'_id': user_info['_id']})
+            if user:
                 user_info = user
         self._users_cache[current_user] = user_info
         return user_info
@@ -367,24 +366,25 @@ class UsersHandler(CollectionHandler):
     document = 'user'
     collection = 'users'
 
-    def filter_get(self, data):
-        if 'password' in data:
-            del data['password']
-        return data
-
-    def filter_get_all(self, data):
-        if 'users' not in data:
-            return data
-        for user in data['users']:
-            if 'password' in user:
-                del user['password']
-        return data
+    @gen.coroutine
+    def get(self, id_=None, **kwargs):
+        if id_:
+            output = self.db.getOne(self.collection, {'_id': id_})
+            if 'password' in output:
+                del output['password']
+        else:
+            output = {self.collection: self.db.query(self.collection, self.arguments)}
+            for user in output['users']:
+                if 'password' in user:
+                    del user['password']
+        self.write(output)
 
     @gen.coroutine
-    def get(self, id_=None, resource=None, resource_id=None, acl=True, **kwargs):
-        super(UsersHandler, self).get(id_, resource, resource_id, acl=acl, **kwargs)
-
-    def filter_input_post_all(self, data):
+    def post(self, **kwargs):
+        data = escape.json_decode(self.request.body or '{}')
+        self._clean_dict(data)
+        if '_id' in data:
+            del data['_id']
         username = (data.get('username') or '').strip()
         password = (data.get('password') or '').strip()
         email = (data.get('email') or '').strip()
@@ -393,10 +393,22 @@ class UsersHandler(CollectionHandler):
         res = self.db.query('users', {'username': username})
         if res:
             raise InputException('username already exists')
-        return {'username': username, 'password': utils.hash_password(password),
-                'email': email}
+        data['username'] = username
+        data['email'] = email
+        data['password'] = utils.hash_password(password)
+        if 'isAdmin' in data:
+            del data['isAdmin']
+        doc = self.db.add(self.collection, data)
+        if 'password' in doc:
+            del doc['password']
+        self.write(doc)
 
-    def filter_input_put(self, data):
+    @gen.coroutine
+    def put(self, id_=None, **kwargs):
+        data = escape.json_decode(self.request.body or '{}')
+        self._clean_dict(data)
+        if id_ is None:
+            return self.build_error(status=404, message='unable to access the resource')
         old_pwd = data.get('old_password')
         new_pwd = data.get('new_password')
         if old_pwd is not None:
@@ -410,15 +422,21 @@ class UsersHandler(CollectionHandler):
         if '_id' in data:
             # Avoid overriding _id
             del data['_id']
-        return data
+        if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
+            return self.build_error(status=401, message='insufficient permissions: current user')
+        merged, doc = self.db.update(self.collection, {'_id': id_}, data)
+        self.write(doc)
 
     @gen.coroutine
-    def put(self, id_=None, resource=None, resource_id=None, **kwargs):
+    def delete(self, id_=None, **kwargs):
         if id_ is None:
             return self.build_error(status=404, message='unable to access the resource')
-        if str(self.current_user_info.get('_id')) != id_:
+        if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
             return self.build_error(status=401, message='insufficient permissions: current user')
-        super(UsersHandler, self).put(id_, resource, resource_id, **kwargs)
+        if id_ in self._users_cache:
+            del self._users_cache[id_]
+        howMany = self.db.delete(self.collection, id_)
+        self.write({'success': True, 'deleted entries': howMany.get('n')})
 
 
 class SettingsHandler(BaseHandler):
@@ -466,10 +484,11 @@ class LoginHandler(RootHandler):
             self.write({'error': True, 'message': 'missing username or password'})
             return
         authorized, user = self.user_authorized(username, password)
-        if authorized and user.get('username'):
+        if authorized and 'username' in user and '_id' in user:
+            id_ = str(user['_id'])
             username = user['username']
-            logging.info('successful login for user %s' % username)
-            self.set_secure_cookie("user", username)
+            logging.info('successful login for user %s (id: %s)' % (username, id_))
+            self.set_secure_cookie("user", id_)
             user_info = self.current_user_info
             if 'password' in user_info:
                 del user_info['password']

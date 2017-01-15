@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""I'll Be There 2 (ibt2) - tests
+"""I'll Be There, 2 (ibt2) - tests
 
-Copyright 2016 Davide Alberani <da@erlug.linux.it>
-               RaspiBO <info@raspibo.org>
+Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>
+                    RaspiBO <info@raspibo.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,15 +32,16 @@ def dictInDict(d, dContainer):
 
 
 class Ibt2Tests(unittest.TestCase):
-    #@classmethod
-    #def setUpClass(cls):
     def setUp(self):
         self.monco_conn = monco.Monco(dbName=DB_NAME)
         self.connection = self.monco_conn.connection
         self.db = self.monco_conn.db
-        self.connection.drop_database(DB_NAME)
+        self.db['attendees'].drop()
+        self.db['users'].remove({'username': 'newuser'})
+        self.db['users'].remove({'username': 'newuser2'})
 
     def tearDown(self):
+        return
         self.add_attendee({'day': '2017-01-15', 'name': 'A name', 'group': 'group A'})
         self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'group C'})
         self.add_attendee({'day': '2017-01-15', 'name': 'Another name', 'group': 'group A'})
@@ -52,8 +53,6 @@ class Ibt2Tests(unittest.TestCase):
         return r
 
     def test_add_attendee(self):
-        # POST /attendees/ {name: 'A Name', day: '2017-01-15', group: 'A group'}
-        # GET /attendees/:id
         attendee = {'name': 'A Name', 'day': '2017-01-15', 'group': 'A group'}
         r = self.add_attendee(attendee)
         rj = r.json()
@@ -65,8 +64,6 @@ class Ibt2Tests(unittest.TestCase):
         self.assertTrue(dictInDict(attendee, rj))
 
     def test_put_attendee(self):
-        # POST /attendees/ {name: 'A Name', day: '2017-01-15', group: 'A group'}
-        # GET /attendees/:id
         attendee = {'name': 'A Name', 'day': '2017-01-15', 'group': 'A group'}
         r = self.add_attendee(attendee)
         update = {'notes': 'A note'}
@@ -83,8 +80,6 @@ class Ibt2Tests(unittest.TestCase):
         self.assertTrue(dictInDict(final, rj))
 
     def test_delete_attendee(self):
-        # POST /attendees/ {name: 'A Name', day: '2017-01-15', group: 'A group'}
-        # GET /attendees/:id
         attendee = {'name': 'A Name', 'day': '2017-01-15', 'group': 'A group'}
         r = self.add_attendee(attendee)
         id_ = r.json().get('_id')
@@ -118,19 +113,74 @@ class Ibt2Tests(unittest.TestCase):
         self.assertEqual(rj,
                          {"days": [{"groups_count": 2, "day": "2017-01-15"}, {"groups_count": 1, "day": "2017-01-16"}]})
 
-    def _test_post_day_group(self):
-        # POST /days/ {day: '2017-01-04'}
-        # GET /days/2017-01-04
-        day = '2017-01-15'
-        query = {'day': day, 'groups': [{'name': 'group1'}]}
-        r = requests.post(BASE_URL + 'days', json=query)
+    def test_create_user(self):
+        r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
+        r.raise_for_status()
+        s = self.login('newuser', 'ibt2')
+        r = s.get(BASE_URL + 'users/current')
+        r.raise_for_status()
+
+    def test_update_user(self):
+        r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
+        r.raise_for_status()
+        id_ = r.json()['_id']
+        r = requests.post(BASE_URL + 'users', json={'username': 'newuser2', 'password': 'ibt2'})
+        r.raise_for_status()
+        id2_ = r.json()['_id']
+        r = requests.put(BASE_URL + 'users/' + id_, json={'email': 't@example.com'})
+        self.assertRaises(r.raise_for_status)
+        s = self.login('newuser', 'ibt2')
+        r = s.put(BASE_URL + 'users/' + id_, json={'email': 'test@example.com'})
+        r.raise_for_status()
+        self.assertEqual(r.json().get('email'), 'test@example.com')
+        r = s.put(BASE_URL + 'users/' + id2_, json={'email': 'test@example.com'})
+        self.assertRaises(r.raise_for_status)
+        s = self.login('admin', 'ibt2')
+        r = s.put(BASE_URL + 'users/' + id_, json={'email': 'test2@example.com'})
+        r.raise_for_status()
+        self.assertEqual(r.json().get('email'), 'test2@example.com')
+
+    def test_delete_user(self):
+        r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
+        r.raise_for_status()
+        id_ = r.json()['_id']
+        r = requests.post(BASE_URL + 'users', json={'username': 'newuser2', 'password': 'ibt2'})
+        r.raise_for_status()
+        id2_ = r.json()['_id']
+        r = requests.delete(BASE_URL + 'users/' + id_)
+        self.assertRaises(r.raise_for_status)
+        s = self.login('newuser', 'ibt2')
+        r = s.delete(BASE_URL + 'users/' + id_)
+        r.raise_for_status()
+        r = s.delete(BASE_URL + 'users/' + id2_)
+        self.assertRaises(r.raise_for_status)
+        s = self.login('admin', 'ibt2')
+        r = s.delete(BASE_URL + 'users/' + id2_)
+        r.raise_for_status()
+
+    def test_duplicate_user(self):
+        r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
+        r.raise_for_status()
+        r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt3'})
+        self.assertRaises(r.raise_for_status)
+
+    def login(self, username, password):
+        s = requests.Session()
+        r = s.post(BASE_URL + 'login', json={'username': username, 'password': password})
+        r.raise_for_status()
+        return s
+
+    def test_created_by(self):
+        s = self.login('admin', 'ibt2')
+        r = s.get(BASE_URL + 'users/current')
+        r.raise_for_status()
+        user_id = r.json()['_id']
+        attendee = {'day': '2017-01-15', 'name': 'A name', 'group': 'group A'}
+        r = s.post('%sattendees' % BASE_URL, json=attendee)
         r.raise_for_status()
         rj = r.json()
-        self.assertTrue(dictInDict(query, rj))
-        r = requests.get('%s%s/%s' % (BASE_URL, 'days', day))
-        r.raise_for_status()
-        rj = r.json()
-        self.assertTrue(dictInDict(query, rj))
+        self.assertEqual(user_id, rj['created_by'])
+        self.assertEqual(user_id, rj['updated_by'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
