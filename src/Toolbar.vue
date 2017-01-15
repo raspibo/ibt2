@@ -1,11 +1,20 @@
 <template>
     <md-toolbar id="toolbar" class="md-dense">
+        <span v-if="currentPath == 'user'">
+            <md-button class="md-icon-button" @click="goBack()">
+                <md-icon>backspace</md-icon>&nbsp;
+            </md-button>
+        </span>
+        <span v-else class="button-spacer">&nbsp;</span>
         <h2 id="toolbar-title" class="md-title">ibt2</h2>
         <span v-if="loggedInUser.username">
-            <span id="logged-in">
-                Logged in: <router-link :to="userUrl">{{ loggedInUser.username }}</router-link>
+            <md-button id="logged-in-icon" class="md-icon-button" @click="toUserPage()">
+                <md-icon>person_pin</md-icon>
+            </md-button>
+            <span id="logged-in" class="md-subheading">
+                <router-link :to="userUrl" class="username-link">{{ loggedInUser.username }}</router-link>
             </span>
-            <md-button class="md-icon-button" @click="logout()">
+            <md-button id="logout-icon" class="md-icon-button" @click="logout()">
                 <md-icon>exit_to_app</md-icon>
             </md-button>
         </span>
@@ -15,11 +24,16 @@
             </md-button>
             <span v-show="showLoginForm" id="login-form">
                 <md-input-container id="username-input" class="login-input" md-inline>
-                    <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />&nbsp;
-                </md-input-container>
-                <md-input-container id="password-input" class="login-input" md-inline>
-                    <md-input ref="passwordInput" @keyup.enter.native="login()" v-model="password" placeholder="password" type="password" md-line />
-                </md-input-container>
+                    <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />
+                </md-input-container>&nbsp;
+                <span id="password-block">
+                    <md-input-container id="password-input" class="login-input" md-inline>
+                        <md-input ref="passwordInput" @keyup.enter.native="login()" v-model="password" placeholder="password" type="password" md-line />
+                    </md-input-container>
+                    <md-button id="login-button" class="md-icon-button" @click="login()">
+                        <md-icon>play_circle_outline</md-icon>
+                    </md-button>
+                </span>
             </span>
         </span>
     </md-toolbar>
@@ -31,8 +45,7 @@ export default {
         return {
             username: '',
             password: '',
-            showLoginForm: false,
-            loggedInUser: {username: ''}
+            showLoginForm: false
         }
     },
 
@@ -43,10 +56,19 @@ export default {
                 return '';
             }
             return '/user/' + this.loggedInUser._id;
+        },
+
+        loggedInUser() {
+            return this.$store.state.loggedInUser;
+        },
+
+        currentPath() {
+            return this.$route.name;
         }
     },
 
     beforeCreate: function() {
+        this.usersUrl = this.$resource('users');
         this.currentUserUrl = this.$resource('users/current');
         this.loginUrl = this.$resource('login');
         this.logoutUrl = this.$resource('logout');
@@ -57,6 +79,14 @@ export default {
     },
 
     methods: {
+        goBack() {
+            this.$router.back();
+        },
+
+        toUserPage() {
+            this.$router.push(this.userUrl);
+        },
+
         focusToLoginForm() {
             this.showLoginForm = true;
             var that = this;
@@ -68,10 +98,13 @@ export default {
         },
 
         login() {
-            this.loginUrl.save({username: this.username, password: this.password}).then((response) => {
+            var user_data = {username: this.username, password: this.password};
+            this.loginUrl.save(user_data).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('login: failed to get resource');
+                if (response.status == 401) {
+                    this.createUser(user_data);
+                }
             }).then((data) => {
                 this.showLoginForm = false;
                 this.getUserInfo();
@@ -84,8 +117,23 @@ export default {
             }, (response) => {
                 alert('logout: failed to get resource');
             }).then((json) => {
-                this.loggedInUser = {};
+                this.$store.commit('clearLoggedInUser');
             });
+        },
+
+        createUser(user_data) {
+            user_data.username = user_data.username || {};
+            user_data.username = user_data.username || this.username;
+            user_data.password = user_data.password || this.password;
+            this.usersUrl.save(user_data).then((response) => {
+                return response.json();
+            }, (response) => {
+                alert('createUser: failed to get resource');
+            }).then((json) => {
+                this.showLoginForm = false;
+                this.getUserInfo();
+            });
+
         },
 
         getUserInfo(callback) {
@@ -94,18 +142,17 @@ export default {
             }, (response) => {
                 alert('getUserInfo: failed to get resource');
             }).then((data) => {
-                this.loggedInUser = data || {};
+                data = data || {};
+                this.$store.commit('setLoggedInUser', data);
                 if (callback) {
-                    callback(this.loggedInUser);
+                    callback(data);
                 }
             });
         }
     }
 }
 </script>
-
 <style>
-
 #toolbar-title {
     flex: 1;
 }
@@ -117,18 +164,33 @@ export default {
     padding-left: 4px;
     min-height: 24px;
     line-height: 0px;
-    margin-right: 20px;
     background-color: white;
 }
 
 #username-input {
     display: inline;
     float: left;
+    margin-right: 20px;
 }
 
 #password-input {
     display: inline;
+    float: left;
+}
+
+#password-block {
+    display: inline;
     float: right;
+}
+
+#login-button {
+    height: 32px;
+}
+
+#logged-in-icon {
+    margin-right: 0px;
+    padding-right: 0px;
+    color: #f6f72f !important;
 }
 
 #logged-in {
@@ -136,4 +198,19 @@ export default {
     top: 10px;
 
 }
+
+#logout-icon {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+.username-link {
+    font-weight: bold;
+    color: #f6f72f !important;
+}
+
+.button-spacer {
+    width: 52px;
+}
+
 </style>

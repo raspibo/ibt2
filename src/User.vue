@@ -1,6 +1,6 @@
 <template>
     <div id="user">
-        User
+        User {{loggedInUser}}
     </div>
 </template>
 <script>
@@ -8,6 +8,15 @@
 export default {
     data () {
         return {
+        }
+    },
+
+    computed: {
+        count() {
+            return this.$store.state.count;
+        },
+        loggedInUser() {
+            return this.$store.state.loggedInUser;
         }
     },
 
@@ -19,18 +28,6 @@ export default {
     },
 
     methods: {
-        getUserInfo(callback) {
-            this.currentUserUrl.get().then((response) => {
-                return response.json();
-            }, (response) => {
-                alert('getUserInfo: failed to get resource');
-            }).then((data) => {
-                this.loggedInUser = data || {};
-                if (callback) {
-                    callback(this.loggedInUser);
-                }
-            });
-        }
     },
 
     components: {
