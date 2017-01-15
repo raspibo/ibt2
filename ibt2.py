@@ -234,17 +234,6 @@ class CollectionHandler(BaseHandler):
                     del data[key]
         return data
 
-    def apply_filter(self, data, filter_name):
-        """Apply a filter to the data.
-
-        :param data: the data to filter
-        :returns: the modified (possibly also in place) data
-        """
-        filter_method = getattr(self, 'filter_%s' % filter_name, None)
-        if filter_method is not None:
-            data = filter_method(data)
-        return data
-
 
 class AttendeesHandler(CollectionHandler):
     document = 'attendee'
@@ -270,7 +259,6 @@ class AttendeesHandler(CollectionHandler):
         data['updated_by'] = user_id
         data['updated_at'] = now
         doc = self.db.add(self.collection, data)
-        doc = self.apply_filter(doc, 'create')
         self.write(doc)
 
     @gen.coroutine
@@ -279,22 +267,35 @@ class AttendeesHandler(CollectionHandler):
         self._clean_dict(data)
         if '_id' in data:
             del data['_id']
+        doc = self.db.getOne(self.collection, {'_id': id_}) or {}
+        owner_id = doc.get('created_by')
         user_info = self.current_user_info
+        if not doc:
+            return self.build_error(status=404, message='unable to access the resource')
+        if (owner_id and str(self.current_user_info.get('_id')) != str(owner_id) and not
+                self.current_user_info.get('isAdmin')):
+            return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
         user_id = user_info.get('_id')
         now = datetime.datetime.now()
         data['updated_by'] = user_id
         data['updated_at'] = now
         merged, doc = self.db.update(self.collection, {'_id': id_}, data)
-        doc = self.apply_filter(doc, 'update')
         self.write(doc)
 
     @gen.coroutine
     def delete(self, id_=None, **kwargs):
-        if id_ is not None:
-            howMany = self.db.delete(self.collection, id_)
-            self.write({'success': True, 'deleted entries': howMany.get('n')})
-        else:
+        if id_ is None:
             self.write({'success': False})
+            return
+        doc = self.db.getOne(self.collection, {'_id': id_}) or {}
+        owner_id = doc.get('created_by')
+        if not doc:
+            return self.build_error(status=404, message='unable to access the resource')
+        if (owner_id and str(self.current_user_info.get('_id')) != str(owner_id) and not
+                self.current_user_info.get('isAdmin')):
+            return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
+        howMany = self.db.delete(self.collection, id_)
+        self.write({'success': True, 'deleted entries': howMany.get('n')})
 
 
 class DaysHandler(CollectionHandler):
@@ -423,7 +424,7 @@ class UsersHandler(CollectionHandler):
             # Avoid overriding _id
             del data['_id']
         if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
-            return self.build_error(status=401, message='insufficient permissions: current user')
+            return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
         merged, doc = self.db.update(self.collection, {'_id': id_}, data)
         self.write(doc)
 
@@ -432,7 +433,7 @@ class UsersHandler(CollectionHandler):
         if id_ is None:
             return self.build_error(status=404, message='unable to access the resource')
         if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
-            return self.build_error(status=401, message='insufficient permissions: current user')
+            return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
         if id_ in self._users_cache:
             del self._users_cache[id_]
         howMany = self.db.delete(self.collection, id_)
