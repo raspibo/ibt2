@@ -12,6 +12,7 @@ import jQuery from 'jquery';
 import store_data from './store.js';
 import App from './App';
 import User from './User';
+import Users from './Users';
 import Toolbar from './Toolbar';
 
 Vue.use(Vuex);
@@ -20,10 +21,11 @@ Vue.use(VueResource);
 Vue.use(VueMaterial);
 
 var routes = [
-    {path: '/', name: 'root', component: App},
+    {path: '/', name: 'home', component: App},
     {path: '/day/', name: 'days', component: App},
     {path: '/day/:day', name: 'day', component: App},
-    {path: '/user/:user', name: 'user', component: User}
+    {path: '/user/', name: 'users', component: Users},
+    {path: '/user/:id', name: 'user', component: User}
 ];
 
 const store = new Vuex.Store(store_data);
@@ -46,5 +48,5 @@ var vue = new Vue({
     store: store,
     template: '<div id="app"><Toolbar /><router-view class="view"></router-view></div>',
     router: router,
-    components: { App, Toolbar, User }
+    components: { App, Toolbar, Users, User }
 });

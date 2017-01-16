@@ -370,10 +370,14 @@ class UsersHandler(CollectionHandler):
     @gen.coroutine
     def get(self, id_=None, **kwargs):
         if id_:
+            if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
+                return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
             output = self.db.getOne(self.collection, {'_id': id_})
             if 'password' in output:
                 del output['password']
         else:
+            if not self.current_user_info.get('isAdmin'):
+                return self.build_error(status=401, message='insufficient permissions: must be an admin')
             output = {self.collection: self.db.query(self.collection, self.arguments)}
             for user in output['users']:
                 if 'password' in user:
@@ -410,19 +414,16 @@ class UsersHandler(CollectionHandler):
         self._clean_dict(data)
         if id_ is None:
             return self.build_error(status=404, message='unable to access the resource')
-        old_pwd = data.get('old_password')
-        new_pwd = data.get('new_password')
-        if old_pwd is not None:
-            del data['old_password']
-        if new_pwd is not None:
-            del data['new_password']
-            authorized, user = self.user_authorized(data['username'], old_pwd)
-            if not (authorized and self.current_user == data['username']):
-                raise InputException('not authorized to change password')
-            data['password'] = utils.hash_password(new_pwd)
         if '_id' in data:
             # Avoid overriding _id
             del data['_id']
+        if 'username' in data:
+            del data['username']
+        if 'password' in data:
+            if data['password']:
+                data['password'] = utils.hash_password(data['password'])
+            else:
+                del data['password']
         if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
             return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
         merged, doc = self.db.update(self.collection, {'_id': id_}, data)
