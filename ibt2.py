@@ -17,7 +17,6 @@ limitations under the License.
 
 import os
 import re
-import string
 import logging
 import datetime
 from operator import itemgetter
@@ -59,26 +58,35 @@ class BaseHandler(tornado.web.RequestHandler):
     # Cache currently connected users.
     _users_cache = {}
 
+    # set of documents we're managing (a collection in MongoDB or a table in a SQL database)
+    document = None
+    collection = None
+
     # A property to access the first value of each argument.
     arguments = property(lambda self: dict([(k, v[0])
         for k, v in self.request.arguments.iteritems()]))
 
-    _bool_convert = {
-        '0': False,
-        'n': False,
-        'f': False,
-        'no': False,
-        'off': False,
-        'false': False,
-        '1': True,
-        'y': True,
-        't': True,
-        'on': True,
-        'yes': True,
-        'true': True
-    }
-
     _re_split_salt = re.compile(r'\$(?P<salt>.+)\$(?P<hash>.+)')
+
+    @property
+    def clean_body(self):
+        """Return a clean dictionary from a JSON body, suitable for a query on MongoDB.
+
+        :returns: a clean copy of the body arguments
+        :rtype: dict"""
+        data = escape.json_decode(self.request.body or '{}')
+        return self._clean_dict(data)
+
+    def _clean_dict(self, data):
+        """Filter a dictionary (in place) to remove unwanted keywords in db queries.
+
+        :param data: dictionary to clean
+        :type data: dict"""
+        if isinstance(data, dict):
+            for key in data.keys():
+                if isinstance(key, (str, unicode)) and key.startswith('$'):
+                    del data[key]
+        return data
 
     def write_error(self, status_code, **kwargs):
         """Default error handler."""
@@ -94,18 +102,6 @@ class BaseHandler(tornado.web.RequestHandler):
         """Return True if the path is from an API call."""
         return self.request.path.startswith('/v%s' % API_VERSION)
 
-    def tobool(self, obj):
-        """Convert some textual values to boolean."""
-        if isinstance(obj, (list, tuple)):
-            obj = obj[0]
-        if isinstance(obj, (str, unicode)):
-            obj = obj.lower()
-        return self._bool_convert.get(obj, obj)
-
-    def arguments_tobool(self):
-        """Return a dictionary of arguments, converted to booleans where possible."""
-        return dict([(k, self.tobool(v)) for k, v in self.arguments.iteritems()])
-
     def initialize(self, **kwargs):
         """Add every passed (key, value) as attributes of the instance."""
         for key, value in kwargs.iteritems():
@@ -118,7 +114,10 @@ class BaseHandler(tornado.web.RequestHandler):
 
     @property
     def current_user_info(self):
-        """Information about the current user."""
+        """Information about the current user.
+
+        :returns: full information about the current user
+        :rtype: dict"""
         current_user = self.current_user
         if current_user in self._users_cache:
             return self._users_cache[current_user]
@@ -168,6 +167,13 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_status(status)
         self.write({'error': True, 'message': message})
 
+    def has_permission(self, owner_id):
+        if (owner_id and str(self.current_user_info.get('_id')) != str(owner_id) and not
+                self.current_user_info.get('isAdmin')):
+            self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
+            return False
+        return True
+
     def logout(self):
         """Remove the secure cookie used fro authentication."""
         if self.current_user in self._users_cache:
@@ -186,56 +192,7 @@ class RootHandler(BaseHandler):
             self.write(fd.read())
 
 
-class CollectionHandler(BaseHandler):
-    """Base class for handlers that need to interact with the database backend.
-
-    Introduce basic CRUD operations."""
-    # set of documents we're managing (a collection in MongoDB or a table in a SQL database)
-    document = None
-    collection = None
-
-    # set of documents used to store incremental sequences
-    counters_collection = 'counters'
-
-    _id_chars = string.ascii_lowercase + string.digits
-
-    def _filter_results(self, results, params):
-        """Filter a list using keys and values from a dictionary.
-
-        :param results: the list to be filtered
-        :type results: list
-        :param params: a dictionary of items that must all be present in an original list item to be included in the return
-        :type params: dict
-
-        :returns: list of items that have all the keys with the same values as params
-        :rtype: list"""
-        if not params:
-            return results
-        params = monco.convert(params)
-        filtered = []
-        for result in results:
-            add = True
-            for key, value in params.iteritems():
-                if key not in result or result[key] != value:
-                    add = False
-                    break
-            if add:
-                filtered.append(result)
-        return filtered
-
-    def _clean_dict(self, data):
-        """Filter a dictionary (in place) to remove unwanted keywords in db queries.
-
-        :param data: dictionary to clean
-        :type data: dict"""
-        if isinstance(data, dict):
-            for key in data.keys():
-                if isinstance(key, (str, unicode)) and key.startswith('$'):
-                    del data[key]
-        return data
-
-
-class AttendeesHandler(CollectionHandler):
+class AttendeesHandler(BaseHandler):
     document = 'attendee'
     collection = 'attendees'
 
@@ -249,10 +206,8 @@ class AttendeesHandler(CollectionHandler):
 
     @gen.coroutine
     def post(self, **kwargs):
-        data = escape.json_decode(self.request.body or '{}')
-        self._clean_dict(data)
-        user_info = self.current_user_info
-        user_id = user_info.get('_id')
+        data = self.clean_body
+        user_id = self.current_user_info.get('_id')
         now = datetime.datetime.now()
         data['created_by'] = user_id
         data['created_at'] = now
@@ -263,19 +218,16 @@ class AttendeesHandler(CollectionHandler):
 
     @gen.coroutine
     def put(self, id_, **kwargs):
-        data = escape.json_decode(self.request.body or '{}')
-        self._clean_dict(data)
+        data = self.clean_body
         if '_id' in data:
             del data['_id']
         doc = self.db.getOne(self.collection, {'_id': id_}) or {}
-        owner_id = doc.get('created_by')
-        user_info = self.current_user_info
         if not doc:
             return self.build_error(status=404, message='unable to access the resource')
-        if (owner_id and str(self.current_user_info.get('_id')) != str(owner_id) and not
-                self.current_user_info.get('isAdmin')):
-            return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
-        user_id = user_info.get('_id')
+        owner_id = doc.get('created_by')
+        if not self.has_permission(owner_id):
+            return
+        user_id = self.current_user_info.get('_id')
         now = datetime.datetime.now()
         data['updated_by'] = user_id
         data['updated_at'] = now
@@ -288,17 +240,16 @@ class AttendeesHandler(CollectionHandler):
             self.write({'success': False})
             return
         doc = self.db.getOne(self.collection, {'_id': id_}) or {}
-        owner_id = doc.get('created_by')
         if not doc:
             return self.build_error(status=404, message='unable to access the resource')
-        if (owner_id and str(self.current_user_info.get('_id')) != str(owner_id) and not
-                self.current_user_info.get('isAdmin')):
-            return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
+        owner_id = doc.get('created_by')
+        if not self.has_permission(owner_id):
+            return
         howMany = self.db.delete(self.collection, id_)
         self.write({'success': True, 'deleted entries': howMany.get('n')})
 
 
-class DaysHandler(CollectionHandler):
+class DaysHandler(BaseHandler):
     """Handle requests for Days."""
 
     def _summarize(self, days):
@@ -362,7 +313,7 @@ class DaysHandler(CollectionHandler):
             self.write({})
 
 
-class UsersHandler(CollectionHandler):
+class UsersHandler(BaseHandler):
     """Handle requests for Users."""
     document = 'user'
     collection = 'users'
@@ -370,8 +321,8 @@ class UsersHandler(CollectionHandler):
     @gen.coroutine
     def get(self, id_=None, **kwargs):
         if id_:
-            if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
-                return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
+            if not self.has_permission(id_):
+                return
             output = self.db.getOne(self.collection, {'_id': id_})
             if 'password' in output:
                 del output['password']
@@ -386,8 +337,7 @@ class UsersHandler(CollectionHandler):
 
     @gen.coroutine
     def post(self, **kwargs):
-        data = escape.json_decode(self.request.body or '{}')
-        self._clean_dict(data)
+        data = self.clean_body
         if '_id' in data:
             del data['_id']
         username = (data.get('username') or '').strip()
@@ -410,22 +360,21 @@ class UsersHandler(CollectionHandler):
 
     @gen.coroutine
     def put(self, id_=None, **kwargs):
-        data = escape.json_decode(self.request.body or '{}')
-        self._clean_dict(data)
+        data = self.clean_body
         if id_ is None:
             return self.build_error(status=404, message='unable to access the resource')
+        if not self.has_permission(id_):
+            return
         if '_id' in data:
-            # Avoid overriding _id
             del data['_id']
         if 'username' in data:
             del data['username']
         if 'password' in data:
-            if data['password']:
-                data['password'] = utils.hash_password(data['password'])
+            password = (data['password'] or '').strip()
+            if password:
+                data['password'] = utils.hash_password(password)
             else:
                 del data['password']
-        if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
-            return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
         merged, doc = self.db.update(self.collection, {'_id': id_}, data)
         self.write(doc)
 
@@ -433,21 +382,12 @@ class UsersHandler(CollectionHandler):
     def delete(self, id_=None, **kwargs):
         if id_ is None:
             return self.build_error(status=404, message='unable to access the resource')
-        if str(self.current_user_info.get('_id')) != id_ and not self.current_user_info.get('isAdmin'):
-            return self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
+        if not self.has_permission(id_):
+            return
+        howMany = self.db.delete(self.collection, id_)
         if id_ in self._users_cache:
             del self._users_cache[id_]
-        howMany = self.db.delete(self.collection, id_)
         self.write({'success': True, 'deleted entries': howMany.get('n')})
-
-
-class SettingsHandler(BaseHandler):
-    """Handle requests for Settings."""
-    @gen.coroutine
-    def get(self, **kwargs):
-        query = self.arguments_tobool()
-        settings = self.db.query('settings', query)
-        self.write({'settings': settings})
 
 
 class CurrentUserHandler(BaseHandler):
@@ -478,7 +418,7 @@ class LoginHandler(RootHandler):
             password = self.get_body_argument('password')
             username = self.get_body_argument('username')
         except tornado.web.MissingArgumentError:
-            data = escape.json_decode(self.request.body or '{}')
+            data = self.clean_body
             username = data.get('username')
             password = data.get('password')
         if not (username and password):
@@ -517,8 +457,6 @@ def run():
     # specified with the --config argument.
     define("port", default=3000, help="run on the given port", type=int)
     define("address", default='', help="bind the server at the given address", type=str)
-    define("data_dir", default=os.path.join(os.path.dirname(__file__), "data"),
-            help="specify the directory used to store the data")
     define("ssl_cert", default=os.path.join(os.path.dirname(__file__), 'ssl', 'ibt2_cert.pem'),
             help="specify the SSL certificate to use for secure connections")
     define("ssl_key", default=os.path.join(os.path.dirname(__file__), 'ssl', 'ibt2_key.pem'),
@@ -527,7 +465,6 @@ def run():
             help="URL to MongoDB server", type=str)
     define("db_name", default='ibt2',
             help="Name of the MongoDB database to use", type=str)
-    define("authentication", default=False, help="if set to true, authentication is required")
     define("debug", default=False, help="run in debug mode")
     define("config", help="read configuration file",
             callback=lambda path: tornado.options.parse_config_file(path, final=False))
@@ -544,8 +481,7 @@ def run():
 
     # database backend connector
     db_connector = monco.Monco(url=options.mongo_url, dbName=options.db_name)
-    init_params = dict(db=db_connector, data_dir=options.data_dir, listen_port=options.port,
-            authentication=options.authentication, logger=logger, ssl_options=ssl_options)
+    init_params = dict(db=db_connector, listen_port=options.port, logger=logger, ssl_options=ssl_options)
 
     # If not present, we store a user 'admin' with password 'ibt2' into the database.
     if not db_connector.query('users', {'username': 'admin'}):
@@ -578,7 +514,6 @@ def run():
             (_users_path, UsersHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _users_path), UsersHandler, init_params),
             (r"/(?:index.html)?", RootHandler, init_params),
-            (r"/settings", SettingsHandler, init_params),
             (r'/login', LoginHandler, init_params),
             (r'/v%s/login' % API_VERSION, LoginHandler, init_params),
             (r'/logout', LogoutHandler),
