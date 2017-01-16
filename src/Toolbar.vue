@@ -104,13 +104,19 @@ export default {
             this.$refs.passwordInput.$el.focus();
         },
 
-        login() {
+        login(opt) {
+            opt = opt || {};
             var user_data = {username: this.username, password: this.password};
             this.loginUrl.save(user_data).then((response) => {
                 return response.json();
             }, (response) => {
+                // Unable to login? Let's try to create the user!
                 if (response.status == 401) {
-                    this.createUser(user_data);
+                    if (opt.stopHere) {
+                        alert('login: failed to get resource');
+                    } else {
+                        this.createUser(user_data);
+                    }
                 }
             }).then((data) => {
                 this.showLoginForm = false;
@@ -135,10 +141,8 @@ export default {
             this.usersUrl.save(user_data).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('createUser: failed to get resource');
             }).then((json) => {
-                this.showLoginForm = false;
-                this.getUserInfo();
+                this.login({stopHere: true});
             });
 
         },
