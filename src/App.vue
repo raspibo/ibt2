@@ -2,7 +2,7 @@
     <div id="main-attendees">
         <md-layout md-gutter md-row>
             <md-layout md-column md-flex="20" md-gutter>
-                <datepicker id="datepicker" :value="date" :inline="true" @selected="getDay"></datepicker>
+                <datepicker id="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" @selected="getDay"></datepicker>
             </md-layout>
             <md-layout id="panel" md-column>
                 <md-layout md-row>
@@ -19,11 +19,31 @@ import Datepicker from 'vuejs-datepicker';
 import Group from './Group';
 
 export default {
-    data () {
+    data() {
         return {
             date: null, // a Date object representing the selected date
             day: {},
             daysSummary: {}
+        }
+    },
+
+    computed: {
+        highlightedDates() {
+            var ds = this.daysSummary.days || [];
+            var datesWithGroups = [];
+            for (var i=0; i < ds.length; i++) {
+                var [year, month, day] = ds[i].day.split('-');
+                year = parseInt(year);
+                month = parseInt(month) - 1;
+                day = parseInt(day);
+                if (isNaN(year) || isNaN(month) || isNaN(day)) {
+                    continue;
+                }
+                datesWithGroups.push(new Date(year, month, day));
+            }
+            return {
+                dates: datesWithGroups
+            };
         }
     },
 

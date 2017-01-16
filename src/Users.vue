@@ -73,7 +73,6 @@ export default {
             }, (response) => {
                 alert('deleteUser: unable to get resource');
             }).then((data) => {
-                console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAA');
             });
         }
     }

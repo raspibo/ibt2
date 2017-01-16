@@ -33,7 +33,6 @@ export default {
 
     computed: {
         loggedInUser() {
-            console.log(this.$store.state.loggedInUser);
             return this.$store.state.loggedInUser;
         }
     },
