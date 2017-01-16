@@ -121,4 +121,8 @@ export default {
 .new-group {
     width: 260px;
 }
+
+.new-group-header i:after {
+    background-color: initial !important;
+}
 </style>
