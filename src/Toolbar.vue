@@ -8,10 +8,10 @@
         <span v-else class="button-spacer">&nbsp;</span>
         <h2 id="toolbar-title" class="md-title"><router-link :to="{name: 'home'}" class="home-link">ibt2</router-link></h2>
         <span v-if="loggedInUser.username">
-            <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toUserPage()">
+            <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toUsersPage()">
                 <md-icon>people_outline</md-icon>
             </md-button>
-            <md-button id="logged-in-icon" class="md-icon-button" @click="toUsersPage()">
+            <md-button id="logged-in-icon" class="md-icon-button" @click="toUserPage()">
                 <md-icon>person_pin</md-icon>
             </md-button>
             <span id="logged-in" class="md-subheading">

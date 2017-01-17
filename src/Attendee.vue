@@ -46,7 +46,7 @@ export default {
 
     methods: {
         isAuthorized(ownerID) {
-            return this.$store.state.loggedInUser.isAdmin || (this.$store.state.loggedInUser._id && this.$store.state.loggedInUser._id == ownerID);
+            return !ownerID || this.$store.state.loggedInUser.isAdmin || (this.$store.state.loggedInUser._id && this.$store.state.loggedInUser._id == ownerID);
         },
 
         editAttendee() {
