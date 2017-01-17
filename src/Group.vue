@@ -4,7 +4,7 @@
             <md-card-header class="group-header">
                 <md-layout md-row>
                     <div class="md-title">
-                        <md-icon class="group-icon">folder_open</md-icon>&nbsp;Group: {{ group.group }}
+                        <md-icon class="group-icon">folder_open</md-icon>&nbsp;Group: {{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
                     </div>
                 </md-layout>
             </md-card-header>
@@ -52,6 +52,12 @@ export default {
 
     data: function () {
         return { newAttendee: '', newGroup: '' }
+    },
+
+    computed: {
+        counter: function() {
+            return (this.group.attendees || []).length;
+        }
     },
 
     beforeCreate: function() {
@@ -126,5 +132,18 @@ export default {
 
 .new-group-header i:after {
     background-color: initial !important;
+}
+
+.counter {
+    margin-left: 4px;
+    position: relative;
+    bottom: 12px;
+    background-color: #eee;
+    color: #666;
+    padding: 2px 5px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 200;
+    line-height: 1;
 }
 </style>
