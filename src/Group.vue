@@ -14,6 +14,7 @@
                     <md-list-item class="attendee-add">
                         <md-icon>person_add</md-icon>
                         <md-input-container class="new-attendee">
+                            <label>new attendee</label>
                             <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(group.group, newAttendee)" v-model="newAttendee" class="attendee-add-name" />
                         </md-input-container>
                     </md-list-item>
@@ -23,7 +24,7 @@
         <md-card v-if="addNewGroup" md-with-hover @mouseenter.native="focusToNewGroup()" md-align="start">
             <md-card-header class="new-group-header">
                 <div class="md-title">
-                    <md-input-container class="new-group">
+                    <md-input-container class="new-group" md-inline>
                         <md-icon>create_new_folder</md-icon>&nbsp;&nbsp;<md-input ref="newGroup" v-model="newGroup" @keyup.enter.native="focusToNewAttendee()" class="group-add-name" placeholder="new group" />
                     </md-input-container>
                 </div>
@@ -32,7 +33,8 @@
                 <md-list v-show="newGroup">
                     <md-list-item class="attendee-add">
                         <md-icon>person_add</md-icon>
-                        <md-input-container md-inline>
+                        <md-input-container>
+                            <label>new attendee</label>
                             <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(newGroup, newAttendee)" v-model="newAttendee" class="attendee-add-name" />
                         </md-input-container>
                     </md-list-item>

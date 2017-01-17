@@ -1,39 +1,49 @@
 <template>
     <md-toolbar id="toolbar" class="md-dense">
-        <span v-if="currentPath == 'user'">
+        <span v-if="currentPath != 'home' && currentPath != 'day' && currentPath != 'days'">
             <md-button class="md-icon-button" @click="goBack()">
+                <md-tooltip md-direction="right">back</md-tooltip>
                 <md-icon>backspace</md-icon>&nbsp;
             </md-button>
         </span>
         <span v-else class="button-spacer">&nbsp;</span>
-        <h2 id="toolbar-title" class="md-title"><router-link :to="{name: 'home'}" class="home-link">ibt2</router-link></h2>
+        <h2 id="toolbar-title" class="md-title">
+            <router-link :to="{name: 'home'}" class="home-link">ibt2</router-link>
+        </h2>
         <span v-if="loggedInUser.username">
             <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toUsersPage()">
+                <md-tooltip md-direction="left">list of users</md-tooltip>
                 <md-icon>people_outline</md-icon>
             </md-button>
             <md-button id="logged-in-icon" class="md-icon-button" @click="toUserPage()">
+                <md-tooltip md-direction="left">personal page</md-tooltip>
                 <md-icon>person_pin</md-icon>
             </md-button>
             <span id="logged-in" class="md-subheading">
                 <router-link :to="userUrl" class="username-link">{{ loggedInUser.username }}</router-link>
             </span>
             <md-button id="logout-icon" class="md-icon-button" @click="logout()">
+                <md-tooltip md-direction="left">logout</md-tooltip>
                 <md-icon>exit_to_app</md-icon>
             </md-button>
         </span>
         <span v-else>
             <md-button v-show="!showLoginForm" class="md-icon-button" @click="focusToLoginForm()">
+                <md-tooltip md-direction="left">login or create a new user</md-tooltip>
                 <md-icon>power_settings_new</md-icon>
             </md-button>
             <span v-show="showLoginForm" id="login-form">
                 <md-input-container id="username-input" class="login-input" md-inline>
+                    <md-tooltip md-direction="bottom">login name or create a new user if it doesn't exist</md-tooltip>
                     <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />
                 </md-input-container>&nbsp;
                 <span id="password-block">
                     <md-input-container id="password-input" class="login-input" md-has-password md-inline>
+                    <md-tooltip md-direction="bottom">login password or create a new user if it doesn't exist</md-tooltip>
                         <md-input ref="passwordInput" @keyup.enter.native="login()" v-model="password" placeholder="password" type="password" md-line />
                     </md-input-container>
                     <md-button id="login-button" class="md-icon-button" @click="login()">
+                        <md-tooltip md-direction="left">login or create a new user if it doesn't exist</md-tooltip>
                         <md-icon>play_circle_outline</md-icon>
                     </md-button>
                 </span>
