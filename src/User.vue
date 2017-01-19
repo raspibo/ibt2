@@ -82,6 +82,7 @@ export default {
 </script>
 
 <style>
+
 #user {
     padding: 10px;
 }
@@ -89,4 +90,5 @@ export default {
 #save-button {
     margin-top: 40px;
 }
+
 </style>

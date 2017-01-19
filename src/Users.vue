@@ -82,11 +82,12 @@ export default {
 
     components: { IbtDialog }
 }
-</script>
 
+</script>
 <style>
+
 #users {
     padding: 10px;
 }
-</style>
 
+</style>

@@ -1,3 +1,6 @@
+/*
+ * Shared state of the ibt2 app.
+ */
 
 export default {
     state: {

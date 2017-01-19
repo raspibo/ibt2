@@ -51,10 +51,6 @@ export default {
 
     beforeCreate: function() {
         this.daysUrl = this.$resource('days{/day}');
-        this.attendeesUrl = this.$resource('attendees{/id}');
-        this.currentUserUrl = this.$resource('users/current');
-        this.loginUrl = this.$resource('login');
-        this.logoutUrl = this.$resource('logout');
     },
 
     mounted: function() {
@@ -134,9 +130,10 @@ export default {
         Datepicker, Group, IbtDialog
     }
 }
-</script>
 
+</script>
 <style>
+
 #main-attendees {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -157,14 +154,4 @@ export default {
     flex: 1;
 }
 
-.login-input {
-    width: 200px;
-    margin: 0px 0px 0px;
-    padding-top: 0px;
-    padding-left: 4px;
-    min-height: 24px;
-    line-height: 0px;
-    margin-right: 20px;
-    background-color: white;
-}
 </style>

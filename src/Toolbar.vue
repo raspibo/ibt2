@@ -177,8 +177,10 @@ export default {
 
     components: { IbtDialog, IbtSnackbar }
 }
+
 </script>
 <style>
+
 #toolbar-title {
     flex: 1;
 }
@@ -243,4 +245,5 @@ export default {
     font-weight: bold;
     color: white !important;
 }
+
 </style>

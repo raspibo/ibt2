@@ -88,6 +88,7 @@ export default {
 
 </script>
 <style>
+
 .md-list-item .md-list-item-holder>.md-icon:first-child {
     margin-right: 16px;
 }
@@ -95,4 +96,5 @@ export default {
 .attendee-list-item {
     min-width: 250px;
 }
+
 </style>

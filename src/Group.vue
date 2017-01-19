@@ -102,6 +102,7 @@ export default {
 
 </script>
 <style>
+
 .group-layout {
     padding: 10px;
 }
@@ -148,4 +149,5 @@ export default {
     font-weight: 200;
     line-height: 1;
 }
+
 </style>
