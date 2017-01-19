@@ -11,12 +11,14 @@
                 </md-layout>
             </md-layout>
         </md-layout>
+        <ibt-dialog ref="dialogObj" />
     </div>
 </template>
 <script>
 
 import Datepicker from 'vuejs-datepicker';
 import Group from './Group';
+import IbtDialog from './IbtDialog.vue';
 
 export default {
     data() {
@@ -97,7 +99,7 @@ export default {
             this.daysUrl.query(params).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('getSummary: failed to get resource');
+                this.$refs.dialogObj.show({text: 'unable to get the monthly summary'});
             }).then((json) => {
                 this.daysSummary = json;
             });
@@ -118,9 +120,9 @@ export default {
             this.daysUrl.get({day: day}).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('getDay: failed to get resource');
+                this.$refs.dialogObj.show({text: 'unable to get information about this day'});
             }).then((dayData) => {
-                if (!dayData.day) {
+                if (!(dayData && dayData.day)) {
                     dayData.day = day;
                 }
                 this.day = dayData;
@@ -129,7 +131,7 @@ export default {
     },
 
     components: {
-        Datepicker, Group
+        Datepicker, Group, IbtDialog
     }
 }
 </script>

@@ -19,9 +19,12 @@
                 <md-button class="md-raised md-primary" @click="save()">Save</md-button>
             </md-card-content>
         </md-card>
+        <ibt-dialog ref="dialogObj" />
     </div>
 </template>
 <script>
+
+import IbtDialog from './IbtDialog.vue';
 
 export default {
     data () {
@@ -50,22 +53,25 @@ export default {
             this.usersUrl.get({id: id}).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('getUsers: unable to get resource');
+                this.$refs.dialogObj.show({text: 'unable to get user'});
             }).then((data) => {
                 this.user = data || {};
             });
         },
+
         save() {
             var user_data = {password: this.password, email: this.user.email};
             this.usersUrl.update({id: this.user._id}, user_data).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('save: unable to get resource');
+                this.$refs.dialogObj.show({text: 'unable to save user settings'});
             }).then((data) => {
                 this.user = data;
             });
         }
-    }
+    },
+
+    components: { IbtDialog }
 }
 </script>
 

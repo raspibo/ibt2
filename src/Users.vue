@@ -27,9 +27,12 @@
                 </md-table>
             </md-card-content>
         </md-card>
+        <ibt-dialog ref="dialogObj" />
     </div>
 </template>
 <script>
+
+import IbtDialog from './IbtDialog.vue';
 
 export default {
     data () {
@@ -61,7 +64,7 @@ export default {
             this.usersUrl.get().then((response) => {
                 return response.json();
             }, (response) => {
-                alert('getUsers: unable to get resource');
+                this.$refs.dialogObj.show({text: 'unable to get the list of users'});
             }).then((data) => {
                 this.users = data.users || [];
             });
@@ -71,11 +74,13 @@ export default {
             this.usersUrl.update({id: userId}).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('deleteUser: unable to get resource');
+                this.$refs.dialogObj.show({text: 'unable to delete the user'});
             }).then((data) => {
             });
         }
-    }
+    },
+
+    components: { IbtDialog }
 }
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-    <md-list-item :key="attendee._id">
+    <md-list-item class="attendee-list-item" :key="attendee._id">
         <md-icon>person</md-icon>
         <span v-if="!edit">{{attendee.name}}</span>
         <md-input-container md-inline v-if="edit">
@@ -21,9 +21,12 @@
                 </md-menu-item>
             </md-menu-content>
         </md-menu>
+        <ibt-dialog ref="dialogObj" />
     </md-list-item>
 </template>
 <script>
+
+import IbtDialog from './IbtDialog.vue';
 
 export default {
     props: {attendee: {default: {}}},
@@ -62,7 +65,7 @@ export default {
             this.attendeesUrl.update({id: this.attendee._id}, this.attendee).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('updateAttendee: failed to update resource');
+                this.$refs.dialogObj.show({text: 'unable to update the attendee'});
             }).then((json) => {
                 this.edit = false;
                 this.$emit('updated');
@@ -73,19 +76,23 @@ export default {
             this.attendeesUrl.delete({id: this.attendee._id}).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('deleteAttendee: failed to delete resource');
+                this.$refs.dialogObj.show({text: 'unable to delete the attendee'});
             }).then((json) => {
                 this.$emit('updated');
             });
         }
-    }
+    },
+
+    components: {IbtDialog}
 };
 
 </script>
 <style>
-
 .md-list-item .md-list-item-holder>.md-icon:first-child {
     margin-right: 16px;
 }
 
+.attendee-list-item {
+    min-width: 250px;
+}
 </style>

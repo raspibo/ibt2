@@ -28,11 +28,7 @@
             </md-button>
         </span>
         <span v-else>
-            <md-button v-show="!showLoginForm" class="md-icon-button" @click="focusToLoginForm()">
-                <md-tooltip md-direction="left">login or create a new user</md-tooltip>
-                <md-icon>power_settings_new</md-icon>
-            </md-button>
-            <span v-show="showLoginForm" id="login-form">
+            <span id="login-form">
                 <md-input-container id="username-input" class="login-input" md-inline>
                     <md-tooltip md-direction="bottom">login name or create a new user if it doesn't exist</md-tooltip>
                     <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />
@@ -49,16 +45,27 @@
                 </span>
             </span>
         </span>
+        <md-snackbar md-position="top center" ref="snackbar">
+            <span>{{ snackbackMessage }}</span>
+            <md-button @click="$refs.snackbar.close()" class="snackbar-close">[x]</md-button>
+        </md-snackbar>
+        <ibt-dialog ref="dialogObj" />
     </md-toolbar>
 </template>
 <script>
+
+import IbtDialog from './IbtDialog.vue';
 
 export default {
     data () {
         return {
             username: '',
             password: '',
-            showLoginForm: false
+            snackbackMessage: '',
+            dialog: {
+                text: 'some error',
+                ok: 'ok'
+            }
         }
     },
 
@@ -105,7 +112,6 @@ export default {
         },
 
         focusToLoginForm() {
-            this.showLoginForm = true;
             var that = this;
             setTimeout(function() { that.$refs.usernameInput.$el.focus(); }, 400);
         },
@@ -123,13 +129,12 @@ export default {
                 // Unable to login? Let's try to create the user!
                 if (response.status == 401) {
                     if (opt.stopHere) {
-                        alert('login: failed to get resource');
+                        this.$refs.dialogObj.show({text: 'failed to login and create a new user. Wrong username and password?'});
                     } else {
                         this.createUser(user_data);
                     }
                 }
             }).then((data) => {
-                this.showLoginForm = false;
                 this.getUserInfo();
             });
         },
@@ -138,9 +143,10 @@ export default {
             this.logoutUrl.get().then((response) => {
                 return response.json();
             }, (response) => {
-                alert('logout: failed to get resource');
+                this.$refs.dialogObj.show({text: 'failed to logout'});
             }).then((json) => {
                 this.$store.commit('clearLoggedInUser');
+                this.showMessage('logged out');
             });
         },
 
@@ -161,7 +167,7 @@ export default {
             this.currentUserUrl.get().then((response) => {
                 return response.json();
             }, (response) => {
-                alert('getUserInfo: failed to get resource');
+                this.$refs.dialogObj.show({text: 'unable to get user info'});
             }).then((data) => {
                 data = data || {};
                 this.$store.commit('setLoggedInUser', data);
@@ -169,8 +175,15 @@ export default {
                     callback(data);
                 }
             });
+        },
+
+        showMessage(message) {
+            this.snackbackMessage = message;
+            this.$refs.snackbar.open();
         }
-    }
+    },
+
+    components: { IbtDialog }
 }
 </script>
 <style>
@@ -237,6 +250,11 @@ export default {
 .home-link {
     font-weight: bold;
     color: white !important;
+}
+
+.snackbar-close {
+    font-weight: bold;
+    color: #f6f72f;
 }
 
 </style>

@@ -41,11 +41,13 @@
                 </md-list>
             </md-card-content>
         </md-card>
+        <ibt-dialog ref="dialogObj" />
     </md-layout>
 </template>
 <script>
 
 import Attendee from './Attendee';
+import IbtDialog from './IbtDialog.vue';
 
 export default {
     props: {group: {}, day: {}, addNewGroup: {default: false}},
@@ -87,7 +89,7 @@ export default {
             this.attendeesUrl.save({day: this.day, group: group, name: newAttendee}).then((response) => {
                 return response.json();
             }, (response) => {
-                alert('addAttendee: failed to get resource');
+                this.$refs.dialogObj.show({text: 'unable to add the attendee'});
             }).then((json) => {
                 this.reset();
                 this.$emit('updated');
@@ -95,7 +97,7 @@ export default {
         }
     },
 
-    components: { Attendee }
+    components: { Attendee, IbtDialog }
 };
 
 </script>
@@ -127,7 +129,7 @@ export default {
 }
 
 .new-group {
-    width: 260px;
+    min-width: 250px;
 }
 
 .new-group-header i:after {

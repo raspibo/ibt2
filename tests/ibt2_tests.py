@@ -41,11 +41,9 @@ class Ibt2Tests(unittest.TestCase):
         self.db['users'].remove({'username': 'newuser2'})
 
     def tearDown(self):
-        return
-        self.add_attendee({'day': '2017-01-15', 'name': 'A name', 'group': 'group A'})
-        self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'group C'})
-        self.add_attendee({'day': '2017-01-15', 'name': 'Another name', 'group': 'group A'})
-        self.add_attendee({'day': '2017-01-15', 'name': 'Yet another name', 'group': 'group B'})
+        self.db['attendees'].drop()
+        self.db['users'].remove({'username': 'newuser'})
+        self.db['users'].remove({'username': 'newuser2'})
 
     def add_attendee(self, attendee):
         r = requests.post('%sattendees' % BASE_URL, json=attendee)
