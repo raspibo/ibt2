@@ -19,12 +19,14 @@
                 <md-button class="md-raised md-primary" @click="save()">Save</md-button>
             </md-card-content>
         </md-card>
+        <ibt-snackbar ref="snackbarObj" />
         <ibt-dialog ref="dialogObj" />
     </div>
 </template>
 <script>
 
 import IbtDialog from './IbtDialog.vue';
+import IbtSnackbar from './IbtSnackbar.vue';
 
 export default {
     data () {
@@ -67,11 +69,12 @@ export default {
                 this.$refs.dialogObj.show({text: 'unable to save user settings'});
             }).then((data) => {
                 this.user = data;
+                this.$refs.snackbarObj.show('user saved');
             });
         }
     },
 
-    components: { IbtDialog }
+    components: { IbtDialog, IbtSnackbar }
 }
 </script>
 

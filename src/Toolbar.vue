@@ -45,23 +45,20 @@
                 </span>
             </span>
         </span>
-        <md-snackbar md-position="top center" ref="snackbar">
-            <span>{{ snackbackMessage }}</span>
-            <md-button @click="$refs.snackbar.close()" class="snackbar-close">[x]</md-button>
-        </md-snackbar>
+        <ibt-snackbar ref="snackbarObj" />
         <ibt-dialog ref="dialogObj" />
     </md-toolbar>
 </template>
 <script>
 
 import IbtDialog from './IbtDialog.vue';
+import IbtSnackbar from './IbtSnackbar.vue';
 
 export default {
     data () {
         return {
             username: '',
             password: '',
-            snackbackMessage: '',
             dialog: {
                 text: 'some error',
                 ok: 'ok'
@@ -146,7 +143,7 @@ export default {
                 this.$refs.dialogObj.show({text: 'failed to logout'});
             }).then((json) => {
                 this.$store.commit('clearLoggedInUser');
-                this.showMessage('logged out');
+                this.$refs.snackbarObj.show('logged out');
             });
         },
 
@@ -175,15 +172,10 @@ export default {
                     callback(data);
                 }
             });
-        },
-
-        showMessage(message) {
-            this.snackbackMessage = message;
-            this.$refs.snackbar.open();
         }
     },
 
-    components: { IbtDialog }
+    components: { IbtDialog, IbtSnackbar }
 }
 </script>
 <style>
@@ -251,10 +243,4 @@ export default {
     font-weight: bold;
     color: white !important;
 }
-
-.snackbar-close {
-    font-weight: bold;
-    color: #f6f72f;
-}
-
 </style>
