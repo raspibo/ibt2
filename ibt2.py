@@ -351,7 +351,7 @@ class UsersHandler(BaseHandler):
         data['username'] = username
         data['email'] = email
         data['password'] = utils.hash_password(password)
-        if 'isAdmin' in data:
+        if 'isAdmin' in data and not self.current_user_info.get('isAdmin'):
             del data['isAdmin']
         doc = self.db.add(self.collection, data)
         if 'password' in doc:
@@ -369,6 +369,8 @@ class UsersHandler(BaseHandler):
             del data['_id']
         if 'username' in data:
             del data['username']
+        if 'isAdmin' in data and (str(self.current_user) == id_ or not self.current_user_info.get('isAdmin')):
+            del data['isAdmin']
         if 'password' in data:
             password = (data['password'] or '').strip()
             if password:
@@ -376,6 +378,8 @@ class UsersHandler(BaseHandler):
             else:
                 del data['password']
         merged, doc = self.db.update(self.collection, {'_id': id_}, data)
+        if 'password' in doc:
+            del doc['password']
         self.write(doc)
 
     @gen.coroutine

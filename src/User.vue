@@ -13,10 +13,13 @@
                 <div class="md-body-2">Change password</div>
                 <md-input-container id="password-input" md-has-password>
                     <label>New password</label>
-                    <md-input v-model="password" type="password" />
+                    <md-input v-model="user.password" type="password" />
                 </md-input-container>
 
-                <md-button class="md-raised md-primary" @click="save()">Save</md-button>
+                <md-switch v-if="loggedInUser.isAdmin" v-model="user.isAdmin" class="md-warn">is admin</md-switch>
+                <br />
+
+                <md-button id="save-button" class="md-raised md-primary" @click="save()">Save</md-button>
             </md-card-content>
         </md-card>
         <ibt-snackbar ref="snackbarObj" />
@@ -31,7 +34,7 @@ import IbtSnackbar from './IbtSnackbar.vue';
 export default {
     data () {
         return {
-            user: {},
+            user: {email: '', password: null, isAdmin: false},
             password: null
         }
     },
@@ -57,13 +60,13 @@ export default {
             }, (response) => {
                 this.$refs.dialogObj.show({text: 'unable to get user'});
             }).then((data) => {
+                console.log(data);
                 this.user = data || {};
             });
         },
 
         save() {
-            var user_data = {password: this.password, email: this.user.email};
-            this.usersUrl.update({id: this.user._id}, user_data).then((response) => {
+            this.usersUrl.update({id: this.user._id}, this.user).then((response) => {
                 return response.json();
             }, (response) => {
                 this.$refs.dialogObj.show({text: 'unable to save user settings'});
@@ -81,5 +84,9 @@ export default {
 <style>
 #user {
     padding: 10px;
+}
+
+#save-button {
+    margin-top: 40px;
 }
 </style>
