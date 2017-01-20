@@ -11,7 +11,7 @@ Basic workflow:
 
 It's recommended to login with username '''admin''' and password '''ibt2''', go to your personal page and change the password, if you've just installed ibt2.
 
-## Run, develop and debug
+## Install, run, develop and debug
 
 To install it:
 ``` bash
@@ -38,6 +38,12 @@ npm run build
 npm run server
 ```
 
+Now you can **point your browser to http://localhost:3000/** (that's the server for production)
+
+If you want, you can **share a link to a specific day**, specifying it in the *yyyy-mm-dd* format, like: http://localhost:3000/#/day/2017-01-20
+
+You can also **run the server in https**, putting in the *ssl* directory two files named *ibt2_key.pem* and *ibt2_cert.pem*
+
 To run a development environment:
 ``` bash
 # install dependencies (one time only)
@@ -52,6 +58,8 @@ npm run dev
 # only when the devserver is running, you can also run the testsuite
 python ./tests/ibt2_tests.py
 ```
+
+Your browser will automatically open http://localhost:8080/ (that's the server for development)
 
 
 Development
