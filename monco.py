@@ -282,4 +282,3 @@ class Monco(object):
             _id_or_query = {'_id': _id_or_query}
         _id_or_query = convert(_id_or_query)
         return db[collection].remove(_id_or_query)
-

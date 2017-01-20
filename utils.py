@@ -21,7 +21,6 @@ import string
 import random
 import hashlib
 import datetime
-import StringIO
 from bson.objectid import ObjectId
 
 

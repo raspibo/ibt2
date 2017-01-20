@@ -504,10 +504,9 @@ def run():
                 {'setting': 'server_cookie_secret', 'cookie_secret': cookie_secret})
 
     _days_path = r"/days/?(?P<day>[\d_-]+)?"
-    _attendees_path = r"/days/(?P<day_id>[\d_-]+)/groups/(?P<group_id>[\w\d_\ -]+)/attendees/?(?P<attendee_id>[\w\d_\ -]+)?"
+    _attendees_path = r"/attendees/?(?P<id_>[\w\d_-]+)?"
     _current_user_path = r"/users/current/?"
     _users_path = r"/users/?(?P<id_>[\w\d_-]+)?/?(?P<resource>[\w\d_-]+)?/?(?P<resource_id>[\w\d_-]+)?"
-    _attendees_path = r"/attendees/?(?P<id_>[\w\d_-]+)?"
     application = tornado.web.Application([
             (_attendees_path, AttendeesHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _attendees_path), AttendeesHandler, init_params),
