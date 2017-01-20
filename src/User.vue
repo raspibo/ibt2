@@ -60,7 +60,6 @@ export default {
             }, (response) => {
                 this.$refs.dialogObj.show({text: 'unable to get user'});
             }).then((data) => {
-                console.log(data);
                 this.user = data || {};
             });
         },
