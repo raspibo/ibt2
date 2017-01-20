@@ -31,7 +31,7 @@ To run it:
 # install dependencies (one time only)
 npm install
 
-# build for production with minification (one time only)
+# build for production with minification (each time the sources changes)
 npm run build
 
 # run the Python webserver at localhost:3000
