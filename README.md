@@ -13,7 +13,7 @@ It's recommended to login with username **admin** and password **ibt2**, go to y
 
 # Demo
 
-See [http://ibt2.ismito.it:3002/](http://ibt2.ismito.it:3002/)
+See [https://ibt2.ismito.it:3002/](https://ibt2.ismito.it:3002/)
 
 ## Install, run, develop and debug
 
