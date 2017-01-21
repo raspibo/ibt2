@@ -28,6 +28,7 @@ import App from './App';
 import User from './User';
 import Users from './Users';
 import Toolbar from './Toolbar';
+import IbtFooter from './IbtFooter';
 
 Vue.use(Vuex);
 Vue.use(VueRouter);
@@ -48,7 +49,7 @@ const router = new VueRouter({routes});
 var vue = new Vue({
     el: '#app',
     store: store,
-    template: '<div id="app"><Toolbar /><router-view class="view"></router-view></div>',
+    template: '<div id="app"><toolbar /><router-view class="view"></router-view><ibt-footer /></div>',
     router: router,
-    components: { App, Toolbar, Users, User }
+    components: { App, Toolbar, IbtFooter, Users, User }
 });
