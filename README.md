@@ -9,7 +9,7 @@ Basic workflow:
 - write your name
 - rinse and repeat
 
-It's recommended to login with username '''admin''' and password '''ibt2''', go to your personal page and change the password, if you've just installed ibt2.
+It's recommended to login with username **admin** and password **ibt2**, go to your personal page and change the password, if you've just installed ibt2.
 
 # Demo
 
