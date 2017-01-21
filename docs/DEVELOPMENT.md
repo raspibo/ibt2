@@ -91,6 +91,9 @@ not-so-FAQs
 - **A:** yes, probably in the near future.
 
 
+- **Q:** *.vue* files? What's that?
+- **A:** Vue [single-file components](https://vuejs.org/v2/guide/single-file-components.html); a [webpack](https://webpack.js.org/) plugin will take care of translating them into stuff that can be digested by a browser.
+
 - **Q:** I've added a new path to the backend, and now the hot reload server is not working!!1!!
 - **A:** that's not even a question.  Anyway, add the path to dev.proxyTable in *config/index.js*
 

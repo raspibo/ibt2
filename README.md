@@ -11,6 +11,10 @@ Basic workflow:
 
 It's recommended to login with username '''admin''' and password '''ibt2''', go to your personal page and change the password, if you've just installed ibt2.
 
+# Demo
+
+See [http://ibt2.ismito.it:3002/](http://ibt2.ismito.it:3002/)
+
 ## Install, run, develop and debug
 
 To install it:
@@ -38,7 +42,7 @@ npm run build
 npm run server
 ```
 
-Now you can **point your browser to http://localhost:3000/** (that's the server for production)
+Now you can **point your browser to [http://localhost:3000/](http://localhost:3000/)** (that's the server for production)
 
 If you want, you can **share a link to a specific day**, specifying it in the *yyyy-mm-dd* format, like: http://localhost:3000/#/day/2017-01-20
 
@@ -59,7 +63,7 @@ npm run dev
 python ./tests/ibt2_tests.py
 ```
 
-Your browser will automatically open http://localhost:8080/ (that's the server for development)
+Your browser will automatically open [http://localhost:8080/](http://localhost:8080/) (that's the server for development)
 
 
 Development
@@ -73,7 +77,7 @@ Technological stack
 
 - [VueJS](https://vuejs.org/) for the webApp
 - [Vue Material](https://vuematerial.github.io/) for the UI components
-- [vue Datepicker](https://github.com/charliekassel/vuejs-datepicker) for the datepicker
+- [Vue Datepicker](https://github.com/charliekassel/vuejs-datepicker) for the datepicker
 - [Tornado web](http://www.tornadoweb.org/) as web server
 - [MongoDB](https://www.mongodb.org/) to store the data
 
