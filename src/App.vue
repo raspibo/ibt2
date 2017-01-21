@@ -1,7 +1,7 @@
 <template>
     <div id="main-attendees">
         <md-layout md-gutter md-row>
-            <md-layout md-column md-flex="20" md-gutter>
+            <md-layout id="datepicker-column" md-column md-flex="20" md-gutter>
                 <datepicker id="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" @selected="getDay"></datepicker>
             </md-layout>
             <md-layout id="panel" md-column>
@@ -140,6 +140,10 @@ export default {
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
     margin-top: 0px;
+}
+
+#datepicker-column {
+    min-width: 320px;
 }
 
 #datepicker {
