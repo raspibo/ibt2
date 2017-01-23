@@ -34,6 +34,8 @@ Vue.use(Vuex);
 Vue.use(VueRouter);
 Vue.use(VueResource);
 Vue.use(VueMaterial);
+// disable ink ripple.
+Vue.material.inkRipple = false;
 
 var routes = [
     {path: '/', name: 'home', component: App},
