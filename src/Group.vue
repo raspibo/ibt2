@@ -1,4 +1,5 @@
 <template>
+    <!-- XXX: too much duplication in this template -->
     <md-layout class="group-layout" md-col gutter="120" md-align="start">
         <md-card v-if="!addNewGroup" md-with-hover @mouseenter.native="focusToNewAttendee()">
             <md-card-header class="group-header">
@@ -12,11 +13,22 @@
                 <md-list md-dense>
                     <attendee v-for="attendee in group.attendees || []" :attendee="attendee" @updated="reload" />
                     <md-list-item class="attendee-add">
-                        <md-icon>person_add</md-icon>
+                        <md-icon @click.native="addAttendee(group.group)">person_add</md-icon>
                         <md-input-container class="new-attendee">
                             <label>new attendee</label>
-                            <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(group.group, newAttendee)" v-model="newAttendee" class="attendee-add-name" />
+                            <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendee" />
                         </md-input-container>
+
+                        <md-list-expand>
+                            <md-list>
+                                <md-list-item class="md-inset">
+                                    <md-input-container>
+                                        <label>notes</label>
+                                        <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendeeNotes" />
+                                    </md-input-container>
+                                </md-list-item>
+                            </md-list>
+                        </md-list-expand>
                     </md-list-item>
                 </md-list>
             </md-card-content>
@@ -32,11 +44,22 @@
             <md-card-content>
                 <md-list v-show="newGroup">
                     <md-list-item class="attendee-add">
-                        <md-icon>person_add</md-icon>
+                        <md-icon @click.native="addAttendee(newGroup)">person_add</md-icon>
                         <md-input-container>
                             <label>new attendee</label>
-                            <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(newGroup, newAttendee)" v-model="newAttendee" class="attendee-add-name" />
+                            <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendee" />
                         </md-input-container>
+
+                        <md-list-expand>
+                            <md-list>
+                                <md-list-item class="md-inset">
+                                    <md-input-container>
+                                        <label>notes</label>
+                                        <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendeeNotes" />
+                                    </md-input-container>
+                                </md-list-item>
+                            </md-list>
+                        </md-list-expand>
                     </md-list-item>
                 </md-list>
             </md-card-content>
@@ -53,7 +76,11 @@ export default {
     props: {group: {}, day: {}, addNewGroup: {default: false}},
 
     data: function () {
-        return { newAttendee: '', newGroup: '' }
+        return {
+            newAttendee: '',
+            newAttendeeNotes: '',
+            newGroup: ''
+        }
     },
 
     computed: {
@@ -69,6 +96,7 @@ export default {
     methods: {
         reset() {
             this.newAttendee = '';
+            this.newAttendeeNotes = '';
             this.newGroup = '';
         },
 
@@ -86,7 +114,14 @@ export default {
         },
 
         addAttendee(group, newAttendee) {
-            this.attendeesUrl.save({day: this.day, group: group, name: newAttendee}).then((response) => {
+            newAttendee = newAttendee || this.newAttendee;
+            var attendee = {
+                day: this.day,
+                group: group,
+                name: newAttendee,
+                notes: this.newAttendeeNotes
+            };
+            this.attendeesUrl.save(attendee).then((response) => {
                 return response.json();
             }, (response) => {
                 this.$refs.dialogObj.show({text: 'unable to add the attendee'});
@@ -148,6 +183,10 @@ export default {
     font-size: 12px;
     font-weight: 200;
     line-height: 1;
+}
+
+.new-attendee-notes {
+    max-width: 120px;
 }
 
 </style>

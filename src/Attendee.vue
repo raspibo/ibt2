@@ -1,12 +1,23 @@
 <template>
-    <md-list-item class="attendee-list-item" :key="attendee._id">
+    <md-list-item class="attendee-list-item md-double-line" :key="attendee._id">
         <md-icon>person</md-icon>
-        <span v-if="!edit">{{attendee.name}}</span>
-        <md-input-container md-inline v-if="edit">
-            <md-input @keyup.enter.native="updateAttendee()" v-model="attendee.name" ref="updateAttendeeName" />
-        </md-input-container>
+        <div v-if="!edit" class="md-list-text-container">
+            <span>{{ attendee.name }}</span>
+            <span v-if="attendee.notes" class="attendee-notes">{{ attendee.notes }}</span>
+        </div>
+        <div v-if="edit">
+            <md-input-container md-inline>
+                <md-input @keyup.enter.native="updateAttendee()" @keydown.esc.native="edit = false" v-model="attendee.name" ref="updateAttendeeName" />
+            </md-input-container>
+            <div class="notes-editor-list-item">
+                <md-input-container md-inline>
+                    <label>notes</label>
+                    <md-input class="attendee-notes" @keyup.enter.native="updateAttendee()" @keydown.esc.native="edit = false" v-model="attendee.notes" />
+                </md-input-container>
+            </div>
+        </div>
 
-        <md-menu v-if="isAuthorized(attendee.created_by)" md-align-trigger>
+        <md-menu v-if="isAuthorized(attendee.created_by) && !edit" md-align-trigger>
             <md-button class="md-icon-button" md-menu-trigger>
                 <md-icon>more_vert</md-icon>
             </md-button>
@@ -95,6 +106,33 @@ export default {
 
 .attendee-list-item {
     min-width: 250px;
+}
+
+.attendee-notes {
+    font-style: italic !important;
+}
+
+.notes-editor-list-item {
+    margin-bottom: 0px !important;
+    padding-left: 16px;
+}
+
+.notes-editor-list-item ul {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+}
+
+.notes-editor-list-item .md-theme-default.md-list {
+    background-color: transparent;
+}
+
+
+.notes-editor-list-item button:hover {
+    background-color: transparent !important;
+}
+
+.attendee-notes {
+    max-width: 120px;
 }
 
 </style>
