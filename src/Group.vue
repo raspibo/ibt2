@@ -20,6 +20,7 @@
                     </md-menu>
                 </md-layout>
                 <md-layout v-if="group.notes" md-row>
+                    <md-tooltip md-direction="top">click to expande/collapse notes</md-tooltip>
                     <div ref="groupNotes" class="group-notes" @click="toggleNotes()">{{ group.notes }}</div>
                 </md-layout>
             </md-card-header>
@@ -258,7 +259,7 @@ export default {
 
 .group-notes {
     font-style: italic;
-    padding-left: 15px;
+    padding-left: 30px;
     text-overflow: ellipsis;
     max-width: 400px;
     overflow: hidden;
