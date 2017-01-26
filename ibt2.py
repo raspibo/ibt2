@@ -207,6 +207,11 @@ class AttendeesHandler(BaseHandler):
     @gen.coroutine
     def post(self, **kwargs):
         data = self.clean_body
+        for key in 'name', 'group', 'day':
+            value = (data.get(key) or '').strip()
+            if not value:
+                return self.build_error(status=404, message="%s can't be empty" % key)
+            data[key] = value
         user_id = self.current_user_info.get('_id')
         now = datetime.datetime.now()
         data['created_by'] = user_id

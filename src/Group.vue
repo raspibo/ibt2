@@ -153,7 +153,8 @@ export default {
             this.attendeesUrl.save(attendee).then((response) => {
                 return response.json();
             }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to add the attendee'});
+                var msg = (response && response.body && response.body.message) || '';
+                this.$refs.dialogObj.show({text: 'unable to add the attendee: ' + msg});
             }).then((json) => {
                 this.reset();
                 this.$emit('updated');
