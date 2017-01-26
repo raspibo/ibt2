@@ -5,7 +5,7 @@
             <md-card-header class="group-header">
                 <md-layout md-row>
                     <div class="md-title group-title">
-                        <md-icon class="group-icon">folder_open</md-icon>&nbsp;Group: {{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
+                        <md-icon class="group-icon">folder_open</md-icon>&nbsp;{{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
                     </div>
                     <md-menu md-align-trigger>
                         <md-button class="md-icon-button" md-menu-trigger>
