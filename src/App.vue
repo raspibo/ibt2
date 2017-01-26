@@ -178,6 +178,7 @@ export default {
                 this.$refs.dialogObj.show({text: 'unable to edit day notes'});
             }).then((json) => {
                 this.day.notes = json.notes;
+                this.reload();
             });
         }
     },

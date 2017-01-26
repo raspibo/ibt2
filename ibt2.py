@@ -330,7 +330,11 @@ class DaysHandler(BaseHandler):
         now = datetime.datetime.now()
         data['updated_by'] = self.current_user_info.get('_id')
         data['updated_at'] = now
-        merged, doc = self.db.update('days', self.arguments, data)
+        day = (data.get('day') or '').strip()
+        if not day:
+            return self.build_error(status=404, message='unable to access the resource')
+        data['day'] = day
+        merged, doc = self.db.update('days', {'day': day}, data)
         self.write(doc)
 
 
@@ -342,7 +346,13 @@ class GroupsHandler(BaseHandler):
         now = datetime.datetime.now()
         data['updated_by'] = self.current_user_info.get('_id')
         data['updated_at'] = now
-        merged, doc = self.db.update('groups', self.arguments, data)
+        day = (data.get('day') or '').strip()
+        group = (data.get('group') or '').strip()
+        if not (day and group):
+            return self.build_error(status=404, message='unable to access the resource')
+        data['day'] = day
+        data['group'] = group
+        merged, doc = self.db.update('groups', {'day': day, 'group': group}, data)
         self.write(doc)
 
 
