@@ -24,7 +24,7 @@
                     <div ref="groupNotes" class="group-notes" @click="toggleNotes()">{{ group.notes }}</div>
                 </md-layout>
             </md-card-header>
-            <md-card-content>
+            <md-card-content class="group-card">
                 <md-list md-dense>
                     <attendee v-for="attendee in group.attendees || []" :attendee="attendee" @updated="reload" />
                     <md-list-item class="attendee-add">
@@ -267,12 +267,20 @@ export default {
     color: rgba(0, 0, 0, 0.54);
 }
 
+.group-card {
+    padding-right: 8px !important;
+}
+
 .new-group-label {
     left: 30px !important;
 }
 
 .group-add-name {
     margin-left: 0px !important;
+}
+
+.attendee-add > button {
+    padding-left: 0px !important;
 }
 
 </style>

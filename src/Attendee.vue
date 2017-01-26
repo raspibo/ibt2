@@ -108,6 +108,11 @@ export default {
     min-width: 250px;
 }
 
+.attendee-list-item button {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+
 .attendee-notes {
     font-style: italic !important;
 }
