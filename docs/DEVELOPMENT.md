@@ -38,7 +38,7 @@ Example of */attendees/:id*:
 
 Example of */days/:day*:
 ``` json
-{"day": "2017-01-20", "groups": [{"name": "Group Name", "attendees": [{"day": "2017-01-20", "name": "Attendee Name", "group": "Group Name", "updated_by": "587a7c79dff0d71c89211dc4", "created_at": "2017-01-20 13:57:26.029000", "updated_at": "2017-01-20 13:57:26.029000", "created_by": "587a7c79dff0d71c89211dc4", "_id": "58820936dff0d740dee647a4"}]}]}
+{"day": "2017-01-20", "groups": [{"group": "Group Name", "attendees": [{"day": "2017-01-20", "name": "Attendee Name", "group": "Group Name", "updated_by": "587a7c79dff0d71c89211dc4", "created_at": "2017-01-20 13:57:26.029000", "updated_at": "2017-01-20 13:57:26.029000", "created_by": "587a7c79dff0d71c89211dc4", "_id": "58820936dff0d740dee647a4"}]}]}
 ```
 
 

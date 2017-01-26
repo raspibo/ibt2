@@ -4,9 +4,23 @@
         <md-card v-if="!addNewGroup" md-with-hover @mouseenter.native="focusToNewAttendee()">
             <md-card-header class="group-header">
                 <md-layout md-row>
-                    <div class="md-title">
+                    <div class="md-title group-title">
                         <md-icon class="group-icon">folder_open</md-icon>&nbsp;Group: {{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
                     </div>
+                    <md-menu md-align-trigger>
+                        <md-button class="md-icon-button" md-menu-trigger>
+                            <md-icon>more_vert</md-icon>
+                        </md-button>
+                        <md-menu-content>
+                            <md-menu-item @click="openNotesDialog()">
+                                <span>edit notes</span>
+                                <md-icon>edit</md-icon>
+                            </md-menu-item>
+                        </md-menu-content>
+                    </md-menu>
+                </md-layout>
+                <md-layout v-if="group.notes" md-row>
+                    <div ref="groupNotes" class="group-notes" @click="toggleNotes()">{{ group.notes }}</div>
                 </md-layout>
             </md-card-header>
             <md-card-content>
@@ -35,9 +49,10 @@
         </md-card>
         <md-card v-if="addNewGroup" md-with-hover @mouseenter.native="focusToNewGroup()" md-align="start">
             <md-card-header class="new-group-header">
-                <div class="md-title">
-                    <md-input-container class="new-group" md-inline>
-                        <md-icon>create_new_folder</md-icon>&nbsp;&nbsp;<md-input ref="newGroup" v-model="newGroup" @keyup.enter.native="focusToNewAttendee()" class="group-add-name" placeholder="new group" />
+                <div class="md-title group-title">
+                    <md-input-container class="new-group">
+                        <label class="new-group-label">new group</label>
+                        <md-icon>create_new_folder</md-icon>&nbsp;&nbsp;<md-input ref="newGroup" v-model="newGroup" @keyup.enter.native="focusToNewAttendee()" class="group-add-name" />
                     </md-input-container>
                 </div>
             </md-card-header>
@@ -65,6 +80,15 @@
             </md-card-content>
         </md-card>
         <ibt-dialog ref="dialogObj" />
+        <md-dialog-prompt
+                    v-model="groupNotes"
+                    @open="dialogGroupNotesOpen"
+                    @close="dialogGroupNotesClose"
+                    :md-title="noteDialog.title"
+                    :md-ok-text="noteDialog.ok"
+                    :md-cancel-text="noteDialog.cancel"
+                    ref="dialogGroupNotes">
+        </md-dialog-prompt>
     </md-layout>
 </template>
 <script>
@@ -79,7 +103,10 @@ export default {
         return {
             newAttendee: '',
             newAttendeeNotes: '',
-            newGroup: ''
+            newGroup: '',
+            groupNotes: '',
+            noteDialog: {title: 'Group notes', ok: 'ok', cancel: 'cancel'},
+            expandedNote: false
         }
     },
 
@@ -90,6 +117,7 @@ export default {
     },
 
     beforeCreate: function() {
+        this.groupsUrl = this.$resource('groups');
         this.attendeesUrl = this.$resource('attendees{/id}');
     },
 
@@ -129,6 +157,41 @@ export default {
                 this.reset();
                 this.$emit('updated');
             });
+        },
+
+        openNotesDialog() {
+            this.$refs.dialogGroupNotes.open();
+        },
+
+        dialogGroupNotesOpen() {
+            this.groupNotes = this.group.notes || '';
+        },
+
+        dialogGroupNotesClose(type) {
+            if (type != 'ok' || !this.group || !this.group.group || !this.day) {
+                return;
+            }
+            var data = {day: this.day, group: this.group.group, notes: this.groupNotes};
+            this.groupsUrl.update(data).then((response) => {
+                return response.json();
+            }, (response) => {
+                this.$refs.dialogObj.show({text: 'unable to edit group notes'});
+            }).then((json) => {
+                this.reset();
+                this.$emit('updated');
+            });
+        },
+
+        toggleNotes() {
+            if (!this.expandedNote) {
+                $(this.$refs.groupNotes).css('text-overflow', 'initial');
+                $(this.$refs.groupNotes).css('white-space', 'initial');
+                this.expandedNote = true;
+            } else {
+                $(this.$refs.groupNotes).css('text-overflow', 'ellipsis');
+                $(this.$refs.groupNotes).css('white-space', 'nowrap');
+                this.expandedNote = false;
+            }
         }
     },
 
@@ -148,7 +211,11 @@ export default {
     padding-bottom: 0px !important;
 }
 
-.new-group-header .md-title {
+.group-title {
+    flex: 1;
+}
+
+.new-group-header .group-title {
     margin-top: 0px !important;
 }
 
@@ -187,6 +254,24 @@ export default {
 
 .new-attendee-notes {
     max-width: 120px;
+}
+
+.group-notes {
+    font-style: italic;
+    padding-left: 15px;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    overflow: hidden;
+    white-space: nowrap;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.new-group-label {
+    left: 30px !important;
+}
+
+.group-add-name {
+    margin-left: 0px !important;
 }
 
 </style>

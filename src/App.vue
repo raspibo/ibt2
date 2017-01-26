@@ -3,6 +3,29 @@
         <md-layout md-gutter md-row>
             <md-layout id="datepicker-column" md-column md-flex="20" md-gutter>
                 <datepicker id="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" @selected="getDay"></datepicker>
+                <md-card id="day-info">
+                    <md-card-header class="group-header">
+                        <md-layout md-row>
+                            <div class="md-title day-info-title">
+                                <md-icon class="day-icon">today</md-icon>&nbsp;{{ day.day }}
+                            </div>
+                            <md-menu md-align-trigger>
+                                <md-button class="md-icon-button" md-menu-trigger>
+                                    <md-icon>more_vert</md-icon>
+                                </md-button>
+                                <md-menu-content>
+                                    <md-menu-item @click="openNotesDialog()">
+                                        <span>edit notes</span>
+                                        <md-icon>edit</md-icon>
+                                    </md-menu-item>
+                                </md-menu-content>
+                            </md-menu>
+                        </md-layout>
+                    </md-card-header>
+                    <md-card-content>
+                        <div id="day-notes">{{ day.notes }}</div>
+                    </md-card-content>
+                </md-card>
             </md-layout>
             <md-layout id="panel" md-column>
                 <md-layout md-row>
@@ -12,6 +35,15 @@
             </md-layout>
         </md-layout>
         <ibt-dialog ref="dialogObj" />
+        <md-dialog-prompt
+                    v-model="dayNotes"
+                    @open="dialogDayNotesOpen"
+                    @close="dialogDayNotesClose"
+                    :md-title="noteDialog.title"
+                    :md-ok-text="noteDialog.ok"
+                    :md-cancel-text="noteDialog.cancel"
+                    ref="dialogDayNotes">
+        </md-dialog-prompt>
     </div>
 </template>
 <script>
@@ -25,7 +57,9 @@ export default {
         return {
             date: null, // a Date object representing the selected date
             day: {},
-            daysSummary: {}
+            daysSummary: {},
+            dayNotes: '',
+            noteDialog: {title: 'Day notes', ok: 'ok', cancel: 'cancel'}
         }
     },
 
@@ -123,6 +157,28 @@ export default {
                 }
                 this.day = dayData;
             });
+        },
+
+        openNotesDialog() {
+            this.$refs.dialogDayNotes.open();
+        },
+
+        dialogDayNotesOpen() {
+            this.dayNotes = this.day.notes || '';
+        },
+
+        dialogDayNotesClose(type) {
+            if (type != 'ok' || !this.day) {
+                return;
+            }
+            var data = {day: this.day.day, notes: this.dayNotes};
+            this.daysUrl.update(data).then((response) => {
+                return response.json();
+            }, (response) => {
+                this.$refs.dialogObj.show({text: 'unable to edit day notes'});
+            }).then((json) => {
+                this.day.notes = json.notes;
+            });
         }
     },
 
@@ -154,8 +210,24 @@ export default {
     flex: initial;
 }
 
-#toolbar-title {
+#day-info {
+    margin: 10px;
+    width: 300px;
+    min-height: 200px;
+}
+
+.day-info-title {
     flex: 1;
 }
+
+#day-notes {
+    padding: 10px;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.day-icon {
+    vertical-align: text-top;
+}
+
 
 </style>

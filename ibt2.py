@@ -270,8 +270,12 @@ class DaysHandler(BaseHandler):
         end = params.get('end')
         if end:
             del params['end']
+        base = {}
+        groupsDetails = {}
         if day:
             params['day'] = day
+            base = self.db.getOne('days', {'day': day})
+            groupsDetails = dict([(x['group'], x) for x in self.db.query('groups', {'day': day})])
         else:
             if start:
                 params['day'] = {'$gte': start}
@@ -299,18 +303,42 @@ class DaysHandler(BaseHandler):
                 for group, attendees in itertools.groupby(sorted(dayItems, key=itemgetter('group')),
                                                           key=itemgetter('group')):
                     attendees = sorted(attendees, key=itemgetter('_id'))
-                    dayData['groups'].append({'group': group, 'attendees': attendees})
+                    groupData = groupsDetails.get(group) or {}
+                    groupData.update({'group': group, 'attendees': attendees})
+                    dayData['groups'].append(groupData)
                 days.append(dayData)
         except Exception as e:
-            self.logger.warn('unable to parse entry; dayData: %s', dayData)
+            self.logger.warn('unable to parse entry; dayData: %s error: %s', dayData, e)
         if summary:
             days = self._summarize(days)
         if not day:
             self.write({'days': days})
         elif days:
-            self.write(days[0])
+            base.update(days[0])
+            self.write(base)
         else:
-            self.write({})
+            self.write(base)
+
+    @gen.coroutine
+    def put(self, **kwargs):
+        data = self.clean_body
+        now = datetime.datetime.now()
+        data['updated_by'] = self.current_user_info.get('_id')
+        data['updated_at'] = now
+        merged, doc = self.db.update('days', self.arguments, data)
+        self.write(doc)
+
+
+class GroupsHandler(BaseHandler):
+    """Handle requests for Groups."""
+    @gen.coroutine
+    def put(self, **kwargs):
+        data = self.clean_body
+        now = datetime.datetime.now()
+        data['updated_by'] = self.current_user_info.get('_id')
+        data['updated_at'] = now
+        merged, doc = self.db.update('groups', self.arguments, data)
+        self.write(doc)
 
 
 class UsersHandler(BaseHandler):
@@ -504,6 +532,7 @@ def run():
                 {'setting': 'server_cookie_secret', 'cookie_secret': cookie_secret})
 
     _days_path = r"/days/?(?P<day>[\d_-]+)?"
+    _groups_path = r"/groups/?"
     _attendees_path = r"/attendees/?(?P<id_>[\w\d_-]+)?"
     _current_user_path = r"/users/current/?"
     _users_path = r"/users/?(?P<id_>[\w\d_-]+)?/?(?P<resource>[\w\d_-]+)?/?(?P<resource_id>[\w\d_-]+)?"
@@ -511,6 +540,8 @@ def run():
             (_attendees_path, AttendeesHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _attendees_path), AttendeesHandler, init_params),
             (_days_path, DaysHandler, init_params),
+            (r'/v%s%s' % (API_VERSION, _groups_path), GroupsHandler, init_params),
+            (_groups_path, GroupsHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _days_path), DaysHandler, init_params),
             (_current_user_path, CurrentUserHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _current_user_path), CurrentUserHandler, init_params),

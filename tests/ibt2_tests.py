@@ -37,11 +37,15 @@ class Ibt2Tests(unittest.TestCase):
         self.connection = self.monco_conn.connection
         self.db = self.monco_conn.db
         self.db['attendees'].drop()
+        self.db['days'].drop()
+        self.db['groups'].drop()
         self.db['users'].remove({'username': 'newuser'})
         self.db['users'].remove({'username': 'newuser2'})
 
     def tearDown(self):
         self.db['attendees'].drop()
+        self.db['days'].drop()
+        self.db['groups'].drop()
         self.db['users'].remove({'username': 'newuser'})
         self.db['users'].remove({'username': 'newuser2'})
 
@@ -179,6 +183,31 @@ class Ibt2Tests(unittest.TestCase):
         rj = r.json()
         self.assertEqual(user_id, rj['created_by'])
         self.assertEqual(user_id, rj['updated_by'])
+
+    def test_put_day(self):
+        day = {'day': '2017-01-16', 'notes': 'A day note'}
+        self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'group C'})
+        r = requests.put(BASE_URL + 'days', json=day)
+        r.raise_for_status()
+        rj = r.json()
+        self.assertTrue(dictInDict(day, rj))
+        r = requests.get(BASE_URL + 'days/2017-01-16')
+        r.raise_for_status()
+        rj = r.json()
+        self.assertTrue(dictInDict(day, rj))
+
+    def test_put_group(self):
+        self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'A group'})
+        group = {'group': 'A group', 'day': '2017-01-16', 'notes': 'A group note'}
+        r = requests.put(BASE_URL + 'groups', json=group)
+        r.raise_for_status()
+        rj = r.json()
+        self.assertTrue(dictInDict(group, rj))
+        r = requests.get(BASE_URL + 'days/2017-01-16')
+        r.raise_for_status()
+        rj = r.json()
+        self.assertTrue(dictInDict(group, rj['groups'][0]))
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
