@@ -22,6 +22,8 @@ Web server
 - /attendees/:id GET - a single entry
 - /attendees/:id PUT - update an entry
 - /days GET - all entries, grouped by day and by group
+- /days PUT - write or update information about the day
+- /groups PUT - write or update information about a group
 - /days/:day GET - a single day entries, grouped by group (yyyy-mm-dd format)
 - /users GET - list of all users
 - /users POST - create a new user
