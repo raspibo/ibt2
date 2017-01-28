@@ -84,7 +84,9 @@ class BaseHandler(tornado.web.RequestHandler):
         :type data: dict"""
         if isinstance(data, dict):
             for key in data.keys():
-                if isinstance(key, (str, unicode)) and key.startswith('$'):
+                if (isinstance(key, (str, unicode)) and key.startswith('$')) or key in ('_id', 'created_by',
+                                                                                        'created_at', 'updated_by',
+                                                                                        'updated_at'):
                     del data[key]
         return data
 
@@ -168,7 +170,15 @@ class BaseHandler(tornado.web.RequestHandler):
         self.write({'error': True, 'message': message})
 
     def has_permission(self, owner_id):
-        if (owner_id and str(self.current_user_info.get('_id')) != str(owner_id) and not
+        """Check if the given owner_id matches with the current user or the logged in user is an admin; if not,
+        build an error reply.
+
+        :param owner_id: owner ID to check against
+        :type owner_id: str, ObjectId, None
+
+        :returns: if the logged in user has the permission
+        :rtype: bool"""
+        if (owner_id and str(self.current_user) != str(owner_id) and not
                 self.current_user_info.get('isAdmin')):
             self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
             return False
@@ -179,6 +189,23 @@ class BaseHandler(tornado.web.RequestHandler):
         if self.current_user in self._users_cache:
             del self._users_cache[self.current_user]
         self.clear_cookie("user")
+
+    def add_access_info(self, doc):
+        """Add created/updated by/at to a document (modified in place and returned).
+
+        :param doc: the doc to be updated
+        :type doc: dict
+        :returns: the updated document
+        :rtype: dict"""
+        user_id = self.current_user
+        now = datetime.datetime.now()
+        if 'created_by' not in doc:
+            doc['created_by'] = user_id
+        if 'created_at' not in doc:
+            doc['created_at'] = now
+        doc['updated_by'] = user_id
+        doc['updated_at'] = now
+        return doc
 
 
 class RootHandler(BaseHandler):
@@ -212,30 +239,19 @@ class AttendeesHandler(BaseHandler):
             if not value:
                 return self.build_error(status=404, message="%s can't be empty" % key)
             data[key] = value
-        user_id = self.current_user_info.get('_id')
-        now = datetime.datetime.now()
-        data['created_by'] = user_id
-        data['created_at'] = now
-        data['updated_by'] = user_id
-        data['updated_at'] = now
+        self.add_access_info(data)
         doc = self.db.add(self.collection, data)
         self.write(doc)
 
     @gen.coroutine
     def put(self, id_, **kwargs):
         data = self.clean_body
-        if '_id' in data:
-            del data['_id']
         doc = self.db.getOne(self.collection, {'_id': id_}) or {}
         if not doc:
             return self.build_error(status=404, message='unable to access the resource')
-        owner_id = doc.get('created_by')
-        if not self.has_permission(owner_id):
+        if not self.has_permission(doc.get('created_by')):
             return
-        user_id = self.current_user_info.get('_id')
-        now = datetime.datetime.now()
-        data['updated_by'] = user_id
-        data['updated_at'] = now
+        self.add_access_info(data)
         merged, doc = self.db.update(self.collection, {'_id': id_}, data)
         self.write(doc)
 
@@ -247,8 +263,7 @@ class AttendeesHandler(BaseHandler):
         doc = self.db.getOne(self.collection, {'_id': id_}) or {}
         if not doc:
             return self.build_error(status=404, message='unable to access the resource')
-        owner_id = doc.get('created_by')
-        if not self.has_permission(owner_id):
+        if not self.has_permission(doc.get('created_by')):
             return
         howMany = self.db.delete(self.collection, id_)
         self.write({'success': True, 'deleted entries': howMany.get('n')})
@@ -327,13 +342,11 @@ class DaysHandler(BaseHandler):
     @gen.coroutine
     def put(self, **kwargs):
         data = self.clean_body
-        now = datetime.datetime.now()
-        data['updated_by'] = self.current_user_info.get('_id')
-        data['updated_at'] = now
         day = (data.get('day') or '').strip()
         if not day:
             return self.build_error(status=404, message='unable to access the resource')
         data['day'] = day
+        self.add_access_info(data)
         merged, doc = self.db.update('days', {'day': day}, data)
         self.write(doc)
 
@@ -343,15 +356,13 @@ class GroupsHandler(BaseHandler):
     @gen.coroutine
     def put(self, **kwargs):
         data = self.clean_body
-        now = datetime.datetime.now()
-        data['updated_by'] = self.current_user_info.get('_id')
-        data['updated_at'] = now
         day = (data.get('day') or '').strip()
         group = (data.get('group') or '').strip()
         if not (day and group):
             return self.build_error(status=404, message='unable to access the resource')
         data['day'] = day
         data['group'] = group
+        self.add_access_info(data)
         merged, doc = self.db.update('groups', {'day': day, 'group': group}, data)
         self.write(doc)
 
@@ -381,8 +392,6 @@ class UsersHandler(BaseHandler):
     @gen.coroutine
     def post(self, **kwargs):
         data = self.clean_body
-        if '_id' in data:
-            del data['_id']
         username = (data.get('username') or '').strip()
         password = (data.get('password') or '').strip()
         email = (data.get('email') or '').strip()
@@ -392,8 +401,9 @@ class UsersHandler(BaseHandler):
         if res:
             raise InputException('username already exists')
         data['username'] = username
-        data['email'] = email
         data['password'] = utils.hash_password(password)
+        data['email'] = email
+        self.add_access_info(data)
         if 'isAdmin' in data and not self.current_user_info.get('isAdmin'):
             del data['isAdmin']
         doc = self.db.add(self.collection, data)
@@ -408,8 +418,6 @@ class UsersHandler(BaseHandler):
             return self.build_error(status=404, message='unable to access the resource')
         if not self.has_permission(id_):
             return
-        if '_id' in data:
-            del data['_id']
         if 'username' in data:
             del data['username']
         if 'isAdmin' in data and (str(self.current_user) == id_ or not self.current_user_info.get('isAdmin')):
@@ -420,6 +428,7 @@ class UsersHandler(BaseHandler):
                 data['password'] = utils.hash_password(password)
             else:
                 del data['password']
+        self.add_access_info(data)
         merged, doc = self.db.update(self.collection, {'_id': id_}, data)
         if 'password' in doc:
             del doc['password']
