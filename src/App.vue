@@ -23,7 +23,7 @@
                         </md-layout>
                     </md-card-header>
                     <md-card-content>
-                        <div id="day-notes">{{ day.notes }}</div>
+                        <div id="day-notes"><vue-markdown :source="day.notes"></vue-markdown></div>
                     </md-card-content>
                 </md-card>
             </md-layout>
@@ -51,6 +51,7 @@
 import Datepicker from 'vuejs-datepicker';
 import Group from './Group';
 import IbtDialog from './IbtDialog.vue';
+import VueMarkdown from 'vue-markdown';
 
 export default {
     data() {
@@ -183,9 +184,7 @@ export default {
         }
     },
 
-    components: {
-        Datepicker, Group, IbtDialog
-    }
+    components: { Datepicker, Group, IbtDialog, VueMarkdown }
 }
 
 </script>

@@ -21,7 +21,7 @@
                 </md-layout>
                 <md-layout v-if="group.notes" md-row>
                     <md-tooltip md-direction="top">click to expande/collapse notes</md-tooltip>
-                    <div ref="groupNotes" class="group-notes" @click="toggleNotes()">{{ group.notes }}</div>
+                    <div ref="groupNotes" class="group-notes" @click="toggleNotes()"><vue-markdown :source="group.notes" :break="false"></vue-markdown></div>
                 </md-layout>
             </md-card-header>
             <md-card-content class="group-card">
@@ -96,6 +96,7 @@
 
 import Attendee from './Attendee';
 import IbtDialog from './IbtDialog.vue';
+import VueMarkdown from 'vue-markdown';
 
 export default {
     props: {group: {}, day: {}, addNewGroup: {default: false}},
@@ -179,6 +180,7 @@ export default {
             }, (response) => {
                 this.$refs.dialogObj.show({text: 'unable to edit group notes'});
             }).then((json) => {
+                this.group.notes = json.notes;
                 this.reset();
                 this.$emit('updated');
             });
@@ -197,7 +199,7 @@ export default {
         }
     },
 
-    components: { Attendee, IbtDialog }
+    components: { Attendee, IbtDialog, VueMarkdown }
 };
 
 </script>

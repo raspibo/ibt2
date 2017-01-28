@@ -5,11 +5,13 @@
 Basic workflow:
 - if you want (not mandatory), login with your user; to create a new user, simply choose a username and a password. Benefit of logging in: only you or admins can edit/delete your entries.
 - pick a date
-- choose the name of a new group
-- write your name
+- choose the group you want to join or the name of a new group
+- write your name and, optionally, a note
 - rinse and repeat
 
 It's recommended to login with username **admin** and password **ibt2**, go to your personal page and change the password, if you've just installed ibt2. The *admin* user can grant super cow powers to any other user.
+
+For the notes, you can use the [Markdown](https://daringfireball.net/projects/markdown/) syntax.
 
 # Demo
 
@@ -78,6 +80,7 @@ Technological stack
 - [VueJS](https://vuejs.org/) for the webApp
 - [Vue Material](https://vuematerial.github.io/) for the UI components
 - [Vue Datepicker](https://github.com/charliekassel/vuejs-datepicker) for the datepicker
+- [Vue Markdown](https://www.npmjs.com/package/vue-markdown) for parsing the Markdown syntax
 - [Tornado web](http://www.tornadoweb.org/) as web server
 - [MongoDB](https://www.mongodb.org/) to store the data
 
