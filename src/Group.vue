@@ -263,6 +263,7 @@ export default {
 .group-notes > p {
     font-style: italic;
     padding-left: 30px;
+    margin: 0px;
     text-overflow: ellipsis;
     max-width: 400px;
     overflow: hidden;
