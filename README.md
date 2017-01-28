@@ -34,7 +34,7 @@ Installation of [Node.js](https://nodejs.org/en/download/) and npm is left as an
 
 To run it:
 ``` bash
-# install dependencies (one time only)
+# install dependencies (one time only, or every time the dependencies in package.json change)
 npm install
 
 # build for production with minification (each time the sources changes)
