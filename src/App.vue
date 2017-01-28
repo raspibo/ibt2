@@ -221,7 +221,6 @@ export default {
 }
 
 #day-notes {
-    padding: 10px;
     color: rgba(0, 0, 0, 0.54);
 }
 

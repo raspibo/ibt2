@@ -141,4 +141,8 @@ export default {
     max-width: 120px;
 }
 
+.attendee-notes > p {
+    margin: 0px;
+}
+
 </style>
