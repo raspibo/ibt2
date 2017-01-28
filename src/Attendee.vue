@@ -3,7 +3,7 @@
         <md-icon>person</md-icon>
         <div v-if="!edit" class="md-list-text-container">
             <span>{{ attendee.name }}</span>
-            <span v-if="attendee.notes" class="attendee-notes">{{ attendee.notes }}</span>
+            <vue-markdown v-if="attendee.notes" class="attendee-notes" :source="attendee.notes" :break="false"></vue-markdown>
         </div>
         <div v-if="edit">
             <md-input-container md-inline>
@@ -12,7 +12,7 @@
             <div class="notes-editor-list-item">
                 <md-input-container md-inline>
                     <label>notes</label>
-                    <md-input class="attendee-notes" @keyup.enter.native="updateAttendee()" @keydown.esc.native="edit = false" v-model="attendee.notes" />
+                    <md-input @keyup.enter.native="updateAttendee()" @keydown.esc.native="edit = false" v-model="attendee.notes" />
                 </md-input-container>
             </div>
         </div>
@@ -38,6 +38,7 @@
 <script>
 
 import IbtDialog from './IbtDialog.vue';
+import VueMarkdown from 'vue-markdown';
 
 export default {
     props: {attendee: {default: {}}},
@@ -94,7 +95,7 @@ export default {
         }
     },
 
-    components: {IbtDialog}
+    components: { IbtDialog, VueMarkdown }
 };
 
 </script>
