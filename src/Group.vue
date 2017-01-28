@@ -21,7 +21,7 @@
                 </md-layout>
                 <md-layout v-if="group.notes" md-row>
                     <md-tooltip md-direction="top">click to expande/collapse notes</md-tooltip>
-                    <div ref="groupNotes" class="group-notes" @click="toggleNotes()"><vue-markdown :source="group.notes" :break="false"></vue-markdown></div>
+                    <vue-markdown ref="groupNotes" @click.native="toggleNotes()" class="group-notes" :source="group.notes" :break="false"></vue-markdown>
                 </md-layout>
             </md-card-header>
             <md-card-content class="group-card">
@@ -188,12 +188,12 @@ export default {
 
         toggleNotes() {
             if (!this.expandedNote) {
-                $(this.$refs.groupNotes).css('text-overflow', 'initial');
-                $(this.$refs.groupNotes).css('white-space', 'initial');
+                $(this.$refs.groupNotes.$el).find('p').css('text-overflow', 'initial');
+                $(this.$refs.groupNotes.$el).find('p').css('white-space', 'initial');
                 this.expandedNote = true;
             } else {
-                $(this.$refs.groupNotes).css('text-overflow', 'ellipsis');
-                $(this.$refs.groupNotes).css('white-space', 'nowrap');
+                $(this.$refs.groupNotes.$el).find('p').css('text-overflow', 'ellipsis');
+                $(this.$refs.groupNotes.$el).find('p').css('white-space', 'nowrap');
                 this.expandedNote = false;
             }
         }
@@ -260,7 +260,7 @@ export default {
     max-width: 120px;
 }
 
-.group-notes {
+.group-notes > p {
     font-style: italic;
     padding-left: 30px;
     text-overflow: ellipsis;
