@@ -2,7 +2,7 @@
     <div id="main-attendees">
         <md-layout md-gutter md-row>
             <md-layout id="datepicker-column" md-column md-flex="20" md-gutter>
-                <datepicker id="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" @selected="getDay"></datepicker>
+                <datepicker id="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" :monday-first="true" @selected="getDay"></datepicker>
                 <md-card id="day-info">
                     <md-card-header class="group-header">
                         <md-layout md-row>
