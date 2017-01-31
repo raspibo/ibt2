@@ -34,7 +34,7 @@ import IbtSnackbar from './IbtSnackbar.vue';
 export default {
     data () {
         return {
-            user: {email: '', password: null, isAdmin: false},
+            user: {_id: null, email: '', password: null, isAdmin: false},
             password: null
         }
     },
@@ -50,6 +50,12 @@ export default {
     },
 
     mounted: function() {
+        this.$router.afterEach((to, from) => {
+            if (this.user._id && this.user._id != this.$route.params.id &&
+                    to.name == from.name && to.name == 'user') {
+                this.getUser(this.$route.params.id);
+            }
+        });
         this.getUser(this.$route.params.id);
     },
 
