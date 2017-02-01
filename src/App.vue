@@ -230,6 +230,10 @@ export default {
     background-color: #f8bbd0;
 }
 
+.calendar:hover .prev:hover, .calendar .up:hover, .calendar .next:hover {
+    background-color: #f06292 !important;
+}
+
 #day-notes {
     color: rgba(0, 0, 0, 0.54);
 }
