@@ -202,6 +202,12 @@ export default {
     min-width: 320px;
 }
 
+@media screen and (min-width: 945px) {
+    #datepicker-column {
+        flex-direction: column;
+    }
+}
+
 #datepicker {
     padding: 10px;
 }
