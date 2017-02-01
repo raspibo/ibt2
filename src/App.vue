@@ -4,7 +4,7 @@
             <md-layout id="datepicker-column" md-flex="20" md-flex-small="100" md-gutter>
                 <datepicker id="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" :monday-first="true" @selected="getDay"></datepicker>
                 <md-card id="day-info">
-                    <md-card-header class="group-header">
+                    <md-card-header class="day-info-header">
                         <md-layout md-row>
                             <div class="md-title day-info-title">
                                 <md-icon class="day-icon">today</md-icon>&nbsp;{{ day.day }}
@@ -224,6 +224,10 @@ export default {
 
 .day-info-title {
     flex: 1;
+}
+
+.day-info-header, .calendar .prev, .calendar .up, .calendar .next {
+    background-color: #f8bbd0;
 }
 
 #day-notes {
