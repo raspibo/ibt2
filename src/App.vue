@@ -2,7 +2,7 @@
     <div id="main-attendees">
         <md-layout md-gutter md-row>
             <md-layout id="datepicker-column" md-flex="20" md-flex-small="100" md-gutter>
-                <datepicker id="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" :monday-first="true" @selected="getDay"></datepicker>
+                <datepicker id="datepicker" ref="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" :monday-first="true" @selected="getDay"></datepicker>
                 <md-card id="day-info">
                     <md-card-header class="day-info-header">
                         <md-layout md-row>
@@ -99,6 +99,9 @@ export default {
         if (!(this.date && !isNaN(this.date.getTime()))) {
             this.date = new Date();
         }
+        $('div.calendar span.prev').on('click', this.changeMonth);
+        $('div.calendar span.next').on('click', this.changeMonth);
+        $('div.calendar span.month').on('click', this.changeMonth);
         this.reload();
     },
 
@@ -107,6 +110,14 @@ export default {
             var ym = this.dateToString(this.date, true);
             this.getSummary({start: ym, end: ym});
             this.getDay();
+        },
+
+        changeMonth() {
+            var day = new Date();
+            day.setTime(this.$refs.datepicker.currDate);
+            var ym = this.dateToString(day, true);
+            this.getSummary({start: ym, end: ym});
+            this.getDay(day);
         },
 
         dateToString(date, excludeDay) {
@@ -208,7 +219,7 @@ export default {
     }
 }
 
-#datepicker {
+.datepicker {
     padding: 10px;
 }
 
@@ -226,11 +237,11 @@ export default {
     flex: 1;
 }
 
-.day-info-header, .calendar .prev, .calendar .up, .calendar .next {
+.calendar > header > span {
     background-color: #f8bbd0;
 }
 
-.calendar:hover .prev:hover, .calendar .up:hover, .calendar .next:hover {
+.calendar > header > span:hover {
     background-color: #f06292 !important;
 }
 

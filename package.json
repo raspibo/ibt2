@@ -21,7 +21,7 @@
     "vue-material": "^0.6.3",
     "vue-resource": "^1.0.3",
     "vue-router": "^2.1.1",
-    "vuejs-datepicker": "^0.4.27",
+    "vuejs-datepicker": "^0.5.5",
     "vuex": "^2.1.1"
   },
   "devDependencies": {
