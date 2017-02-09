@@ -359,8 +359,8 @@ export default {
     margin-left: 0px !important;
 }
 
-.attendee-add > button {
-    padding-left: 0px !important;
+.attendee-add .md-list-item-container {
+    padding-left: 0px;
 }
 
 </style>

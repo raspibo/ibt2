@@ -22,11 +22,11 @@
                 <md-icon>more_vert</md-icon>
             </md-button>
             <md-menu-content>
-                <md-menu-item @click="editAttendee()">
+                <md-menu-item @click.native="editAttendee()">
                     <span>edit</span>
                     <md-icon>edit</md-icon>
                 </md-menu-item>
-                <md-menu-item @click="deleteAttendee()">
+                <md-menu-item @click.native="deleteAttendee()">
                     <span>delete</span>
                     <md-icon>cancel</md-icon>
                 </md-menu-item>
@@ -112,9 +112,9 @@ export default {
     min-width: 250px;
 }
 
-.attendee-list-item button {
-    padding-left: 0px !important;
-    padding-right: 0px !important;
+.attendee-list-item .md-list-item-container {
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 .attendee-notes {
@@ -140,12 +140,15 @@ export default {
     background-color: transparent !important;
 }
 
-.attendee-notes {
-    max-width: 120px;
-}
-
 .attendee-notes > p {
     margin: 0px;
+    font-style: italic;
+    margin: 0px;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    overflow: hidden;
+    white-space: nowrap;
+    color: rgba(0, 0, 0, 0.54);
 }
 
 </style>
