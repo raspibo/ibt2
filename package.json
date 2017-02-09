@@ -1,9 +1,18 @@
 {
   "name": "ibt2",
-  "version": "1.0.0",
-  "description": "I'll be there, 2",
+  "version": "1.0.1",
+  "description": "I'll be there, 2: an oversimplified application to register attendees at a conference or event",
   "author": "Davide Alberani <da@erlug.linux.it>",
-  "private": true,
+  "license": "Apache-2.0",
+  "private": false,
+  "homepage": "https://github.com/raspibo/ibt2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raspibo/ibt2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raspibo/ibt2/issues"
+  },
   "scripts": {
     "dev": "node build/dev-server.js",
     "devserver": "python ibt2.py --debug --db_name=ibt2_test",
