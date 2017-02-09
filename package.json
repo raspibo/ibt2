@@ -4,7 +4,7 @@
   "description": "I'll be there, 2: an oversimplified application to register attendees at a conference or event",
   "author": "Davide Alberani <da@erlug.linux.it>",
   "license": "Apache-2.0",
-  "private": false,
+  "private": true,
   "homepage": "https://github.com/raspibo/ibt2",
   "repository": {
     "type": "git",
