@@ -3,7 +3,7 @@
         <md-icon>person</md-icon>
         <div v-if="!edit" class="md-list-text-container">
             <span>{{ attendee.name }}</span>
-            <vue-markdown v-if="attendee.notes" class="attendee-notes" :source="attendee.notes" :break="false"></vue-markdown>
+            <vue-markdown v-if="attendee.notes" ref="attendeeNotes" @click.native="toggleNotes()" class="attendee-notes" :source="attendee.notes" :break="false"></vue-markdown>
         </div>
         <div v-if="edit">
             <md-input-container md-inline>
@@ -45,7 +45,8 @@ export default {
 
     data: function () {
         return {
-            edit: false
+            edit: false,
+            expandedNote: false
         }
     },
 
@@ -95,6 +96,18 @@ export default {
             }).then((json) => {
                 this.$emit('updated');
             });
+        },
+
+        toggleNotes() {
+            if (!this.expandedNote) {
+                $(this.$refs.attendeeNotes.$el).find('p').css('text-overflow', 'initial');
+                $(this.$refs.attendeeNotes.$el).find('p').css('white-space', 'initial');
+                this.expandedNote = true;
+            } else {
+                $(this.$refs.attendeeNotes.$el).find('p').css('text-overflow', 'ellipsis');
+                $(this.$refs.attendeeNotes.$el).find('p').css('white-space', 'nowrap');
+                this.expandedNote = false;
+            }
         }
     },
 
