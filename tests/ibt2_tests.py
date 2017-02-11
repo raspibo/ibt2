@@ -208,6 +208,16 @@ class Ibt2Tests(unittest.TestCase):
         rj = r.json()
         self.assertTrue(dictInDict(group, rj['groups'][0]))
 
+    def test_delete_group(self):
+        self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'A group'})
+        s = self.login('admin', 'ibt2')
+        r = s.delete(BASE_URL + 'groups', params={'day': '2017-01-16', 'group': 'A group'})
+        r.raise_for_status()
+        rj = r.json()
+        r = requests.get(BASE_URL + 'days/2017-01-16')
+        r.raise_for_status()
+        rj = r.json()
+        self.assertTrue(rj == {})
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

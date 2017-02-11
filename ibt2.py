@@ -66,6 +66,9 @@ class BaseHandler(tornado.web.RequestHandler):
     arguments = property(lambda self: dict([(k, v[0])
         for k, v in self.request.arguments.iteritems()]))
 
+    # Arguments suitable for a query on MongoDB.
+    clean_arguments = property(lambda self: self._clean_dict(self.arguments))
+
     _re_split_salt = re.compile(r'\$(?P<salt>.+)\$(?P<hash>.+)')
 
     @property
@@ -228,7 +231,7 @@ class AttendeesHandler(BaseHandler):
         if id_:
             output = self.db.getOne(self.collection, {'_id': id_})
         else:
-            output = {self.collection: self.db.query(self.collection, self.arguments)}
+            output = {self.collection: self.db.query(self.collection, self.clean_arguments)}
         self.write(output)
 
     @gen.coroutine
@@ -280,7 +283,7 @@ class DaysHandler(BaseHandler):
 
     @gen.coroutine
     def get(self, day=None, **kwargs):
-        params = self.arguments
+        params = self.clean_arguments
         summary = params.get('summary', False)
         if summary:
             del params['summary']
@@ -366,6 +369,21 @@ class GroupsHandler(BaseHandler):
         merged, doc = self.db.update('groups', {'day': day, 'group': group}, data)
         self.write(doc)
 
+    @gen.coroutine
+    def delete(self, **kwargs):
+        data = self.clean_arguments
+        day = (data.get('day') or '').strip()
+        group = (data.get('group') or '').strip()
+        if not (day and group):
+            return self.build_error(status=404, message='unable to access the resource')
+        if not self.current_user_info.get('isAdmin'):
+            self.build_error(status=401, message='insufficient permissions: must be admin')
+            return False
+        query = {'day': day, 'group': group}
+        howMany = self.db.delete('attendees', query)
+        self.db.delete('groups', query)
+        self.write({'success': True, 'deleted entries': howMany.get('n')})
+
 
 class UsersHandler(BaseHandler):
     """Handle requests for Users."""
@@ -383,7 +401,7 @@ class UsersHandler(BaseHandler):
         else:
             if not self.current_user_info.get('isAdmin'):
                 return self.build_error(status=401, message='insufficient permissions: must be an admin')
-            output = {self.collection: self.db.query(self.collection, self.arguments)}
+            output = {self.collection: self.db.query(self.collection, self.clean_arguments)}
             for user in output['users']:
                 if 'password' in user:
                     del user['password']

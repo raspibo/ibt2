@@ -16,6 +16,10 @@
                                 <span>edit notes</span>
                                 <md-icon>edit</md-icon>
                             </md-menu-item>
+                            <md-menu-item v-if="loggedInUser.isAdmin" @click="openDeleteGroupDialog()">
+                                <span>delete group</span>
+                                <md-icon>delete</md-icon>
+                            </md-menu-item>
                         </md-menu-content>
                     </md-menu>
                 </md-layout>
@@ -90,6 +94,14 @@
                     :md-cancel-text="noteDialog.cancel"
                     ref="dialogGroupNotes">
         </md-dialog-prompt>
+        <md-dialog-confirm
+                    @close="dialogDeleteGroupClose"
+                    :md-title="deleteDialog.title"
+                    :md-content="deleteDialog.content"
+                    :md-ok-text="deleteDialog.ok"
+                    :md-cancel-text="deleteDialog.cancel"
+                    ref="dialogDeleteGroup">
+        </md-dialog-confirm>
     </md-layout>
 </template>
 <script>
@@ -108,6 +120,7 @@ export default {
             newGroup: '',
             groupNotes: '',
             noteDialog: {title: 'Group notes', ok: 'ok', cancel: 'cancel'},
+            deleteDialog: {title: 'Delete group', content: 'Really delete this group?', ok: 'ok', cancel: 'cancel'},
             expandedNote: false
         }
     },
@@ -115,6 +128,9 @@ export default {
     computed: {
         counter: function() {
             return (this.group.attendees || []).length;
+        },
+        loggedInUser() {
+            return this.$store.state.loggedInUser;
         }
     },
 
@@ -196,6 +212,24 @@ export default {
                 $(this.$refs.groupNotes.$el).find('p').css('white-space', 'nowrap');
                 this.expandedNote = false;
             }
+        },
+
+        openDeleteGroupDialog() {
+            this.$refs.dialogDeleteGroup.open();
+        },
+
+        dialogDeleteGroupClose(type) {
+            if (type != 'ok' || !this.group || !this.group.group || !this.day || !this.loggedInUser.isAdmin) {
+                return;
+            }
+            var data = {day: this.day, group: this.group.group};
+            this.groupsUrl.delete(data).then((response) => {
+                return response.json();
+            }, (response) => {
+                this.$refs.dialogObj.show({text: 'unable to delete this group'});
+            }).then((json) => {
+                this.$emit('updated');
+            });
         }
     },
 
