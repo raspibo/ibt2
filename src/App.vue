@@ -237,6 +237,10 @@ export default {
     flex: 1;
 }
 
+.day-info-header {
+    background-color: #f8bbd0;
+}
+
 .calendar > header > span {
     background-color: #f8bbd0;
 }
