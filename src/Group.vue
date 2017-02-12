@@ -16,6 +16,10 @@
                                 <span>edit notes</span>
                                 <md-icon>edit</md-icon>
                             </md-menu-item>
+                            <md-menu-item @click="openRenameGroupDialog()">
+                                <span>rename group</span>
+                                <md-icon>label</md-icon>
+                            </md-menu-item>
                             <md-menu-item v-if="loggedInUser.isAdmin" @click="openDeleteGroupDialog()">
                                 <span>delete group</span>
                                 <md-icon>delete</md-icon>
@@ -94,6 +98,15 @@
                     :md-cancel-text="noteDialog.cancel"
                     ref="dialogGroupNotes">
         </md-dialog-prompt>
+        <md-dialog-prompt
+                    v-model="groupNewName"
+                    @open="dialogRenameGroupOpen"
+                    @close="dialogRenameGroupClose"
+                    :md-title="renameDialog.title"
+                    :md-ok-text="renameDialog.ok"
+                    :md-cancel-text="renameDialog.cancel"
+                    ref="dialogRenameGroup">
+        </md-dialog-prompt>
         <md-dialog-confirm
                     @close="dialogDeleteGroupClose"
                     :md-title="deleteDialog.title"
@@ -119,7 +132,9 @@ export default {
             newAttendeeNotes: '',
             newGroup: '',
             groupNotes: '',
+            groupNewName: '',
             noteDialog: {title: 'Group notes', ok: 'ok', cancel: 'cancel'},
+            renameDialog: {title: 'Rename group', ok: 'ok', cancel: 'cancel'},
             deleteDialog: {title: 'Delete group', content: 'Really delete this group?', ok: 'ok', cancel: 'cancel'},
             expandedNote: false
         }
@@ -135,7 +150,8 @@ export default {
     },
 
     beforeCreate: function() {
-        this.groupsUrl = this.$resource('groups');
+        this.groupsUrl = this.$resource('days{/day}/groups{/group}');
+        this.groupsInfoUrl = this.$resource('days{/day}/groups{/group}/info');
         this.attendeesUrl = this.$resource('attendees{/id}');
     },
 
@@ -190,8 +206,9 @@ export default {
             if (type != 'ok' || !this.group || !this.group.group || !this.day) {
                 return;
             }
-            var data = {day: this.day, group: this.group.group, notes: this.groupNotes};
-            this.groupsUrl.update(data).then((response) => {
+            this.groupsInfoUrl.update(
+                    {day: this.day, group: this.group.group},
+                    {notes: this.groupNotes}).then((response) => {
                 return response.json();
             }, (response) => {
                 this.$refs.dialogObj.show({text: 'unable to edit group notes'});
@@ -222,11 +239,33 @@ export default {
             if (type != 'ok' || !this.group || !this.group.group || !this.day || !this.loggedInUser.isAdmin) {
                 return;
             }
-            var data = {day: this.day, group: this.group.group};
-            this.groupsUrl.delete(data).then((response) => {
+            this.groupsUrl.delete({day: this.day, group: this.group.group}).then((response) => {
                 return response.json();
             }, (response) => {
                 this.$refs.dialogObj.show({text: 'unable to delete this group'});
+            }).then((json) => {
+                this.$emit('updated');
+            });
+        },
+
+        openRenameGroupDialog() {
+            this.$refs.dialogRenameGroup.open();
+        },
+
+        dialogRenameGroupOpen() {
+            this.groupNewName = this.group.group || '';
+        },
+
+        dialogRenameGroupClose(type) {
+            if (type != 'ok' || !this.group || !this.group.group || !this.day || !this.groupNewName) {
+                return;
+            }
+            this.groupsUrl.update(
+                    {day: this.day, group: this.group.group},
+                    {newName: this.groupNewName}).then((response) => {
+                return response.json();
+            }, (response) => {
+                this.$refs.dialogObj.show({text: 'unable to rename this group'});
             }).then((json) => {
                 this.$emit('updated');
             });
