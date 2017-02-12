@@ -23,6 +23,8 @@ To install it:
 ``` bash
 wget https://bootstrap.pypa.io/get-pip.py
 sudo python3 get-pip.py
+# if you want to install these modules for an unprivileged user, add --user and remove "sudo";
+# if you want to upgrade the versions already present in the system, also add --upgrade
 sudo pip3 install tornado
 sudo pip3 install pymongo
 git clone https://github.com/raspibo/ibt2
