@@ -19,7 +19,7 @@ import unittest
 import requests
 import monco
 
-BASE_URL = 'http://localhost:3000/v1.0/'
+BASE_URL = 'http://localhost:3000/v1.1/'
 DB_NAME = 'ibt2_test'
 
 def dictInDict(d, dContainer):

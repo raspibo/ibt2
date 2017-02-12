@@ -32,7 +32,7 @@ from tornado import gen, escape
 import utils
 import monco
 
-API_VERSION = '1.0'
+API_VERSION = '1.1'
 
 
 class BaseException(Exception):
