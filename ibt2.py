@@ -201,7 +201,7 @@ class BaseHandler(tornado.web.RequestHandler):
         :returns: the updated document
         :rtype: dict"""
         user_id = self.current_user
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         if 'created_by' not in doc:
             doc['created_by'] = user_id
         if 'created_at' not in doc:
