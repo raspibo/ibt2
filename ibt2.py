@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """I'll Be There, 2 (ibt2) - an oversimplified attendees registration system.
 
 Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>
@@ -63,8 +63,8 @@ class BaseHandler(tornado.web.RequestHandler):
     collection = None
 
     # A property to access the first value of each argument.
-    arguments = property(lambda self: dict([(k, v[0])
-        for k, v in self.request.arguments.iteritems()]))
+    arguments = property(lambda self: dict([(k, v[0].decode('utf-8'))
+        for k, v in self.request.arguments.items()]))
 
     # Arguments suitable for a query on MongoDB.
     clean_arguments = property(lambda self: self._clean_dict(self.arguments))
@@ -86,8 +86,8 @@ class BaseHandler(tornado.web.RequestHandler):
         :param data: dictionary to clean
         :type data: dict"""
         if isinstance(data, dict):
-            for key in data.keys():
-                if (isinstance(key, (str, unicode)) and key.startswith('$')) or key in ('_id', 'created_by',
+            for key in list(data.keys()):
+                if (isinstance(key, str) and key.startswith('$')) or key in ('_id', 'created_by',
                                                                                         'created_at', 'updated_by',
                                                                                         'updated_at'):
                     del data[key]
@@ -109,13 +109,16 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def initialize(self, **kwargs):
         """Add every passed (key, value) as attributes of the instance."""
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             setattr(self, key, value)
 
     @property
     def current_user(self):
         """Retrieve current user ID from the secure cookie."""
-        return self.get_secure_cookie("user")
+        current_user = self.get_secure_cookie("user")
+        if isinstance(current_user, bytes):
+            current_user = current_user.decode('utf-8')
+        return current_user
 
     @property
     def current_user_info(self):
@@ -381,8 +384,7 @@ class GroupsHandler(BaseHandler):
         if not (day and group):
             return self.build_error(status=404, message='unable to access the resource')
         if not self.current_user_info.get('isAdmin'):
-            self.build_error(status=401, message='insufficient permissions: must be admin')
-            return False
+            return self.build_error(status=401, message='insufficient permissions: must be admin')
         query = {'day': day, 'group': group}
         howMany = self.db.delete('attendees', query)
         self.db.delete('groups', query)

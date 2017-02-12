@@ -15,8 +15,8 @@
   },
   "scripts": {
     "dev": "node build/dev-server.js",
-    "devserver": "python ibt2.py --debug --db_name=ibt2_test",
-    "server": "python ibt2.py --debug",
+    "devserver": "python3 ibt2.py --debug --db_name=ibt2_test",
+    "server": "python3 ibt2.py --debug",
     "build": "node build/build.js"
   },
   "dependencies": {

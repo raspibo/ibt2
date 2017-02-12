@@ -36,15 +36,22 @@ def hash_password(password, salt=None):
     :rtype: str"""
     if salt is None:
         salt_pool = string.ascii_letters + string.digits
-        salt = ''.join(random.choice(salt_pool) for x in xrange(32))
-    hash_ = hashlib.sha512('%s%s' % (salt, password))
+        salt = ''.join(random.choice(salt_pool) for x in range(32))
+    pass_and_salt = '%s%s' % (salt, password)
+    pass_and_salt = pass_and_salt.encode('utf-8', 'ignore')
+    hash_ = hashlib.sha512(pass_and_salt)
     return '$%s$%s' % (salt, hash_.hexdigest())
 
 
 class ImprovedEncoder(json.JSONEncoder):
     """Enhance the default JSON encoder to serialize datetime and ObjectId instances."""
     def default(self, o):
-        if isinstance(o, (datetime.datetime, datetime.date,
+        if isinstance(o, bytes):
+            try:
+                return o.decode('utf-8')
+            except:
+                pass
+        elif isinstance(o, (datetime.datetime, datetime.date,
                           datetime.time, datetime.timedelta, ObjectId)):
             try:
                 return str(o)

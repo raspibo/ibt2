@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """I'll Be There, 2 (ibt2) - tests
 
 Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>
@@ -23,7 +23,7 @@ BASE_URL = 'http://localhost:3000/v1.1/'
 DB_NAME = 'ibt2_test'
 
 def dictInDict(d, dContainer):
-    for k, v in d.viewitems():
+    for k, v in d.items():
         if k not in dContainer:
             return False
         if v != dContainer[k]:
@@ -39,15 +39,15 @@ class Ibt2Tests(unittest.TestCase):
         self.db['attendees'].drop()
         self.db['days'].drop()
         self.db['groups'].drop()
-        self.db['users'].remove({'username': 'newuser'})
-        self.db['users'].remove({'username': 'newuser2'})
+        self.db['users'].delete_one({'username': 'newuser'})
+        self.db['users'].delete_one({'username': 'newuser2'})
 
     def tearDown(self):
         self.db['attendees'].drop()
         self.db['days'].drop()
         self.db['groups'].drop()
-        self.db['users'].remove({'username': 'newuser'})
-        self.db['users'].remove({'username': 'newuser2'})
+        self.db['users'].delete_one({'username': 'newuser'})
+        self.db['users'].delete_one({'username': 'newuser2'})
 
     def add_attendee(self, attendee):
         r = requests.post('%sattendees' % BASE_URL, json=attendee)
@@ -85,9 +85,11 @@ class Ibt2Tests(unittest.TestCase):
         attendee = {'name': 'A Name', 'day': '2017-01-15', 'group': 'A group'}
         r = self.add_attendee(attendee)
         id_ = r.json().get('_id')
+        r.connection.close()
         r = requests.delete(BASE_URL + 'attendees/' + id_)
         r.raise_for_status()
         self.assertTrue(r.json().get('success'))
+        r.connection.close()
 
     def test_get_days(self):
         self.add_attendee({'day': '2017-01-15', 'name': 'A name', 'group': 'group A'})
@@ -118,9 +120,11 @@ class Ibt2Tests(unittest.TestCase):
     def test_create_user(self):
         r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
         r.raise_for_status()
+        r.connection.close()
         s = self.login('newuser', 'ibt2')
         r = s.get(BASE_URL + 'users/current')
         r.raise_for_status()
+        r.connection.close()
 
     def test_update_user(self):
         r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
@@ -130,17 +134,20 @@ class Ibt2Tests(unittest.TestCase):
         r.raise_for_status()
         id2_ = r.json()['_id']
         r = requests.put(BASE_URL + 'users/' + id_, json={'email': 't@example.com'})
-        self.assertRaises(r.raise_for_status)
+        self.assertRaises(requests.exceptions.HTTPError, r.raise_for_status)
         s = self.login('newuser', 'ibt2')
         r = s.put(BASE_URL + 'users/' + id_, json={'email': 'test@example.com'})
         r.raise_for_status()
         self.assertEqual(r.json().get('email'), 'test@example.com')
+        r.connection.close()
         r = s.put(BASE_URL + 'users/' + id2_, json={'email': 'test@example.com'})
-        self.assertRaises(r.raise_for_status)
+        self.assertRaises(requests.exceptions.HTTPError, r.raise_for_status)
+        r.connection.close()
         s = self.login('admin', 'ibt2')
         r = s.put(BASE_URL + 'users/' + id_, json={'email': 'test2@example.com'})
         r.raise_for_status()
         self.assertEqual(r.json().get('email'), 'test2@example.com')
+        r.connection.close()
 
     def test_delete_user(self):
         r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
@@ -150,26 +157,31 @@ class Ibt2Tests(unittest.TestCase):
         r.raise_for_status()
         id2_ = r.json()['_id']
         r = requests.delete(BASE_URL + 'users/' + id_)
-        self.assertRaises(r.raise_for_status)
+        self.assertRaises(requests.exceptions.HTTPError, r.raise_for_status)
+        r.connection.close()
         s = self.login('newuser', 'ibt2')
         r = s.delete(BASE_URL + 'users/' + id_)
         r.raise_for_status()
+        r.connection.close()
         r = s.delete(BASE_URL + 'users/' + id2_)
-        self.assertRaises(r.raise_for_status)
+        self.assertRaises(requests.exceptions.HTTPError, r.raise_for_status)
+        r.connection.close()
         s = self.login('admin', 'ibt2')
         r = s.delete(BASE_URL + 'users/' + id2_)
         r.raise_for_status()
+        r.connection.close()
 
     def test_duplicate_user(self):
         r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
         r.raise_for_status()
         r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt3'})
-        self.assertRaises(r.raise_for_status)
+        self.assertRaises(requests.exceptions.HTTPError, r.raise_for_status)
 
     def login(self, username, password):
         s = requests.Session()
         r = s.post(BASE_URL + 'login', json={'username': username, 'password': password})
         r.raise_for_status()
+        r.connection.close()
         return s
 
     def test_created_by(self):
@@ -177,12 +189,14 @@ class Ibt2Tests(unittest.TestCase):
         r = s.get(BASE_URL + 'users/current')
         r.raise_for_status()
         user_id = r.json()['_id']
+        r.connection.close()
         attendee = {'day': '2017-01-15', 'name': 'A name', 'group': 'group A'}
         r = s.post('%sattendees' % BASE_URL, json=attendee)
         r.raise_for_status()
         rj = r.json()
         self.assertEqual(user_id, rj['created_by'])
         self.assertEqual(user_id, rj['updated_by'])
+        r.connection.close()
 
     def test_put_day(self):
         day = {'day': '2017-01-16', 'notes': 'A day note'}
@@ -214,10 +228,12 @@ class Ibt2Tests(unittest.TestCase):
         r = s.delete(BASE_URL + 'days/2017-01-16/groups/A group', params={'day': '2017-01-16', 'group': 'A group'})
         r.raise_for_status()
         rj = r.json()
+        r.connection.close()
         r = requests.get(BASE_URL + 'days/2017-01-16')
         r.raise_for_status()
         rj = r.json()
         self.assertTrue(rj == {})
+        r.connection.close()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

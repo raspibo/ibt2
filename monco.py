@@ -56,7 +56,7 @@ def convert(seq):
     """
     if isinstance(seq, dict):
         d = {}
-        for key, item in seq.iteritems():
+        for key, item in seq.items():
             if key in _force_conversion:
                 try:
                     d[key] = _force_conversion[key](item)
@@ -254,7 +254,7 @@ class Monco(object):
         operator = self._operations.get(operation)
         if updateList:
             newData = {}
-            for key, value in data.iteritems():
+            for key, value in data.items():
                 newData['%s.$.%s' % (updateList, key)] = value
             data = newData
         res = db[collection].find_and_modify(query=_id_or_query,

@@ -22,10 +22,9 @@ See [https://ibt2.ismito.it:3002/](https://ibt2.ismito.it:3002/)
 To install it:
 ``` bash
 wget https://bootstrap.pypa.io/get-pip.py
-sudo python get-pip.py
-sudo pip install tornado
-sudo pip install pymongo
-sudo pip install python-dateutil
+sudo python3 get-pip.py
+sudo pip3 install tornado
+sudo pip3 install pymongo
 git clone https://github.com/raspibo/ibt2
 cd ibt2
 ```
@@ -62,7 +61,7 @@ npm run devserver &
 npm run dev
 
 # only when the devserver is running, you can also run the testsuite
-python ./tests/ibt2_tests.py
+python3 ./tests/ibt2_tests.py
 ```
 
 Your browser will automatically open [http://localhost:8080/](http://localhost:8080/) (that's the server for development)
