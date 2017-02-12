@@ -479,7 +479,14 @@ class UsersHandler(BaseHandler):
         if id_ is None:
             return self.build_error(status=404, message='unable to access the resource')
         if not self.has_permission(id_):
-            return
+            return self.build_error(status=401, message='insufficient permissions: must be admin')
+        if id_ == self.current_user:
+            return self.build_error(status=401, message='unable to delete the current user; ask an admin')
+        doc = self.db.getOne(self.collection, {'_id': id_})
+        if not doc:
+            return self.build_error(status=404, message='unable to access the resource')
+        if doc.get('username') == 'admin':
+            return self.build_error(status=401, message='unable to delete the admin user')
         howMany = self.db.delete(self.collection, id_)
         if id_ in self._users_cache:
             del self._users_cache[id_]

@@ -10,6 +10,7 @@
                         <md-table-row>
                             <md-table-head>Username</md-table-head>
                             <md-table-head>Email</md-table-head>
+                            <md-table-head v-if="loggedInUser.isAdmin">Delete</md-table-head>
                         </md-table-row>
                     </md-table-header>
                     <md-table-body>
@@ -21,6 +22,11 @@
                             </md-table-cell>
                             <md-table-cell>
                                 {{user.email}}
+                            </md-table-cell>
+                            <md-table-cell v-if="loggedInUser.isAdmin">
+                                <md-button class="md-icon-button" @click="deleteUser(user._id)">
+                                    <md-icon>delete</md-icon>
+                                </md-button>
                             </md-table-cell>
                         </md-table-row>
                     </md-table-body>
@@ -71,11 +77,12 @@ export default {
         },
 
         deleteUser(userId) {
-            this.usersUrl.update({id: userId}).then((response) => {
+            this.usersUrl.delete({id: userId}).then((response) => {
                 return response.json();
             }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to delete the user'});
+                this.$refs.dialogObj.show({text: 'unable to delete the user: ' + response.body.message});
             }).then((data) => {
+                this.getUsers();
             });
         }
     },

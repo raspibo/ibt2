@@ -296,8 +296,8 @@ class Monco(object):
         :param force: force the deletion of all documents, when `_id_or_query` is empty
         :type force: bool
 
-        :returns: how many documents were removed
-        :rtype: int
+        :returns: dictionary with the number or removed documents
+        :rtype: dict
         """
         if not _id_or_query and not force:
             return
