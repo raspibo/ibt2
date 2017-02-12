@@ -261,8 +261,7 @@ class AttendeesHandler(BaseHandler):
     @gen.coroutine
     def delete(self, id_=None, **kwargs):
         if id_ is None:
-            self.write({'success': False})
-            return
+            return self.build_error(status=404, message='unable to access the resource')
         doc = self.db.getOne(self.collection, {'_id': id_}) or {}
         if not doc:
             return self.build_error(status=404, message='unable to access the resource')
@@ -274,7 +273,6 @@ class AttendeesHandler(BaseHandler):
 
 class DaysHandler(BaseHandler):
     """Handle requests for Days."""
-
     def _summarize(self, days):
         res = []
         for day in days:
@@ -342,12 +340,15 @@ class DaysHandler(BaseHandler):
         else:
             self.write(base)
 
+
+class DaysInfoHandler(BaseHandler):
+    """Handle requests for Days info."""
     @gen.coroutine
-    def put(self, **kwargs):
-        data = self.clean_body
-        day = (data.get('day') or '').strip()
+    def put(self, day='', **kwargs):
+        day = day.strip()
         if not day:
             return self.build_error(status=404, message='unable to access the resource')
+        data = self.clean_body
         data['day'] = day
         self.add_access_info(data)
         merged, doc = self.db.update('days', {'day': day}, data)
@@ -357,23 +358,26 @@ class DaysHandler(BaseHandler):
 class GroupsHandler(BaseHandler):
     """Handle requests for Groups."""
     @gen.coroutine
-    def put(self, **kwargs):
-        data = self.clean_body
-        day = (data.get('day') or '').strip()
-        group = (data.get('group') or '').strip()
+    def put(self, day='', group='', **kwargs):
+        day = day.strip()
+        group = group.strip()
         if not (day and group):
             return self.build_error(status=404, message='unable to access the resource')
-        data['day'] = day
-        data['group'] = group
-        self.add_access_info(data)
-        merged, doc = self.db.update('groups', {'day': day, 'group': group}, data)
-        self.write(doc)
+        data = self.clean_body
+        newName = (data.get('newName') or '').strip()
+        if newName:
+            query = {'day': day, 'group': group}
+            data = {'group': newName}
+            self.db.updateMany('attendees', query, data)
+            self.db.updateMany('groups', query, data)
+            self.write({'success': True})
+        else:
+            self.write({'success': False})
 
     @gen.coroutine
-    def delete(self, **kwargs):
-        data = self.clean_arguments
-        day = (data.get('day') or '').strip()
-        group = (data.get('group') or '').strip()
+    def delete(self, day='', group='', **kwargs):
+        day = day.strip()
+        group = group.strip()
         if not (day and group):
             return self.build_error(status=404, message='unable to access the resource')
         if not self.current_user_info.get('isAdmin'):
@@ -383,6 +387,22 @@ class GroupsHandler(BaseHandler):
         howMany = self.db.delete('attendees', query)
         self.db.delete('groups', query)
         self.write({'success': True, 'deleted entries': howMany.get('n')})
+
+
+class GroupsInfoHandler(BaseHandler):
+    """Handle requests for Groups Info."""
+    @gen.coroutine
+    def put(self, day='', group='', **kwargs):
+        day = day.strip()
+        group = group.strip()
+        if not (day and group):
+            return self.build_error(status=404, message='unable to access the resource')
+        data = self.clean_body
+        data['day'] = day
+        data['group'] = group
+        self.add_access_info(data)
+        merged, doc = self.db.update('groups', {'day': day, 'group': group}, data)
+        self.write(doc)
 
 
 class UsersHandler(BaseHandler):
@@ -574,17 +594,23 @@ def run():
                 {'setting': 'server_cookie_secret', 'cookie_secret': cookie_secret})
 
     _days_path = r"/days/?(?P<day>[\d_-]+)?"
-    _groups_path = r"/groups/?"
+    _days_info_path = r"/days/(?P<day>[\d_-]+)/info"
+    _groups_path = r"/days/(?P<day>[\d_-]+)/groups/(?P<group>.+?)"
+    _groups_info_path = r"/days/(?P<day>[\d_-]+)/groups/(?P<group>.+?)/info"
     _attendees_path = r"/attendees/?(?P<id_>[\w\d_-]+)?"
     _current_user_path = r"/users/current/?"
     _users_path = r"/users/?(?P<id_>[\w\d_-]+)?/?(?P<resource>[\w\d_-]+)?/?(?P<resource_id>[\w\d_-]+)?"
     application = tornado.web.Application([
             (_attendees_path, AttendeesHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _attendees_path), AttendeesHandler, init_params),
-            (_days_path, DaysHandler, init_params),
-            (r'/v%s%s' % (API_VERSION, _groups_path), GroupsHandler, init_params),
+            (_groups_info_path, GroupsInfoHandler, init_params),
+            (r'/v%s%s' % (API_VERSION, _groups_info_path), GroupsInfoHandler, init_params),
             (_groups_path, GroupsHandler, init_params),
+            (r'/v%s%s' % (API_VERSION, _groups_path), GroupsHandler, init_params),
+            (_days_path, DaysHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _days_path), DaysHandler, init_params),
+            (_days_info_path, DaysInfoHandler, init_params),
+            (r'/v%s%s' % (API_VERSION, _days_info_path), DaysInfoHandler, init_params),
             (_current_user_path, CurrentUserHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _current_user_path), CurrentUserHandler, init_params),
             (_users_path, UsersHandler, init_params),

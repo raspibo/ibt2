@@ -86,6 +86,7 @@ export default {
 
     beforeCreate: function() {
         this.daysUrl = this.$resource('days{/day}');
+        this.daysInfoUrl = this.$resource('days{/day}/info');
     },
 
     mounted: function() {
@@ -184,7 +185,7 @@ export default {
                 return;
             }
             var data = {day: this.day.day, notes: this.dayNotes};
-            this.daysUrl.update(data).then((response) => {
+            this.daysInfoUrl.update({day: this.day.day}, data).then((response) => {
                 return response.json();
             }, (response) => {
                 this.$refs.dialogObj.show({text: 'unable to edit day notes'});

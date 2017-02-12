@@ -262,6 +262,30 @@ class Monco(object):
         lastErrorObject = res.get('lastErrorObject') or {}
         return lastErrorObject.get('updatedExisting', False), res.get('value') or {}
 
+    def updateMany(self, collection, query, data):
+        """Update multiple existing documents.
+
+        query can be an ID or a dict representing a query.
+
+        :param collection: update documents in this collection
+        :type collection: str
+        :param query: a query or a list of attributes in the data that must match
+        :type query: str or :class:`~bson.objectid.ObjectId` or iterable
+        :param data: the updated information to store
+        :type data: dict
+
+        :returns: a dict with the success state and number of updated items
+        :rtype: dict
+        """
+        db = self.connect()
+        data = convert(data or {})
+        query = convert(query)
+        if not isinstance(query, dict):
+            query = {'_id': query}
+        if '_id' in data:
+            del data['_id']
+        return db[collection].update(query, {'$set': data}, multi=True)
+
     def delete(self, collection, _id_or_query=None, force=False):
         """Remove one or more documents from a collection.
 

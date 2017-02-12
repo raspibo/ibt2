@@ -187,7 +187,7 @@ class Ibt2Tests(unittest.TestCase):
     def test_put_day(self):
         day = {'day': '2017-01-16', 'notes': 'A day note'}
         self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'group C'})
-        r = requests.put(BASE_URL + 'days', json=day)
+        r = requests.put(BASE_URL + 'days/2017-01-16/info', json=day)
         r.raise_for_status()
         rj = r.json()
         self.assertTrue(dictInDict(day, rj))
@@ -199,7 +199,7 @@ class Ibt2Tests(unittest.TestCase):
     def test_put_group(self):
         self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'A group'})
         group = {'group': 'A group', 'day': '2017-01-16', 'notes': 'A group note'}
-        r = requests.put(BASE_URL + 'groups', json=group)
+        r = requests.put(BASE_URL + 'days/2017-01-16/groups/A group/info', json=group)
         r.raise_for_status()
         rj = r.json()
         self.assertTrue(dictInDict(group, rj))
@@ -211,7 +211,7 @@ class Ibt2Tests(unittest.TestCase):
     def test_delete_group(self):
         self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'A group'})
         s = self.login('admin', 'ibt2')
-        r = s.delete(BASE_URL + 'groups', params={'day': '2017-01-16', 'group': 'A group'})
+        r = s.delete(BASE_URL + 'days/2017-01-16/groups/A group', params={'day': '2017-01-16', 'group': 'A group'})
         r.raise_for_status()
         rj = r.json()
         r = requests.get(BASE_URL + 'days/2017-01-16')

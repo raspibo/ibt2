@@ -21,10 +21,13 @@ Web server
 - /attendees POST - write a new entry
 - /attendees/:id GET - a single entry
 - /attendees/:id PUT - update an entry
+- /attendees/:id DELETE - delete an entry
 - /days GET - all entries, grouped by day and by group
-- /days PUT - write or update information about the day
-- /groups PUT - write or update information about a group
 - /days/:day GET - a single day entries, grouped by group (yyyy-mm-dd format)
+- /days/:day/info PUT - write or update information about a day
+- /days/:day/groups/:group PUT - used to rename a group (with the newName key)
+- /days/:day/groups/:group DELETE - delete a group
+- /days/:day/groups/:group/info PUT - write or update information about a group (the :group key is its name)
 - /users GET - list of all users
 - /users POST - create a new user
 - /users/:id GET - a single user
