@@ -92,10 +92,6 @@ not-so-FAQs
 - **A:** because science! (but mostly because I already had most of it ready from other projects)
 
 
-- **Q:** will it ever be ported to Python 3?
-- **A:** yes, probably in the near future.
-
-
 - **Q:** *.vue* files? What's that?
 - **A:** Vue [single-file components](https://vuejs.org/v2/guide/single-file-components.html); a [webpack](https://webpack.js.org/) plugin will take care of translating them into stuff that can be digested by a browser.
 
