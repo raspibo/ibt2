@@ -87,9 +87,8 @@ class BaseHandler(tornado.web.RequestHandler):
         :type data: dict"""
         if isinstance(data, dict):
             for key in list(data.keys()):
-                if (isinstance(key, str) and key.startswith('$')) or key in ('_id', 'created_by',
-                                                                                        'created_at', 'updated_by',
-                                                                                        'updated_at'):
+                if (isinstance(key, str) and key.startswith('$')) or key in ('_id', 'created_by', 'created_at',
+                                                                    'updated_by', 'updated_at', 'isRegistered'):
                     del data[key]
         return data
 
@@ -135,6 +134,7 @@ class BaseHandler(tornado.web.RequestHandler):
             user = self.db.getOne('users', {'_id': user_info['_id']})
             if user:
                 user_info = user
+                user_info['isRegistered'] = True
         self._users_cache[current_user] = user_info
         return user_info
 
