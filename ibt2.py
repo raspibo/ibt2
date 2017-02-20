@@ -584,7 +584,17 @@ def run():
 
     # database backend connector
     db_connector = monco.Monco(url=options.mongo_url, dbName=options.db_name)
-    init_params = dict(db=db_connector, listen_port=options.port, logger=logger, ssl_options=ssl_options)
+
+    # all global settings stored in the db
+    settings = {}
+    for setting in db_connector.query('settings'):
+        key = setting.get('setting')
+        if not key:
+            continue
+        settings[key] = setting
+
+    init_params = dict(db=db_connector, listen_port=options.port, logger=logger,
+                       ssl_options=ssl_options, settings=settings)
 
     # If not present, we store a user 'admin' with password 'ibt2' into the database.
     if not db_connector.query('users', {'username': 'admin'}):
@@ -593,9 +603,9 @@ def run():
                  'isAdmin': True})
 
     # If present, use the cookie_secret stored into the database.
-    cookie_secret = db_connector.query('settings', {'setting': 'server_cookie_secret'})
+    cookie_secret = settings.get('server_cookie_secret')
     if cookie_secret:
-        cookie_secret = cookie_secret[0]['cookie_secret']
+        cookie_secret = cookie_secret['cookie_secret']
     else:
         # the salt guarantees its uniqueness
         cookie_secret = utils.hash_password('__COOKIE_SECRET__')
