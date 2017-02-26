@@ -84,6 +84,7 @@ Technological stack
 - [Vue Markdown](https://www.npmjs.com/package/vue-markdown) for parsing the Markdown syntax
 - [Tornado web](http://www.tornadoweb.org/) as web server
 - [MongoDB](https://www.mongodb.org/) to store the data
+- [Python 3](https://www.python.org/) is required
 
 The web part is incuded; you need to install Node.js, Tornado, MongoDB and the pymongo module on your system (no configuration needed).
 
