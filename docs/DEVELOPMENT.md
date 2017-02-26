@@ -13,6 +13,7 @@ These are the paths you see in the browser (VueJS does client-side routing: no r
 - /#/day/:day - show groups for the given date (in yyyy-mm-dd format)
 - /#/user/ - list of all users (only visible by admins)
 - /#/user/:id - show setting for the give user ID
+- /#/settings - global setting (only visible by admins)
 
 Web server
 ----------
@@ -33,6 +34,8 @@ Web server
 - /users/:id GET - a single user
 - /users/:id PUT - update a user
 - /users/current GET - information about the currently logged in user
+- /settings GET - get all global settings
+- /settings POST and PUT - add one or more new settings, or update existing ones
 - /login POST - login of a user
 - /logout GET - log the current user out
 

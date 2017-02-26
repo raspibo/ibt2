@@ -26,6 +26,7 @@ import store_data from './store.js';
 import App from './App';
 import User from './User';
 import Users from './Users';
+import GlobalSettings from './GlobalSettings';
 import Toolbar from './Toolbar';
 import IbtFooter from './IbtFooter';
 
@@ -41,7 +42,8 @@ var routes = [
     {path: '/day/', name: 'days', component: App},
     {path: '/day/:day', name: 'day', component: App},
     {path: '/user/', name: 'users', component: Users},
-    {path: '/user/:id', name: 'user', component: User}
+    {path: '/user/:id', name: 'user', component: User},
+    {path: '/settings/', name: 'settings', component: GlobalSettings},
 ];
 
 const store = new Vuex.Store(store_data);
@@ -52,5 +54,5 @@ var vue = new Vue({
     store: store,
     template: '<div id="app"><toolbar /><router-view class="view"></router-view><ibt-footer /></div>',
     router: router,
-    components: { App, Toolbar, IbtFooter, Users, User }
+    components: { App, Toolbar, IbtFooter, Users, User, GlobalSettings }
 });

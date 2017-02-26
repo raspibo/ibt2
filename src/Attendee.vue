@@ -52,6 +52,9 @@ export default {
     computed: {
         loggedInUser() {
             return this.$store.state.loggedInUser;
+        },
+        settings() {
+            return this.$store.state.settings || {};
         }
     },
 
@@ -61,7 +64,7 @@ export default {
 
     methods: {
         isAuthorized(ownerID) {
-            return !ownerID || this.$store.state.loggedInUser.isAdmin || (this.$store.state.loggedInUser._id && this.$store.state.loggedInUser._id == ownerID);
+            return (!ownerID && !this.$store.state.settings.protectUnregistered) || this.$store.state.loggedInUser.isAdmin || (this.$store.state.loggedInUser._id && this.$store.state.loggedInUser._id == ownerID);
         },
 
         editAttendee() {

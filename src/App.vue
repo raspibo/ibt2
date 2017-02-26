@@ -9,12 +9,12 @@
                             <div class="md-title day-info-title">
                                 <md-icon class="day-icon">today</md-icon>&nbsp;{{ day.day }}
                             </div>
-                            <md-menu md-align-trigger>
+                            <md-menu v-if="loggedInUser.isAdmin || !settings.protectDayNotes" md-align-trigger>
                                 <md-button class="md-icon-button" md-menu-trigger>
                                     <md-icon>more_vert</md-icon>
                                 </md-button>
                                 <md-menu-content>
-                                    <md-menu-item @click="openNotesDialog()">
+                                    <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectDayNotes" @click="openNotesDialog()">
                                         <span>edit notes</span>
                                         <md-icon>edit</md-icon>
                                     </md-menu-item>
@@ -81,32 +81,45 @@ export default {
             return {
                 dates: datesWithGroups
             };
+        },
+
+        loggedInUser() {
+            return this.$store.state.loggedInUser;
+        },
+
+        settings() {
+            return this.$store.state.settings || {};
         }
     },
 
     beforeCreate: function() {
         this.daysUrl = this.$resource('days{/day}');
         this.daysInfoUrl = this.$resource('days{/day}/info');
+        this.settingsUrl = this.$resource('settings');
     },
 
     mounted: function() {
-        var [year, month, day] = (this.$route.params.day || '').split('-');
-        year = parseInt(year);
-        month = parseInt(month) - 1;
-        day = parseInt(day);
-        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-            this.date = new Date(year, month, day);
-        }
-        if (!(this.date && !isNaN(this.date.getTime()))) {
-            this.date = new Date();
-        }
-        $('div.calendar span.prev').on('click', this.changeMonth);
-        $('div.calendar span.next').on('click', this.changeMonth);
-        $('div.calendar span.month').on('click', this.changeMonth);
-        this.reload();
+        this.fetchSettings(this.initialize);
     },
 
     methods: {
+        initialize() {
+            var [year, month, day] = (this.$route.params.day || '').split('-');
+            year = parseInt(year);
+            month = parseInt(month) - 1;
+            day = parseInt(day);
+            if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                this.date = new Date(year, month, day);
+            }
+            if (!(this.date && !isNaN(this.date.getTime()))) {
+                this.date = new Date();
+            }
+            $('div.calendar span.prev').on('click', this.changeMonth);
+            $('div.calendar span.next').on('click', this.changeMonth);
+            $('div.calendar span.month').on('click', this.changeMonth);
+            this.reload();
+        },
+
         reload() {
             var ym = this.dateToString(this.date, true);
             this.getSummary({start: ym, end: ym});
@@ -192,6 +205,21 @@ export default {
             }).then((json) => {
                 this.day.notes = json.notes;
                 this.reload();
+            });
+        },
+
+        fetchSettings(cb) {
+            this.settingsUrl.get().then((response) => {
+                return response.json();
+            }, (response) => {
+                this.$refs.dialogObj.show({text: 'unable to fetch settings'});
+            }).then((json) => {
+                if (!json || json.error) {
+                    this.$refs.dialogObj.show({text: 'unable to fetch settings: ' + (json && json.message) || ''});
+                } else {
+                    this.$store.commit('updateSettings', json);
+                }
+                cb();
             });
         }
     },

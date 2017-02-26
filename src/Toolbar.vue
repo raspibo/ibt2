@@ -11,6 +11,10 @@
             <router-link :to="{name: 'home'}" class="home-link">ibt2</router-link>
         </h2>
         <span v-if="loggedInUser.username">
+            <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toSettingsPage()">
+                <md-tooltip md-direction="left">global settings</md-tooltip>
+                <md-icon>settings</md-icon>
+            </md-button>
             <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toUsersPage()">
                 <md-tooltip md-direction="left">list of users</md-tooltip>
                 <md-icon>people_outline</md-icon>
@@ -106,6 +110,10 @@ export default {
 
         toUsersPage() {
             this.$router.push('/user/');
+        },
+
+        toSettingsPage() {
+            this.$router.push('/settings/');
         },
 
         focusToLoginForm() {

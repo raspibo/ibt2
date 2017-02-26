@@ -17,8 +17,8 @@
                 </md-input-container>
 
                 <md-switch v-if="loggedInUser.isAdmin" v-model="user.isAdmin" class="md-warn">is admin</md-switch>
-                <br />
 
+                <br />
                 <md-button id="save-button" class="md-raised md-primary" @click="save()">Save</md-button>
             </md-card-content>
         </md-card>
@@ -32,7 +32,7 @@ import IbtDialog from './IbtDialog.vue';
 import IbtSnackbar from './IbtSnackbar.vue';
 
 export default {
-    data () {
+    data() {
         return {
             user: {_id: null, email: '', password: null, isAdmin: false},
             password: null

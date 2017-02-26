@@ -7,16 +7,16 @@
                     <div class="md-title group-title">
                         <md-icon class="group-icon">folder_open</md-icon>&nbsp;{{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
                     </div>
-                    <md-menu md-align-trigger>
+                    <md-menu v-if="loggedInUser.isAdmin || !settings.protectGroupNotes || !settings.protectGroupName" md-align-trigger>
                         <md-button class="md-icon-button" md-menu-trigger>
                             <md-icon>more_vert</md-icon>
                         </md-button>
                         <md-menu-content>
-                            <md-menu-item @click="openNotesDialog()">
+                            <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupNotes" @click="openNotesDialog()">
                                 <span>edit notes</span>
                                 <md-icon>edit</md-icon>
                             </md-menu-item>
-                            <md-menu-item @click="openRenameGroupDialog()">
+                            <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupName" @click="openRenameGroupDialog()">
                                 <span>rename group</span>
                                 <md-icon>label</md-icon>
                             </md-menu-item>
@@ -146,6 +146,9 @@ export default {
         },
         loggedInUser() {
             return this.$store.state.loggedInUser;
+        },
+        settings() {
+            return this.$store.state.settings || {};
         }
     },
 
