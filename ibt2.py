@@ -138,6 +138,20 @@ class BaseHandler(tornado.web.RequestHandler):
         self._users_cache[current_user] = user_info
         return user_info
 
+    def is_registered(self):
+        """Check if the current user is registered.
+
+        :returns: True if a registered user is logged in
+        :rtype: bool"""
+        return self.current_user_info.get('isRegistered')
+
+    def is_admin(self):
+        """Check if the current user is an admin.
+
+        :returns: True if the logged in user is an admin
+        :rtype: bool"""
+        return self.current_user_info.get('isAdmin')
+
     def user_authorized(self, username, password):
         """Check if a combination of username/password is valid.
 
@@ -185,7 +199,7 @@ class BaseHandler(tornado.web.RequestHandler):
         :returns: if the logged in user has the permission
         :rtype: bool"""
         if (owner_id and str(self.current_user) != str(owner_id) and not
-                self.current_user_info.get('isAdmin')):
+                self.is_admin()):
             self.build_error(status=401, message='insufficient permissions: must be the owner or admin')
             return False
         return True
@@ -212,6 +226,26 @@ class BaseHandler(tornado.web.RequestHandler):
         doc['updated_by'] = user_id
         doc['updated_at'] = now
         return doc
+
+    @staticmethod
+    def update_global_settings(db_connector, settings=None):
+        """Update global settings from the db.
+
+        :param db_connector: database connector
+        :type db_connector: Monco instance
+        :param settings: the dict to update (in place, and returned)
+        :type settings: dict
+
+        :returns: the updated dictionary, also modified in place
+        :rtype: dict"""
+        if settings is None:
+            settings = {}
+        settings.clear()
+        for setting in db_connector.query('settings'):
+            if not ('_id' in setting and 'value' in setting):
+                continue
+            settings[setting['_id']] = setting['value']
+        return settings
 
 
 class RootHandler(BaseHandler):
@@ -257,6 +291,8 @@ class AttendeesHandler(BaseHandler):
             return self.build_error(status=404, message='unable to access the resource')
         if not self.has_permission(doc.get('created_by')):
             return
+        if self.global_settings.get('protectUnregistered') and not self.is_admin():
+            return self.build_error(status=401, message='insufficient permissions: must be admin')
         self.add_access_info(data)
         merged, doc = self.db.update(self.collection, {'_id': id_}, data)
         self.write(doc)
@@ -270,6 +306,8 @@ class AttendeesHandler(BaseHandler):
             return self.build_error(status=404, message='unable to access the resource')
         if not self.has_permission(doc.get('created_by')):
             return
+        if self.global_settings.get('protectUnregistered') and not self.is_admin():
+            return self.build_error(status=401, message='insufficient permissions: must be admin')
         howMany = self.db.delete(self.collection, id_)
         self.write({'success': True, 'deleted entries': howMany.get('n')})
 
@@ -352,6 +390,8 @@ class DaysInfoHandler(BaseHandler):
         if not day:
             return self.build_error(status=404, message='unable to access the resource')
         data = self.clean_body
+        if 'notes' in data and self.global_settings.get('protectDayNotes') and not self.is_admin():
+            return self.build_error(status=401, message='insufficient permissions: must be admin')
         data['day'] = day
         self.add_access_info(data)
         merged, doc = self.db.update('days', {'day': day}, data)
@@ -369,6 +409,8 @@ class GroupsHandler(BaseHandler):
         data = self.clean_body
         newName = (data.get('newName') or '').strip()
         if newName:
+            if self.global_settings.get('protectGroupName') and not self.is_admin():
+                return self.build_error(status=401, message='insufficient permissions: must be admin')
             query = {'day': day, 'group': group}
             data = {'group': newName}
             self.db.updateMany('attendees', query, data)
@@ -383,7 +425,7 @@ class GroupsHandler(BaseHandler):
         group = group.strip()
         if not (day and group):
             return self.build_error(status=404, message='unable to access the resource')
-        if not self.current_user_info.get('isAdmin'):
+        if not self.is_admin():
             return self.build_error(status=401, message='insufficient permissions: must be admin')
         query = {'day': day, 'group': group}
         howMany = self.db.delete('attendees', query)
@@ -400,6 +442,8 @@ class GroupsInfoHandler(BaseHandler):
         if not (day and group):
             return self.build_error(status=404, message='unable to access the resource')
         data = self.clean_body
+        if 'notes' in data and self.global_settings.get('protectGroupNotes') and not self.is_admin():
+            return self.build_error(status=401, message='insufficient permissions: must be admin')
         data['day'] = day
         data['group'] = group
         self.add_access_info(data)
@@ -421,7 +465,7 @@ class UsersHandler(BaseHandler):
             if 'password' in output:
                 del output['password']
         else:
-            if not self.current_user_info.get('isAdmin'):
+            if not self.is_admin():
                 return self.build_error(status=401, message='insufficient permissions: must be an admin')
             output = {self.collection: self.db.query(self.collection, self.clean_arguments)}
             for user in output['users']:
@@ -444,7 +488,7 @@ class UsersHandler(BaseHandler):
         data['password'] = utils.hash_password(password)
         data['email'] = email
         self.add_access_info(data)
-        if 'isAdmin' in data and not self.current_user_info.get('isAdmin'):
+        if 'isAdmin' in data and not self.is_admin():
             del data['isAdmin']
         doc = self.db.add(self.collection, data)
         if 'password' in doc:
@@ -460,7 +504,7 @@ class UsersHandler(BaseHandler):
             return
         if 'username' in data:
             del data['username']
-        if 'isAdmin' in data and (str(self.current_user) == id_ or not self.current_user_info.get('isAdmin')):
+        if 'isAdmin' in data and (str(self.current_user) == id_ or not self.is_admin()):
             del data['isAdmin']
         if 'password' in data:
             password = (data['password'] or '').strip()
@@ -518,13 +562,13 @@ class SettingsHandler(BaseHandler):
         self.write(res)
 
     def post(self, id_=None):
-        if not self.current_user_info.get('isAdmin'):
+        if not self.is_admin():
             return self.build_error(status=401, message='insufficient permissions: must be an admin')
         data = self.clean_body
         if id_ is not None:
             # if we access a specific resource, we assume the data is in {_id: value} format
             if id_ not in data:
-                self.write({'success': False})
+                return self.build_error(status=404, message='incomplete data')
                 return
             data = {id_: data[id_]}
         for key, value in data.items():
@@ -532,7 +576,8 @@ class SettingsHandler(BaseHandler):
                 self.db.update(self.collection, {'_id': key}, {'value': value})
             else:
                 self.db.add(self.collection, {'_id': key, 'value': value})
-        self.write({'success': True})
+        settings = SettingsHandler.update_global_settings(self.db, self.global_settings)
+        self.write(settings)
 
     put = post
 
@@ -619,16 +664,12 @@ def run():
     # database backend connector
     db_connector = monco.Monco(url=options.mongo_url, dbName=options.db_name)
 
-    # all global settings stored in the db
-    settings = {}
-    for setting in db_connector.query('settings'):
-        key = setting.get('setting')
-        if not key:
-            continue
-        settings[key] = setting
+    # global settings stored in the db
+    global_settings = {}
+    BaseHandler.update_global_settings(db_connector, global_settings)
 
     init_params = dict(db=db_connector, listen_port=options.port, logger=logger,
-                       ssl_options=ssl_options, global_settings=settings)
+                       ssl_options=ssl_options, global_settings=global_settings)
 
     # If not present, we store a user 'admin' with password 'ibt2' into the database.
     if not db_connector.query('users', {'username': 'admin'}):

@@ -2,8 +2,8 @@
 
 Classes and functions used to issue queries to a MongoDB database.
 
-Copyright 2016 Davide Alberani <da@erlug.linux.it>
-               RaspiBO <info@raspibo.org>
+Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>
+                    RaspiBO <info@raspibo.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ class MoncoError(Exception):
     pass
 
 
-class MoncoConnection(MoncoError):
+class MoncoConnectionError(MoncoError):
     """Monco exceptions raise when a connection problem occurs."""
     pass
 
@@ -124,7 +124,7 @@ class Monco(object):
         if dbName:
             self._dbName = dbName
         if not self._dbName:
-            raise MoncoConnection('no database name specified')
+            raise MoncoConnectionError('no database name specified')
         self.connection = pymongo.MongoClient(self._url)
         self.db = self.connection[self._dbName]
         return self.db
