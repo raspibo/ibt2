@@ -556,7 +556,7 @@ class SettingsHandler(BaseHandler):
         if id_ is not None:
             query['_id'] = id_
         res = self.db.query(self.collection, query)
-        res = dict((i.get('_id'), i.get('value')) for i in res if '_id' in i)
+        res = dict((i.get('_id'), i.get('value')) for i in res if '_id' in i and isinstance(i.get('_id'), str))
         if id_ is not None:
             res = {id_: res.get(id_)}
         self.write(res)
