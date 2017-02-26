@@ -503,6 +503,40 @@ class CurrentUserHandler(BaseHandler):
         self.write(user_info)
 
 
+class SettingsHandler(BaseHandler):
+    """Handle global settings."""
+    collection = 'settings'
+
+    def get(self, id_=None):
+        query = {}
+        if id_ is not None:
+            query['_id'] = id_
+        res = self.db.query(self.collection, query)
+        res = dict((i.get('_id'), i.get('value')) for i in res if '_id' in i)
+        if id_ is not None:
+            res = {id_: res.get(id_)}
+        self.write(res)
+
+    def post(self, id_=None):
+        if not self.current_user_info.get('isAdmin'):
+            return self.build_error(status=401, message='insufficient permissions: must be an admin')
+        data = self.clean_body
+        if id_ is not None:
+            # if we access a specific resource, we assume the data is in {_id: value} format
+            if id_ not in data:
+                self.write({'success': False})
+                return
+            data = {id_: data[id_]}
+        for key, value in data.items():
+            if self.db.get(self.collection, key):
+                self.db.update(self.collection, {'_id': key}, {'value': value})
+            else:
+                self.db.add(self.collection, {'_id': key, 'value': value})
+        self.write({'success': True})
+
+    put = post
+
+
 class LoginHandler(RootHandler):
     """Handle user authentication requests."""
 
@@ -594,7 +628,7 @@ def run():
         settings[key] = setting
 
     init_params = dict(db=db_connector, listen_port=options.port, logger=logger,
-                       ssl_options=ssl_options, settings=settings)
+                       ssl_options=ssl_options, global_settings=settings)
 
     # If not present, we store a user 'admin' with password 'ibt2' into the database.
     if not db_connector.query('users', {'username': 'admin'}):
@@ -603,14 +637,14 @@ def run():
                  'isAdmin': True})
 
     # If present, use the cookie_secret stored into the database.
-    cookie_secret = settings.get('server_cookie_secret')
+    cookie_secret = db_connector.get('server_settings', 'server_cookie_secret')
     if cookie_secret:
-        cookie_secret = cookie_secret['cookie_secret']
+        cookie_secret = cookie_secret['value']
     else:
         # the salt guarantees its uniqueness
         cookie_secret = utils.hash_password('__COOKIE_SECRET__')
-        db_connector.add('settings',
-                {'setting': 'server_cookie_secret', 'cookie_secret': cookie_secret})
+        db_connector.add('server_settings',
+                {'_id': 'server_cookie_secret', 'value': cookie_secret})
 
     _days_path = r"/days/?(?P<day>[\d_-]+)?"
     _days_info_path = r"/days/(?P<day>[\d_-]+)/info"
@@ -619,6 +653,7 @@ def run():
     _attendees_path = r"/attendees/?(?P<id_>[\w\d_-]+)?"
     _current_user_path = r"/users/current/?"
     _users_path = r"/users/?(?P<id_>[\w\d_-]+)?/?(?P<resource>[\w\d_-]+)?/?(?P<resource_id>[\w\d_-]+)?"
+    _settings_path = r"/settings/?(?P<id_>[\w\d_ -]+)?/?"
     application = tornado.web.Application([
             (_attendees_path, AttendeesHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _attendees_path), AttendeesHandler, init_params),
@@ -634,6 +669,8 @@ def run():
             (r'/v%s%s' % (API_VERSION, _current_user_path), CurrentUserHandler, init_params),
             (_users_path, UsersHandler, init_params),
             (r'/v%s%s' % (API_VERSION, _users_path), UsersHandler, init_params),
+            (_settings_path, SettingsHandler, init_params),
+            (r'/v%s%s' % (API_VERSION, _settings_path), SettingsHandler, init_params),
             (r"/(?:index.html)?", RootHandler, init_params),
             (r'/login', LoginHandler, init_params),
             (r'/v%s/login' % API_VERSION, LoginHandler, init_params),
@@ -642,7 +679,7 @@ def run():
             (r'/?(.*)', tornado.web.StaticFileHandler, {"path": "dist"})
         ],
         static_path=os.path.join(os.path.dirname(__file__), "dist/static"),
-        cookie_secret='__COOKIE_SECRET__',
+        cookie_secret=cookie_secret,
         login_url='/login',
         debug=options.debug)
     http_server = tornado.httpserver.HTTPServer(application, ssl_options=ssl_options or None)

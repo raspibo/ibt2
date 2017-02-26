@@ -162,7 +162,7 @@ class Monco(object):
         :param collection: search for documents in this collection
         :type collection: str
         :param query: search for documents with those attributes
-        :type query: dict or None
+        :type query: dict, list or None
 
         :returns: list of matching documents
         :rtype: list
