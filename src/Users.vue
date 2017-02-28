@@ -107,7 +107,7 @@ export default {
 
 .center-content > .md-table-cell-container {
     text-align: center;
-    display: block;
+    display: block !important;
 }
 
 </style>
