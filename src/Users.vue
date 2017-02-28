@@ -9,8 +9,9 @@
                     <md-table-header>
                         <md-table-row>
                             <md-table-head>Username</md-table-head>
-                            <md-table-head>Email</md-table-head>
-                            <md-table-head v-if="loggedInUser.isAdmin">Delete</md-table-head>
+                            <md-table-head class="center-content">Email</md-table-head>
+                            <md-table-head class="center-content">Admin</md-table-head>
+                            <md-table-head v-if="loggedInUser.isAdmin" class="center-content">Delete</md-table-head>
                         </md-table-row>
                     </md-table-header>
                     <md-table-body>
@@ -20,10 +21,13 @@
                                     {{user.username}}
                                 </router-link>
                             </md-table-cell>
-                            <md-table-cell>
+                            <md-table-cell class="center-content">
                                 {{user.email}}
                             </md-table-cell>
-                            <md-table-cell v-if="loggedInUser.isAdmin">
+                            <md-table-cell class="center-content">
+                                <md-icon>done</md-icon>
+                            </md-table-cell>
+                            <md-table-cell v-if="loggedInUser.isAdmin" class="center-content">
                                 <md-button class="md-icon-button" @click="deleteUser(user._id)">
                                     <md-icon>delete</md-icon>
                                 </md-button>
@@ -95,6 +99,15 @@ export default {
 
 #users {
     padding: 10px;
+}
+
+.center-content > .md-table-head-container {
+    text-align: center;
+}
+
+.center-content > .md-table-cell-container {
+    text-align: center;
+    display: block;
 }
 
 </style>
