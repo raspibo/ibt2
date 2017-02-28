@@ -5,16 +5,17 @@
                 <span class="md-title">Settings</span>
             </md-card-header>
             <md-card-content v-if="loggedInUser.isAdmin">
-                <md-switch v-model="shownSettings.protectUnregistered" class="md-warn">protect unregistered attendees (only admins can modify or delete)</md-switch>
+                Protection modifications from unregistered users:<br />
+                <md-switch v-model="shownSettings.protectUnregistered" class="md-warn">unregistered attendees (modify and delete)</md-switch>
 
                 <br />
-                <md-switch v-model="shownSettings.protectGroupNotes" class="md-warn">protect group notes</md-switch>
+                <md-switch v-model="shownSettings.protectGroupNotes" class="md-warn">group notes</md-switch>
 
                 <br />
-                <md-switch v-model="shownSettings.protectGroupName" class="md-warn">protect group name</md-switch>
+                <md-switch v-model="shownSettings.protectGroupName" class="md-warn">group name</md-switch>
 
                 <br />
-                <md-switch v-model="shownSettings.protectDayNotes" class="md-warn">protect day notes</md-switch>
+                <md-switch v-model="shownSettings.protectDayNotes" class="md-warn">day notes</md-switch>
                 <br />
                 <md-button id="save-button" class="md-raised md-primary" @click="save()">Save</md-button>
             </md-card-content>
