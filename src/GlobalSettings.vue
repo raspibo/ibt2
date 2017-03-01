@@ -5,17 +5,22 @@
                 <span class="md-title">Settings</span>
             </md-card-header>
             <md-card-content v-if="loggedInUser.isAdmin">
-                Protection modifications from unregistered users:<br />
-                <md-switch v-model="shownSettings.protectUnregistered" class="md-warn">unregistered attendees (modify and delete)</md-switch>
+                <div class="md-headline">
+                    Prevent modifications from unregistered users:
+                </div>
+                <div class="protection-sect">
+                    <md-switch v-model="shownSettings.protectUnregistered" class="md-warn">unregistered attendees (modify and delete)</md-switch>
 
-                <br />
-                <md-switch v-model="shownSettings.protectGroupNotes" class="md-warn">group notes</md-switch>
+                    <br />
+                    <md-switch v-model="shownSettings.protectGroupNotes" class="md-warn">group notes</md-switch>
 
-                <br />
-                <md-switch v-model="shownSettings.protectGroupName" class="md-warn">group name</md-switch>
+                    <br />
+                    <md-switch v-model="shownSettings.protectGroupName" class="md-warn">group name</md-switch>
 
-                <br />
-                <md-switch v-model="shownSettings.protectDayNotes" class="md-warn">day notes</md-switch>
+                    <br />
+                    <md-switch v-model="shownSettings.protectDayNotes" class="md-warn">day notes</md-switch>
+
+                </div>
                 <br />
                 <md-button id="save-button" class="md-raised md-primary" @click="save()">Save</md-button>
             </md-card-content>
@@ -97,6 +102,10 @@ export default {
 
 #save-button {
     margin-top: 40px;
+}
+
+.protection-sect {
+    padding-left: 30px;
 }
 
 </style>
