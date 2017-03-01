@@ -25,7 +25,7 @@
                                 {{user.email}}
                             </md-table-cell>
                             <md-table-cell class="center-content">
-                                <md-icon>done</md-icon>
+                                <md-icon v-if="user.isAdmin">done</md-icon>
                             </md-table-cell>
                             <md-table-cell v-if="loggedInUser.isAdmin" class="center-content">
                                 <md-button class="md-icon-button" @click="deleteUser(user._id)">
