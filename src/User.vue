@@ -16,7 +16,7 @@
                     <md-input v-model="user.password" type="password" />
                 </md-input-container>
 
-                <md-switch v-if="loggedInUser.isAdmin" v-model="user.isAdmin" class="md-warn">is admin</md-switch>
+                <md-switch v-if="loggedInUser.isAdmin && loggedInUser.username != user.username" v-model="user.isAdmin" class="md-warn">is admin</md-switch>
 
                 <br />
                 <md-button id="save-button" class="md-raised md-primary" @click="save()">Save</md-button>
