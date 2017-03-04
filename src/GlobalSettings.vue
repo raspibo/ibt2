@@ -21,6 +21,18 @@
                     <md-switch v-model="shownSettings.protectDayNotes" class="md-warn">day notes</md-switch>
 
                 </div>
+
+                <br />
+                <div class="md-headline">
+                    Message of the day
+                </div>
+                <md-switch v-model="shownSettings.showMotd" class="md-warn">show motd</md-switch>
+
+                <md-input-container>
+                    <label>message</label>
+                    <md-textarea v-model="shownSettings.motd"></md-textarea>
+                </md-input-container>
+
                 <br />
                 <md-button id="save-button" class="md-raised md-primary" @click="save()">Save</md-button>
             </md-card-content>
