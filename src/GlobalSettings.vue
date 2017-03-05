@@ -28,7 +28,7 @@
                 </div>
                 <md-switch v-model="shownSettings.showMotd" class="md-warn">show motd</md-switch>
 
-                <md-input-container>
+                <md-input-container v-if="shownSettings.showMotd">
                     <label>message</label>
                     <md-textarea v-model="shownSettings.motd"></md-textarea>
                 </md-input-container>
