@@ -29,7 +29,7 @@
             </md-layout>
             <md-layout id="panel" md-column>
                 <md-layout md-row>
-                    <group v-for="group in day.groups || []" :group="group" :day="day.day" new-attendee="" @updated="reload" />
+                    <group v-for="group in day.groups || []" :group="group" :day="day.day" :key="group.group" new-attendee="" @updated="reload" />
                     <group :add-new-group="true" :day="day.day" new-attendee="" new-group="" @updated="reload" />
                 </md-layout>
             </md-layout>

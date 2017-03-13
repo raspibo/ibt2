@@ -34,7 +34,7 @@
             </md-card-header>
             <md-card-content class="group-card">
                 <md-list md-dense>
-                    <attendee v-for="attendee in group.attendees || []" :attendee="attendee" @updated="reload" />
+                    <attendee v-for="attendee in group.attendees || []" :attendee="attendee" :key="attendee.name" @updated="reload" />
                     <md-list-item class="attendee-add">
                         <md-icon @click.native="addAttendee(group.group)">person_add</md-icon>
                         <md-input-container class="new-attendee">
