@@ -79,7 +79,7 @@ See the *docs/DEVELOPMENT.md* file for more information about how to contribute.
 Technological stack
 ===================
 
-- [VueJS](https://vuejs.org/) for the webApp
+- [VueJS](https://vuejs.org/) 2 for the webApp
 - [Vue Material](https://vuematerial.github.io/) for the UI components
 - [Vue Datepicker](https://github.com/charliekassel/vuejs-datepicker) for the datepicker
 - [Vue Markdown](https://www.npmjs.com/package/vue-markdown) for parsing the Markdown syntax
