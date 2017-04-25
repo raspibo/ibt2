@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ibt2 utils
 
 Miscellaneous utilities.

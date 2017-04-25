@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """I'll Be There, 2 (ibt2) - an oversimplified attendees registration system.
 
 Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>

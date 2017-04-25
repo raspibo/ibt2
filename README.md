@@ -90,6 +90,12 @@ Technological stack
 The web part is incuded; you need to install Node.js, Tornado, MongoDB and the pymongo module on your system (no configuration needed).
 
 
+Other projects
+==============
+
+Need something more sophisticated, that allows you to manage tickets to an event?  Try [EventMan(ager)](https://github.com/raspibo/eventman)
+
+
 License and copyright
 =====================
 
