@@ -34,10 +34,13 @@
             </span>
             <span v-else>
                 <span id="login-form">
-                    <md-input-container id="username-input" class="login-input" md-inline>
-                        <md-tooltip md-direction="bottom">login name or create a new user if it doesn't exist</md-tooltip>
-                        <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />
-                    </md-input-container>&nbsp;
+                    <span id="username-input">
+                        <strong id="login-label">Login:</strong>&nbsp;
+                        <md-input-container id="sername-input" class="login-input" md-inline>
+                            <md-tooltip md-direction="bottom">login name or create a new user if it doesn't exist</md-tooltip>
+                            <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />
+                        </md-input-container>&nbsp;
+                    </span>
                     <span id="password-block">
                         <md-input-container id="password-input" class="login-input" md-has-password md-inline>
                         <md-tooltip md-direction="bottom">login password or create a new user if it doesn't exist</md-tooltip>
@@ -208,11 +211,14 @@ export default {
     padding-left: 4px;
     min-height: 24px;
     line-height: 0px;
-    background-color: white;
+}
+
+#login-label {
+    margin-top: 8px;
 }
 
 #username-input {
-    display: inline;
+    display: flex;
     float: left;
     margin-right: 20px;
 }
