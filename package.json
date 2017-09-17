@@ -1,6 +1,6 @@
 {
   "name": "ibt2",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "I'll be there, 2: an oversimplified application to register attendees at a conference or event",
   "author": "Davide Alberani <da@erlug.linux.it>",
   "license": "Apache-2.0",

@@ -248,7 +248,7 @@ export default {
     }
 }
 
-.datepicker {
+.vdp-datepicker {
     padding: 10px;
 }
 
