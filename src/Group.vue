@@ -1,8 +1,8 @@
 <template>
     <!-- XXX: too much duplication in this template -->
     <md-layout class="group-layout" md-col gutter="120" md-align="start">
-        <md-card v-if="!addNewGroup" md-with-hover @mouseenter.native="focusToNewAttendee()">
-            <md-card-header class="group-header">
+        <md-card v-if="!addNewGroup" md-with-hover @mouseenter.native="focusToNewAttendee()" @mouseleave.native="expandedNewAttendeeNote = false">
+            <md-card-header ref="currentGroup" class="group-header">
                 <md-layout md-row>
                     <div class="md-title group-title">
                         <md-icon class="group-icon">folder_open</md-icon>&nbsp;{{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
@@ -35,29 +35,23 @@
             <md-card-content class="group-card">
                 <md-list md-dense>
                     <attendee v-for="attendee in group.attendees || []" :attendee="attendee" :key="attendee.name" @updated="reload" />
-                    <md-list-item class="attendee-add">
+                    <md-list-item class="attendee-add" @mouseenter.native="expandedNewAttendeeNote = true">
                         <md-icon @click.native="addAttendee(group.group)">person_add</md-icon>
                         <md-input-container class="new-attendee">
                             <label>new attendee</label>
                             <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendee" />
                         </md-input-container>
 
-                        <md-list-expand>
-                            <md-list>
-                                <md-list-item class="md-inset">
-                                    <md-input-container>
-                                        <label>notes</label>
-                                        <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendeeNotes" />
-                                    </md-input-container>
-                                </md-list-item>
-                            </md-list>
-                        </md-list-expand>
                     </md-list-item>
+                    <md-input-container ref="newAttendeeNotes" class="attendee-notes-container" v-if="expandedNewAttendeeNote">
+                        <label>notes</label>
+                        <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendeeNotes" />
+                    </md-input-container>
                 </md-list>
             </md-card-content>
         </md-card>
-        <md-card v-if="addNewGroup" md-with-hover @mouseenter.native="focusToNewGroup()" md-align="start">
-            <md-card-header class="new-group-header">
+        <md-card v-if="addNewGroup" md-with-hover @mouseenter.native="focusToNewGroup()" @mouseleave.native="expandedNewAttendeeNote = false" md-align="start">
+            <md-card-header ref="currentGroup" class="new-group-header">
                 <div class="md-title group-title">
                     <md-input-container class="new-group">
                         <label class="new-group-label">new group</label>
@@ -66,25 +60,18 @@
                 </div>
             </md-card-header>
             <md-card-content>
-                <md-list v-show="newGroup">
-                    <md-list-item class="attendee-add">
+                <md-list v-show="newGroup" md-dense>
+                    <md-list-item class="attendee-add" @mouseenter.native="expandedNewAttendeeNote = true">
                         <md-icon @click.native="addAttendee(newGroup)">person_add</md-icon>
-                        <md-input-container>
+                        <md-input-container class="new-attendee">
                             <label>new attendee</label>
                             <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendee" />
                         </md-input-container>
-
-                        <md-list-expand>
-                            <md-list>
-                                <md-list-item class="md-inset">
-                                    <md-input-container>
-                                        <label>notes</label>
-                                        <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendeeNotes" />
-                                    </md-input-container>
-                                </md-list-item>
-                            </md-list>
-                        </md-list-expand>
                     </md-list-item>
+                    <md-input-container ref="newAttendeeNotes" class="attendee-notes-container" v-if="expandedNewAttendeeNote">
+                        <label>notes</label>
+                        <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendeeNotes" />
+                    </md-input-container>
                 </md-list>
             </md-card-content>
         </md-card>
@@ -136,7 +123,8 @@ export default {
             noteDialog: {title: 'Group notes', ok: 'ok', cancel: 'cancel'},
             renameDialog: {title: 'Rename group', ok: 'ok', cancel: 'cancel'},
             deleteDialog: {title: 'Delete group', content: 'Really delete this group?', ok: 'ok', cancel: 'cancel'},
-            expandedNote: false
+            expandedNote: false,
+            expandedNewAttendeeNote: false
         }
     },
 
@@ -176,6 +164,7 @@ export default {
 
         focusToNewAttendee() {
             this.$refs.newAttendeeInput.$el.focus();
+            this.expandedNewAttendeeNote = true;
         },
 
         addAttendee(group, newAttendee) {
@@ -307,9 +296,6 @@ export default {
     vertical-align: text-top;
 }
 
-.new-attendee {
-    width: 50px;
-}
 
 .new-group {
     min-width: 250px;
@@ -332,8 +318,13 @@ export default {
     line-height: 1;
 }
 
-.new-attendee-notes {
-    max-width: 120px;
+.new-attendee {
+    width: 50px;
+}
+
+.attendee-notes-container {
+    max-width: 170px;
+    margin-left: 60px;
 }
 
 .group-notes > p {
@@ -361,6 +352,7 @@ export default {
 
 .attendee-add .md-list-item-container {
     padding-left: 0px;
+    max-width: 300px;
 }
 
 </style>
