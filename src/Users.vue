@@ -25,11 +25,11 @@
                                 {{user.email}}
                             </md-table-cell>
                             <md-table-cell class="center-content">
-                                <md-icon v-if="user.isAdmin">done</md-icon>
+                                <md-icon v-if="user.isAdmin" md-iconset="ion-android-done"></md-icon>
                             </md-table-cell>
                             <md-table-cell v-if="loggedInUser.isAdmin" class="center-content">
                                 <md-button class="md-icon-button" @click="deleteUser(user._id)">
-                                    <md-icon>delete</md-icon>
+                                    <md-icon md-iconset="ion-trash-a"></md-icon>
                                 </md-button>
                             </md-table-cell>
                         </md-table-row>

@@ -4,7 +4,7 @@
             <span v-if="currentPath != 'home' && currentPath != 'day' && currentPath != 'days'">
                 <md-button class="md-icon-button" @click="goBack()">
                     <md-tooltip md-direction="right">back</md-tooltip>
-                    <md-icon>backspace</md-icon>&nbsp;
+                    <md-icon md-iconset="ion-backspace-outline"></md-icon>&nbsp;
                 </md-button>
             </span>
             <span v-else class="button-spacer">&nbsp;</span>
@@ -14,22 +14,22 @@
             <span v-if="loggedInUser.username">
                 <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toSettingsPage()">
                     <md-tooltip md-direction="left">global settings</md-tooltip>
-                    <md-icon>settings</md-icon>
+                    <md-icon md-iconset="ion-gear-a"></md-icon>
                 </md-button>
                 <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toUsersPage()">
                     <md-tooltip md-direction="left">list of users</md-tooltip>
-                    <md-icon>people_outline</md-icon>
+                    <md-icon md-iconset="ion-person-stalker"></md-icon>
                 </md-button>
                 <md-button id="logged-in-icon" class="md-icon-button" @click="toUserPage()">
                     <md-tooltip md-direction="left">personal page</md-tooltip>
-                    <md-icon>person_pin</md-icon>
+                    <md-icon md-iconset="ion-android-options"></md-icon>
                 </md-button>
                 <span id="logged-in" class="md-subheading">
                     <router-link :to="userUrl" class="username-link">{{ loggedInUser.username }}</router-link>
                 </span>
                 <md-button id="logout-icon" class="md-icon-button" @click="logout()">
                     <md-tooltip md-direction="left">logout</md-tooltip>
-                    <md-icon>exit_to_app</md-icon>
+                    <md-icon md-iconset="ion-log-out"></md-icon>
                 </md-button>
             </span>
             <span v-else>
@@ -48,7 +48,7 @@
                         </md-input-container>
                         <md-button id="login-button" class="md-icon-button" @click="login()">
                             <md-tooltip md-direction="left">login or create a new user if it doesn't exist</md-tooltip>
-                            <md-icon>play_circle_outline</md-icon>
+                            <md-icon md-iconset="ion-log-in"></md-icon>
                         </md-button>
                     </span>
                 </span>

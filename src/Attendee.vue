@@ -1,6 +1,6 @@
 <template>
     <md-list-item class="attendee-list-item md-double-line" :key="attendee._id">
-        <md-icon>person</md-icon>
+        <md-icon md-iconset="ion-person"></md-icon>
         <div v-if="!edit" class="md-list-text-container">
             <span>{{ attendee.name }}</span>
             <vue-markdown v-if="attendee.notes" ref="attendeeNotes" @click.native="toggleNotes()" class="attendee-notes" :source="attendee.notes" :break="false"></vue-markdown>
@@ -19,16 +19,16 @@
 
         <md-menu v-if="isAuthorized(attendee.created_by) && !edit" md-align-trigger>
             <md-button class="md-icon-button" md-menu-trigger>
-                <md-icon>more_vert</md-icon>
+                <md-icon md-iconset="ion-android-more-vertical"></md-icon>
             </md-button>
             <md-menu-content>
                 <md-menu-item @click.native="editAttendee()">
                     <span>edit</span>
-                    <md-icon>edit</md-icon>
+                    <md-icon md-iconset="ion-edit"></md-icon>
                 </md-menu-item>
                 <md-menu-item @click.native="deleteAttendee()">
                     <span>delete</span>
-                    <md-icon>cancel</md-icon>
+                    <md-icon md-iconset="ion-trash-a"></md-icon>
                 </md-menu-item>
             </md-menu-content>
         </md-menu>

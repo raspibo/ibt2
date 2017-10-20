@@ -22,6 +22,7 @@ import VueMaterial from 'vue-material';
 import 'vue-material/dist/vue-material.css';
 import 'roboto-fontface/css/roboto/roboto-fontface.css';
 import 'material-design-icons/iconfont/material-icons.css';
+import 'ionicons/css/ionicons.min.css';
 import store_data from './store.js';
 import App from './App';
 import User from './User';

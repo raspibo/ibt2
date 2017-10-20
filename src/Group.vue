@@ -5,24 +5,24 @@
             <md-card-header ref="currentGroup" class="group-header">
                 <md-layout md-row>
                     <div class="md-title group-title">
-                        <md-icon class="group-icon">folder_open</md-icon>&nbsp;{{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
+                        <md-icon class="group-icon" md-iconset="ion-folder"></md-icon>&nbsp;{{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
                     </div>
                     <md-menu v-if="loggedInUser.isAdmin || !settings.protectGroupNotes || !settings.protectGroupName" md-align-trigger>
                         <md-button class="md-icon-button" md-menu-trigger>
-                            <md-icon>more_vert</md-icon>
+                            <md-icon md-iconset="ion-android-more-vertical"></md-icon>
                         </md-button>
                         <md-menu-content>
                             <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupNotes" @click="openNotesDialog()">
                                 <span>edit notes</span>
-                                <md-icon>edit</md-icon>
+                                <md-icon md-iconset="ion-edit"></md-icon>
                             </md-menu-item>
                             <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupName" @click="openRenameGroupDialog()">
                                 <span>rename group</span>
-                                <md-icon>label</md-icon>
+                                <md-icon md-iconset="ion-pricetag"></md-icon>
                             </md-menu-item>
                             <md-menu-item v-if="loggedInUser.isAdmin" @click="openDeleteGroupDialog()">
                                 <span>delete group</span>
-                                <md-icon>delete</md-icon>
+                                <md-icon md-iconset="ion-trash-a"></md-icon>
                             </md-menu-item>
                         </md-menu-content>
                     </md-menu>
@@ -36,7 +36,7 @@
                 <md-list md-dense>
                     <attendee v-for="attendee in group.attendees || []" :attendee="attendee" :key="attendee.name" @updated="reload" />
                     <md-list-item class="attendee-add" @mouseenter.native="expandedNewAttendeeNote = true">
-                        <md-icon @click.native="addAttendee(group.group)">person_add</md-icon>
+                        <md-icon @click.native="addAttendee(group.group)" md-iconset="ion-person-add"></md-icon>
                         <md-input-container class="new-attendee">
                             <label>new attendee</label>
                             <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendee" />
@@ -55,14 +55,14 @@
                 <div class="md-title group-title">
                     <md-input-container class="new-group">
                         <label class="new-group-label">new group</label>
-                        <md-icon>create_new_folder</md-icon>&nbsp;&nbsp;<md-input ref="newGroup" v-model="newGroup" @keyup.enter.native="focusToNewAttendee()" class="group-add-name" />
+                        <md-icon md-iconset="ion-folder"></md-icon>&nbsp;&nbsp;<md-input ref="newGroup" v-model="newGroup" @keyup.enter.native="focusToNewAttendee()" class="group-add-name" />
                     </md-input-container>
                 </div>
             </md-card-header>
             <md-card-content>
                 <md-list v-show="newGroup" md-dense>
                     <md-list-item class="attendee-add" @mouseenter.native="expandedNewAttendeeNote = true">
-                        <md-icon @click.native="addAttendee(newGroup)">person_add</md-icon>
+                        <md-icon @click.native="addAttendee(newGroup)" md-iconset="ion-person-add"></md-icon>
                         <md-input-container class="new-attendee">
                             <label>new attendee</label>
                             <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendee" />

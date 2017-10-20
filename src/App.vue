@@ -7,16 +7,16 @@
                     <md-card-header class="day-info-header">
                         <md-layout md-row>
                             <div class="md-title day-info-title">
-                                <md-icon class="day-icon">today</md-icon>&nbsp;{{ day.day }}
+                                <md-icon class="day-icon" md-iconset="ion-android-calendar"></md-icon>&nbsp;{{ day.day }}
                             </div>
                             <md-menu v-if="loggedInUser.isAdmin || !settings.protectDayNotes" md-align-trigger>
                                 <md-button class="md-icon-button" md-menu-trigger>
-                                    <md-icon>more_vert</md-icon>
+                                    <md-icon md-iconset="ion-android-more-vertical"></md-icon>
                                 </md-button>
                                 <md-menu-content>
                                     <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectDayNotes" @click="openNotesDialog()">
                                         <span>edit notes</span>
-                                        <md-icon>edit</md-icon>
+                                        <md-icon md-iconset="ion-edit"></md-icon>
                                     </md-menu-item>
                                 </md-menu-content>
                             </md-menu>
