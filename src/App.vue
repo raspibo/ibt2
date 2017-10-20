@@ -270,11 +270,11 @@ export default {
     background-color: #f8bbd0;
 }
 
-.calendar > header > span {
+.vdp-datepicker__calendar > header > span {
     background-color: #f8bbd0;
 }
 
-.calendar > header > span:hover {
+.vdp-datepicker__calendar > header > span:hover {
     background-color: #f06292 !important;
 }
 
