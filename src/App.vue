@@ -2,7 +2,7 @@
     <div id="main-attendees">
         <md-layout md-gutter md-row>
             <md-layout id="datepicker-column" md-flex="20" md-flex-small="100" md-gutter>
-                <datepicker id="datepicker" ref="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" :monday-first="true" @selected="getDay"></datepicker>
+                <datepicker id="datepicker" ref="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" :monday-first="true" @selected="getDay" @changedMonth="changeMonth"></datepicker>
                 <md-card id="day-info">
                     <md-card-header class="day-info-header">
                         <md-layout md-row>
@@ -114,9 +114,6 @@ export default {
             if (!(this.date && !isNaN(this.date.getTime()))) {
                 this.date = new Date();
             }
-            $('div.calendar span.prev').on('click', this.changeMonth);
-            $('div.calendar span.next').on('click', this.changeMonth);
-            $('div.calendar span.month').on('click', this.changeMonth);
             this.reload();
         },
 
@@ -126,9 +123,12 @@ export default {
             this.getDay();
         },
 
-        changeMonth() {
+        changeMonth(newDate) {
+            if (newDate.timestamp) {
+                newDate = new Date(newDate.timestamp);
+            }
             var day = new Date();
-            day.setTime(this.$refs.datepicker.currDate);
+            day.setTime(newDate);
             var ym = this.dateToString(day, true);
             this.getSummary({start: ym, end: ym});
             this.getDay(day);
