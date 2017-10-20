@@ -28,7 +28,7 @@
                 </md-menu-item>
                 <md-menu-item @click.native="deleteAttendee()">
                     <span>delete</span>
-                    <md-icon>cancel</md-icon>
+                    <md-icon>delete</md-icon>
                 </md-menu-item>
             </md-menu-content>
         </md-menu>

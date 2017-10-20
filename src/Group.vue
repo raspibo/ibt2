@@ -1,7 +1,7 @@
 <template>
     <!-- XXX: too much duplication in this template -->
     <md-layout class="group-layout" md-col gutter="120" md-align="start">
-        <md-card v-if="!addNewGroup" md-with-hover @mouseenter.native="focusToNewAttendee()" @mouseleave.native="expandedNewAttendeeNote = false">
+        <md-card v-if="!addNewGroup" md-with-hover @mouseenter.native="focusToNewAttendee()" @mouseleave.native="hasFocus = false">
             <md-card-header ref="currentGroup" class="group-header">
                 <md-layout md-row>
                     <div class="md-title group-title">
@@ -35,41 +35,41 @@
             <md-card-content class="group-card">
                 <md-list md-dense>
                     <attendee v-for="attendee in group.attendees || []" :attendee="attendee" :key="attendee.name" @updated="reload" />
-                    <md-list-item class="attendee-add" @mouseenter.native="expandedNewAttendeeNote = true">
-                        <md-icon @click.native="addAttendee(group.group)">person_add</md-icon>
+                    <md-list-item class="attendee-add">
+                        <md-icon @click.native="addAttendee(group.group)" :class="{'md-primary': hasFocus}">person_add</md-icon>
                         <md-input-container class="new-attendee">
-                            <label>new attendee</label>
+                            <label><i>new attendee</i></label>
                             <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendee" />
                         </md-input-container>
 
                     </md-list-item>
-                    <md-input-container ref="newAttendeeNotes" class="attendee-notes-container" v-if="expandedNewAttendeeNote">
-                        <label>notes</label>
+                    <md-input-container ref="newAttendeeNotes" class="attendee-notes-container">
+                        <label><i>notes</i></label>
                         <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendeeNotes" />
                     </md-input-container>
                 </md-list>
             </md-card-content>
         </md-card>
-        <md-card v-if="addNewGroup" md-with-hover @mouseenter.native="focusToNewGroup()" @mouseleave.native="expandedNewAttendeeNote = false" md-align="start">
+        <md-card v-if="addNewGroup" md-with-hover @mouseenter.native="focusToNewGroup()" @mouseleave.native="hasFocus = false" md-align="start">
             <md-card-header ref="currentGroup" class="new-group-header">
                 <div class="md-title group-title">
                     <md-input-container class="new-group">
-                        <label class="new-group-label">new group</label>
+                        <label class="new-group-label"><i>new group</i></label>
                         <md-icon>create_new_folder</md-icon>&nbsp;&nbsp;<md-input ref="newGroup" v-model="newGroup" @keyup.enter.native="focusToNewAttendee()" class="group-add-name" />
                     </md-input-container>
                 </div>
             </md-card-header>
             <md-card-content>
                 <md-list v-show="newGroup" md-dense>
-                    <md-list-item class="attendee-add" @mouseenter.native="expandedNewAttendeeNote = true">
-                        <md-icon @click.native="addAttendee(newGroup)">person_add</md-icon>
+                    <md-list-item class="attendee-add">
+                        <md-icon @click.native="addAttendee(newGroup)" :class="{'md-primary': hasFocus}">person_add</md-icon>
                         <md-input-container class="new-attendee">
-                            <label>new attendee</label>
+                            <label><i>new attendee</i></label>
                             <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendee" />
                         </md-input-container>
                     </md-list-item>
-                    <md-input-container ref="newAttendeeNotes" class="attendee-notes-container" v-if="expandedNewAttendeeNote">
-                        <label>notes</label>
+                    <md-input-container ref="newAttendeeNotes" class="attendee-notes-container">
+                        <label><i>notes</i></label>
                         <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendeeNotes" />
                     </md-input-container>
                 </md-list>
@@ -120,11 +120,11 @@ export default {
             newGroup: '',
             groupNotes: '',
             groupNewName: '',
+            hasFocus: false,
             noteDialog: {title: 'Group notes', ok: 'ok', cancel: 'cancel'},
             renameDialog: {title: 'Rename group', ok: 'ok', cancel: 'cancel'},
             deleteDialog: {title: 'Delete group', content: 'Really delete this group?', ok: 'ok', cancel: 'cancel'},
-            expandedNote: false,
-            expandedNewAttendeeNote: false
+            expandedNote: false
         }
     },
 
@@ -160,15 +160,20 @@ export default {
 
         focusToNewGroup() {
             this.$refs.newGroup.$el.focus();
+            this.hasFocus = true;
         },
 
         focusToNewAttendee() {
             this.$refs.newAttendeeInput.$el.focus();
-            this.expandedNewAttendeeNote = true;
+            this.hasFocus = true;
         },
 
         addAttendee(group, newAttendee) {
             newAttendee = newAttendee || this.newAttendee;
+            if (!newAttendee) {
+                this.focusToNewAttendee();
+                return;
+            }
             var attendee = {
                 day: this.day,
                 group: group,
@@ -320,6 +325,7 @@ export default {
 
 .new-attendee {
     width: 50px;
+    margin-bottom: 0px;
 }
 
 .attendee-notes-container {

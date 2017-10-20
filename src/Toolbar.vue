@@ -127,11 +127,6 @@ export default {
             this.$router.push('/settings/');
         },
 
-        focusToLoginForm() {
-            var that = this;
-            setTimeout(function() { that.$refs.usernameInput.$el.focus(); }, 400);
-        },
-
         focusToPassword() {
             this.$refs.passwordInput.$el.focus();
         },
