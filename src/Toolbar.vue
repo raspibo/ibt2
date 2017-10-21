@@ -263,6 +263,9 @@ export default {
     color: white !important;
 }
 
+</style>
+<style>
+
 .motd p {
     margin-top: 0px;
     margin-bottom: 0px;
