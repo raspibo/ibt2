@@ -333,17 +333,6 @@ export default {
     margin-left: 60px;
 }
 
-.group-notes > p {
-    font-style: italic;
-    padding-left: 30px;
-    margin: 0px;
-    text-overflow: ellipsis;
-    max-width: 400px;
-    overflow: hidden;
-    white-space: nowrap;
-    color: rgba(0, 0, 0, 0.54);
-}
-
 .group-card {
     padding-right: 8px;
 }
@@ -358,6 +347,18 @@ export default {
 
 </style>
 <style>
+
+.group-notes > p, .attendee-notes > p {
+    font-style: italic;
+    padding-left: 30px;
+    margin: 0px;
+    padding: 0px 4px 0px 0px;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    overflow: hidden;
+    white-space: nowrap;
+    color: rgba(0, 0, 0, 0.54);
+}
 
 .attendee-add .md-icon {
     transition: color 0.5s ease;
