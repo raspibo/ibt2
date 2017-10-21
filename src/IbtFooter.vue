@@ -25,6 +25,7 @@ export default {}
 
 #footer, #footer a {
     color: rgba(0, 0, 0, .40);
+    transition: color 0.5s ease;
 }
 
 #footer:hover, #footer:hover a {

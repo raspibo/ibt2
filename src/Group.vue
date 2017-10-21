@@ -359,6 +359,10 @@ export default {
 </style>
 <style>
 
+.attendee-add .md-icon {
+    transition: color 0.5s ease;
+}
+
 .attendee-add .md-list-item-container {
     padding-left: 0px !important;
     margin-left: 0px;
