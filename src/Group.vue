@@ -273,7 +273,7 @@ export default {
 };
 
 </script>
-<style>
+<style scoped>
 
 .group-layout {
     padding: 10px;
@@ -281,8 +281,8 @@ export default {
 
 .new-group-header {
     background-color: lightsteelblue;
-    padding-top: 0px !important;
-    padding-bottom: 0px !important;
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
 
 .group-title {
@@ -345,19 +345,23 @@ export default {
 }
 
 .group-card {
-    padding-right: 8px !important;
+    padding-right: 8px;
 }
 
 .new-group-label {
-    left: 30px !important;
+    left: 30px;
 }
 
 .group-add-name {
     margin-left: 0px !important;
 }
 
+</style>
+<style>
+
 .attendee-add .md-list-item-container {
-    padding-left: 0px;
+    padding-left: 0px !important;
+    margin-left: 0px;
     max-width: 300px;
 }
 

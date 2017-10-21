@@ -115,19 +115,10 @@ export default {
 };
 
 </script>
-<style>
-
-.md-list-item .md-list-item-holder>.md-icon:first-child {
-    margin-right: 16px;
-}
+<style scoped>
 
 .attendee-list-item {
     min-width: 250px;
-}
-
-.attendee-list-item .md-list-item-container {
-    padding-left: 0px;
-    padding-right: 0px;
 }
 
 .attendee-notes {
@@ -162,6 +153,18 @@ export default {
     overflow: hidden;
     white-space: nowrap;
     color: rgba(0, 0, 0, 0.54);
+}
+
+</style>
+<style>
+
+.md-list-item .md-list-item-holder>.md-icon:first-child {
+    margin-right: 16px;
+}
+
+.attendee-list-item .md-list-item-container {
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 </style>

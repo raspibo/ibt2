@@ -228,7 +228,7 @@ export default {
 }
 
 </script>
-<style>
+<style scoped>
 
 #main-attendees {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -270,14 +270,6 @@ export default {
     background-color: #f8bbd0;
 }
 
-.vdp-datepicker__calendar > header > span {
-    background-color: #f8bbd0;
-}
-
-.vdp-datepicker__calendar > header > span:hover {
-    background-color: #f06292 !important;
-}
-
 #day-notes {
     color: rgba(0, 0, 0, 0.54);
 }
@@ -286,5 +278,15 @@ export default {
     vertical-align: text-top;
 }
 
+</style>
+<style>
+
+.vdp-datepicker__calendar > header > span {
+    background-color: #f8bbd0;
+}
+
+.vdp-datepicker__calendar > header > span:hover {
+    background-color: #f06292 !important;
+}
 
 </style>

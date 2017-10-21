@@ -20,7 +20,7 @@ export default {
 }
 
 </script>
-<style>
+<style scoped>
 
 .snackbar-close {
     font-weight: bold;

@@ -193,7 +193,7 @@ export default {
 }
 
 </script>
-<style>
+<style scoped>
 
 #toolbar-title {
     flex: 1;
@@ -235,7 +235,7 @@ export default {
 #logged-in-icon {
     margin-right: 0px;
     padding-right: 0px;
-    color: #f6f72f !important;
+    color: #f6f72f;
 }
 
 #logged-in {

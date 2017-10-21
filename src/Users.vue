@@ -95,11 +95,14 @@ export default {
 }
 
 </script>
-<style>
+<style scoped>
 
 #users {
     padding: 10px;
 }
+
+</style>
+<style>
 
 .center-content > .md-table-head-container {
     text-align: center;

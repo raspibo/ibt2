@@ -8,8 +8,7 @@
 export default {}
 
 </script>
-
-<style>
+<style scoped>
 
 #footer {
     text-align: center;
@@ -24,8 +23,16 @@ export default {}
     background-color: #b3e5fc;
 }
 
-#footer a {
-    color: white;
+#footer, #footer a {
+    color: rgba(0, 0, 0, .40);
+}
+
+#footer:hover, #footer:hover a {
+    color: rgba(0, 0, 0, .87);
+}
+
+#footer:hover a {
+    text-decoration: underline;
 }
 
 </style>
