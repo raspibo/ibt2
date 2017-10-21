@@ -7,7 +7,7 @@
             <md-card-content>
                 <md-input-container>
                     <label>Email</label>
-                    <md-input v-model="user.email" />
+                    <md-input v-model="user.email" autocorrect="off" autocapitalize="none" />
                 </md-input-container>
 
                 <div class="md-body-2">Change password</div>

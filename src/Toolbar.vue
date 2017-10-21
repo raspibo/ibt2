@@ -36,9 +36,9 @@
                 <span id="login-form">
                     <span id="username-input">
                         <strong id="login-label">Login:</strong>&nbsp;
-                        <md-input-container id="sername-input" class="login-input" md-inline>
+                        <md-input-container id="username-input-container" class="login-input" md-inline>
                             <md-tooltip md-direction="bottom">login name or create a new user if it doesn't exist</md-tooltip>
-                            <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline />
+                            <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline  autocorrect="off" autocapitalize="none" />
                         </md-input-container>&nbsp;
                     </span>
                     <span id="password-block">
