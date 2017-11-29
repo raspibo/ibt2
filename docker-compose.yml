@@ -1,0 +1,14 @@
+version: '3'
+services:
+  ibt2:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+  mongo:
+    image: "mongo:latest"
+    volumes:
+      - data:/data/db
+volumes:
+  data:
