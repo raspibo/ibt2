@@ -21,6 +21,6 @@ WORKDIR /ibt2/
 RUN \
 	npm install && \
 	nodejs build/build.js && \
-	rm -rm node_modules
+	rm -rf node_modules
 
 ENTRYPOINT ["./ibt2.py", "--mongo_url=mongodb://mongo", "--debug"]
