@@ -18,7 +18,17 @@ For the notes, you can use the [Markdown](https://daringfireball.net/projects/ma
 
 See [https://ibt2.ismito.it:3002/](https://ibt2.ismito.it:3002/)
 
+
 ## Install, run, develop and debug
+
+## Docker
+
+Just run:
+
+    docker-compose up
+
+
+## Old-fashioned installation
 
 To install it:
 ``` bash
@@ -52,7 +62,9 @@ If you want, you can **share a link to a specific day**, specifying it in the *y
 
 You can also **run the server in https**, putting in the *ssl* directory two files named *ibt2_key.pem* and *ibt2_cert.pem*
 
-To run a development environment:
+
+## Run a development environment
+
 ``` bash
 # install dependencies (one time only)
 npm install
@@ -70,14 +82,12 @@ python3 ./tests/ibt2_tests.py
 Your browser will automatically open [http://localhost:8080/](http://localhost:8080/) (that's the server for development)
 
 
-Development
-===========
+# Development
 
 See the *docs/DEVELOPMENT.md* file for more information about how to contribute.
 
 
-Technological stack
-===================
+## Technological stack
 
 - [VueJS](https://vuejs.org/) 2 for the webApp
 - [Vue Material](https://vuematerial.github.io/) for the UI components
@@ -90,14 +100,12 @@ Technological stack
 The web part is incuded; you need to install Node.js, Tornado, MongoDB and the pymongo module on your system (no configuration needed).
 
 
-Other projects
-==============
+# Other projects
 
 Need something more sophisticated, that allows you to manage tickets to an event?  Try [EventMan(ager)](https://github.com/raspibo/eventman)
 
 
-License and copyright
-=====================
+# License and copyright
 
 Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>, RaspiBO <info@raspibo.org>
 
