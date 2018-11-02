@@ -14,10 +14,6 @@ The *admin* user can change some global settings and also grant super cow powers
 
 For the notes, you can use the [Markdown](https://daringfireball.net/projects/markdown/) syntax.
 
-# Demo
-
-See [https://ibt2.ismito.it:3002/](https://ibt2.ismito.it:3002/)
-
 
 ## Install, run, develop and debug
 
