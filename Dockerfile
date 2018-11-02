@@ -9,7 +9,6 @@ RUN \
 	apt-get update && \
 	apt-get -y --no-install-recommends install \
 		nodejs \
-		npm \
 		python3-pymongo \
 		python3-tornado && \
 	rm -rf /var/lib/apt/lists/*
