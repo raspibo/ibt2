@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """I'll Be There, 2 (ibt2) - an oversimplified attendees registration system.
 
-Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>
+Copyright 2016-2018 Davide Alberani <da@erlug.linux.it>
                     RaspiBO <info@raspibo.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ limitations under the License.
 
 import os
 import re
+import time
 import logging
 import datetime
 from operator import itemgetter
@@ -663,7 +664,16 @@ def run():
         ssl_options = dict(certfile=options.ssl_cert, keyfile=options.ssl_key)
 
     # database backend connector
-    db_connector = monco.Monco(url=options.mongo_url, dbName=options.db_name)
+    _count = 0
+    while True:
+        try:
+            db_connector = monco.Monco(url=options.mongo_url, dbName=options.db_name)
+            break
+        except Exception:
+            time.sleep(1)
+            _count += 1
+            if _count > 20:
+                raise
 
     # global settings stored in the db
     global_settings = {}
