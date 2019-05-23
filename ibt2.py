@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """I'll Be There, 2 (ibt2) - an oversimplified attendees registration system.
 
-Copyright 2016-2018 Davide Alberani <da@erlug.linux.it>
+Copyright 2016-2019 Davide Alberani <da@erlug.linux.it>
                     RaspiBO <info@raspibo.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
