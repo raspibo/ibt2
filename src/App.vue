@@ -128,7 +128,7 @@ export default {
                 newDate = new Date(newDate.timestamp);
             }
             var day = new Date();
-            day.setTime(newDate);
+            day.setTime(newDate instanceof Date ? newDate.getTime() : newDate);
             var ym = this.dateToString(day, true);
             this.getSummary({start: ym, end: ym});
             this.getDay(day);
@@ -215,7 +215,7 @@ export default {
                 this.$refs.dialogObj.show({text: 'unable to fetch settings'});
             }).then((json) => {
                 if (!json || json.error) {
-                    this.$refs.dialogObj.show({text: 'unable to fetch settings: ' + (json && json.message) || ''});
+                    this.$refs.dialogObj.show({text: 'unable to fetch settings: ' + ((json && json.message) || '')});
                 } else {
                     this.$store.commit('updateSettings', json);
                 }

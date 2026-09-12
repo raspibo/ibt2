@@ -17,10 +17,10 @@ limitations under the License.
 """
 
 import os
-import re
 import time
 import logging
 import datetime
+import secrets
 from operator import itemgetter
 import itertools
 
@@ -57,21 +57,16 @@ class InputException(BaseException):
 
 class BaseHandler(tornado.web.RequestHandler):
     """Base class for request handlers."""
-    # Cache currently connected users.
-    _users_cache = {}
-
     # set of documents we're managing (a collection in MongoDB or a table in a SQL database)
     document = None
     collection = None
 
     # A property to access the first value of each argument.
-    arguments = property(lambda self: dict([(k, v[0].decode('utf-8'))
+    arguments = property(lambda self: dict([(k, v[0].decode('utf-8', 'replace'))
         for k, v in self.request.arguments.items()]))
 
     # Arguments suitable for a query on MongoDB.
     clean_arguments = property(lambda self: self._clean_dict(self.arguments))
-
-    _re_split_salt = re.compile(r'\$(?P<salt>.+)\$(?P<hash>.+)')
 
     @property
     def clean_body(self):
@@ -87,11 +82,17 @@ class BaseHandler(tornado.web.RequestHandler):
 
         :param data: dictionary to clean
         :type data: dict"""
+        forbidden = ('_id', 'created_by', 'created_at', 'updated_by',
+                     'updated_at', 'isRegistered')
         if isinstance(data, dict):
-            for key in list(data.keys()):
-                if (isinstance(key, str) and key.startswith('$')) or key in ('_id', 'created_by', 'created_at',
-                                                                    'updated_by', 'updated_at', 'isRegistered'):
-                    del data[key]
+            return {
+                key: self._clean_dict(value)
+                for key, value in data.items()
+                if not (isinstance(key, str) and
+                        (key.startswith('$') or key in forbidden))
+            }
+        if isinstance(data, list):
+            return [self._clean_dict(value) for value in data]
         return data
 
     def write_error(self, status_code, **kwargs):
@@ -128,8 +129,6 @@ class BaseHandler(tornado.web.RequestHandler):
         :returns: full information about the current user
         :rtype: dict"""
         current_user = self.current_user
-        if current_user in self._users_cache:
-            return self._users_cache[current_user]
         user_info = {}
         if current_user:
             user_info['_id'] = current_user
@@ -137,7 +136,6 @@ class BaseHandler(tornado.web.RequestHandler):
             if user:
                 user_info = user
                 user_info['isRegistered'] = True
-        self._users_cache[current_user] = user_info
         return user_info
 
     def is_registered(self):
@@ -172,11 +170,10 @@ class BaseHandler(tornado.web.RequestHandler):
         db_password = user.get('password') or ''
         if not db_password:
             return (False, {})
-        match = self._re_split_salt.match(db_password)
-        if not match:
-            return (False, {})
-        salt = match.group('salt')
-        if utils.hash_password(password, salt=salt) == db_password:
+        if utils.verify_password(password, db_password):
+            if db_password.startswith('$'):
+                self.db.update('users', user.get('_id'), {
+                    'password': utils.hash_password(password)})
             return (True, user)
         return (False, {})
 
@@ -220,7 +217,7 @@ class BaseHandler(tornado.web.RequestHandler):
         :returns: the updated document
         :rtype: dict"""
         user_id = self.current_user
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         if 'created_by' not in doc:
             doc['created_by'] = user_id
         if 'created_at' not in doc:
@@ -358,7 +355,7 @@ class DaysHandler(BaseHandler):
             sortedDays = []
             for result in results:
                 if not ('day' in result and 'group' in result and 'name' in result):
-                    self.logger.warn('unable to parse entry; dayData: %s', dayData)
+                    self.logger.warning('unable to parse entry; dayData: %s', dayData)
                     continue
                 sortedDays.append(result)
             sortedDays = sorted(sortedDays, key=itemgetter('day'))
@@ -367,12 +364,12 @@ class DaysHandler(BaseHandler):
                 for group, attendees in itertools.groupby(sorted(dayItems, key=itemgetter('group')),
                                                           key=itemgetter('group')):
                     attendees = sorted(attendees, key=itemgetter('_id'))
-                    groupData = groupsDetails.get(group) or {}
+                    groupData = dict(groupsDetails.get(group) or {})
                     groupData.update({'group': group, 'attendees': attendees})
                     dayData['groups'].append(groupData)
                 days.append(dayData)
         except Exception as e:
-            self.logger.warn('unable to parse entry; dayData: %s error: %s', dayData, e)
+            self.logger.warning('unable to parse entry; dayData: %s error: %s', dayData, e)
         if summary:
             days = self._summarize(days)
         if not day:
@@ -534,8 +531,6 @@ class UsersHandler(BaseHandler):
         if doc.get('username') == 'admin':
             return self.build_error(status=401, message='unable to delete the admin user')
         howMany = self.db.delete(self.collection, id_)
-        if id_ in self._users_cache:
-            del self._users_cache[id_]
         self.write({'success': True, 'deleted entries': howMany.get('n')})
 
 
@@ -650,6 +645,8 @@ def run():
     define("db_name", default='ibt2',
             help="Name of the MongoDB database to use", type=str)
     define("debug", default=False, help="run in debug mode")
+    define("admin_password", default=None,
+            help="initial admin password (only used when creating admin)", type=str)
     define("config", help="read configuration file",
             callback=lambda path: tornado.options.parse_config_file(path, final=False))
     tornado.options.parse_command_line()
@@ -682,11 +679,17 @@ def run():
     init_params = dict(db=db_connector, listen_port=options.port, logger=logger,
                        ssl_options=ssl_options, global_settings=global_settings)
 
-    # If not present, we store a user 'admin' with password 'ibt2' into the database.
+    # If not present, create the initial administrator account.
     if not db_connector.query('users', {'username': 'admin'}):
+        admin_password = options.admin_password or secrets.token_urlsafe(18)
         db_connector.add('users',
-                {'username': 'admin', 'password': utils.hash_password('ibt2'),
+                {'username': 'admin', 'password': utils.hash_password(admin_password),
                  'isAdmin': True})
+        if options.admin_password:
+            logger.info('created admin user using the configured password')
+        else:
+            logger.warning('created admin user with generated password: %s',
+                           admin_password)
 
     # If present, use the cookie_secret stored into the database.
     cookie_secret = db_connector.get('server_settings', 'server_cookie_secret')

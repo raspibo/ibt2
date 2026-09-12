@@ -11,7 +11,8 @@ RUN \
 		npm \
 		py3-pip \
 		py3-tornado && \
-	pip3 install pymongo
+	python3 -m venv --system-site-packages /opt/venv && \
+	/opt/venv/bin/pip install --no-cache-dir pymongo
 
 COPY . /ibt2
 
@@ -22,4 +23,4 @@ RUN \
 	node build/build.js && \
 	rm -rf node_modules
 
-ENTRYPOINT ["./ibt2.py", "--mongo_url=mongodb://mongo", "--debug"]
+ENTRYPOINT ["/opt/venv/bin/python", "./ibt2.py", "--mongo_url=mongodb://mongo"]

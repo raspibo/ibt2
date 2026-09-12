@@ -20,8 +20,9 @@ limitations under the License.
 import re
 import pymongo
 from bson.objectid import ObjectId
+from pymongo import ReturnDocument
 
-re_objectid = re.compile(r'[0-9a-f]{24}')
+re_objectid = re.compile(r'[0-9a-f]{24}', re.IGNORECASE)
 
 _force_conversion = {
     '_id': ObjectId
@@ -39,11 +40,8 @@ def convert_obj(obj):
         return None
     if isinstance(obj, bool):
         return obj
-    try:
-        if re_objectid.match(obj):
-            return ObjectId(obj)
-    except:
-        pass
+    if isinstance(obj, str) and re_objectid.fullmatch(obj):
+        return ObjectId(obj)
     return obj
 
 
@@ -61,7 +59,7 @@ def convert(seq):
             if key in _force_conversion:
                 try:
                     d[key] = _force_conversion[key](item)
-                except:
+                except (TypeError, ValueError):
                     d[key] = item
             else:
                 d[key] = convert(item)
@@ -191,7 +189,7 @@ class Monco(object):
         data = convert(data)
         if _id is not None:
             data['_id'] = _id
-        _id = db[collection].insert(data)
+        _id = db[collection].insert_one(data).inserted_id
         return self.get(collection, _id)
 
     def insertOne(self, collection, data):
@@ -207,8 +205,8 @@ class Monco(object):
         """
         db = self.connect()
         data = convert(data)
-        ret = db[collection].update(data, {'$set': data}, upsert=True)
-        return ret['updatedExisting']
+        ret = db[collection].update_one(data, {'$set': data}, upsert=True)
+        return ret.matched_count > 0
 
     def _buildSearchPattern(self, data, searchBy):
         """Return an OR condition."""
@@ -258,10 +256,13 @@ class Monco(object):
             for key, value in data.items():
                 newData['%s.$.%s' % (updateList, key)] = value
             data = newData
-        res = db[collection].find_and_modify(query=_id_or_query,
-                update={operator: data}, full_response=True, new=True, upsert=create)
-        lastErrorObject = res.get('lastErrorObject') or {}
-        return lastErrorObject.get('updatedExisting', False), res.get('value') or {}
+        if operator is None:
+            raise ValueError('unknown update operation: %s' % operation)
+        previous = db[collection].find_one(_id_or_query)
+        result = db[collection].find_one_and_update(
+            _id_or_query, {operator: data},
+            return_document=ReturnDocument.AFTER, upsert=create)
+        return previous is not None, result or {}
 
     def updateMany(self, collection, query, data):
         """Update multiple existing documents.
@@ -285,7 +286,8 @@ class Monco(object):
             query = {'_id': query}
         if '_id' in data:
             del data['_id']
-        return db[collection].update(query, {'$set': data}, multi=True)
+        result = db[collection].update_many(query, {'$set': data})
+        return {'ok': 1, 'n': result.modified_count}
 
     def delete(self, collection, _id_or_query=None, force=False):
         """Remove one or more documents from a collection.
@@ -306,4 +308,6 @@ class Monco(object):
         if not isinstance(_id_or_query, dict):
             _id_or_query = {'_id': _id_or_query}
         _id_or_query = convert(_id_or_query)
-        return db[collection].remove(_id_or_query)
+        result = db[collection].delete_many(
+            {} if force and not _id_or_query else _id_or_query)
+        return {'ok': 1, 'n': result.deleted_count}

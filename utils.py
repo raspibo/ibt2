@@ -18,10 +18,10 @@ limitations under the License.
 """
 
 import json
-import string
-import random
 import hashlib
 import datetime
+import hmac
+import secrets
 from bson.objectid import ObjectId
 
 
@@ -30,18 +30,44 @@ def hash_password(password, salt=None):
 
     :param password: the cleartext password
     :type password: str
-    :param salt: the optional salt (randomly generated, if None)
+    :param salt: optional legacy salt used when verifying old hashes
     :type salt: str
 
     :returns: the hashed password
     :rtype: str"""
-    if salt is None:
-        salt_pool = string.ascii_letters + string.digits
-        salt = ''.join(random.choice(salt_pool) for x in range(32))
-    pass_and_salt = '%s%s' % (salt, password)
-    pass_and_salt = pass_and_salt.encode('utf-8', 'ignore')
-    hash_ = hashlib.sha512(pass_and_salt)
-    return '$%s$%s' % (salt, hash_.hexdigest())
+    if salt is not None:
+        pass_and_salt = ('%s%s' % (salt, password)).encode('utf-8', 'ignore')
+        return '$%s$%s' % (salt, hashlib.sha512(pass_and_salt).hexdigest())
+    salt = secrets.token_bytes(16)
+    iterations = 600000
+    digest = hashlib.pbkdf2_hmac(
+        'sha256', password.encode('utf-8'), salt, iterations)
+    return 'pbkdf2_sha256$%d$%s$%s' % (
+        iterations, salt.hex(), digest.hex())
+
+
+def verify_password(password, encoded):
+    """Verify current PBKDF2 hashes and the original ibt2 hashes."""
+    if not encoded:
+        return False
+    if encoded.startswith('pbkdf2_sha256$'):
+        try:
+            _, iterations, salt, expected = encoded.split('$', 3)
+            actual = hashlib.pbkdf2_hmac(
+                'sha256', password.encode('utf-8'), bytes.fromhex(salt),
+                int(iterations))
+            return hmac.compare_digest(actual.hex(), expected)
+        except (TypeError, ValueError):
+            return False
+    if encoded.startswith('$'):
+        try:
+            salt, expected = encoded[1:].split('$', 1)
+            actual = hashlib.sha512(
+                ('%s%s' % (salt, password)).encode('utf-8')).hexdigest()
+            return hmac.compare_digest(actual, expected)
+        except ValueError:
+            return False
+    return False
 
 
 class ImprovedEncoder(json.JSONEncoder):
@@ -65,4 +91,3 @@ class ImprovedEncoder(json.JSONEncoder):
 
 # Inject our class as the default encoder.
 json._default_encoder = ImprovedEncoder()
-

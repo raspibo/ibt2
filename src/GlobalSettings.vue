@@ -79,7 +79,7 @@ export default {
                 this.$refs.dialogObj.show({text: 'unable to fetch settings'});
             }).then((json) => {
                 if (!json || json.error) {
-                    this.$refs.dialogObj.show({text: 'unable to fetch settings: ' + (json && json.message) || ''});
+                    this.$refs.dialogObj.show({text: 'unable to fetch settings: ' + ((json && json.message) || '')});
                 } else {
                     this.$store.commit('updateSettings', json);
                 }

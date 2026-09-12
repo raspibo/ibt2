@@ -162,7 +162,6 @@ export default {
         },
 
         createUser(user_data) {
-            user_data.username = user_data.username || {};
             user_data.username = user_data.username || this.username;
             user_data.password = user_data.password || this.password;
             this.usersUrl.save(user_data).then((response) => {

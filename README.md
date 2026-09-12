@@ -9,7 +9,10 @@ Basic workflow:
 - write your name and, optionally, a note
 - rinse and repeat
 
-It's recommended to login with username **admin** and password **ibt2**, go to your personal page and change the password, if you've just installed ibt2.
+On first startup, ibt2 creates an administrator account. Set the
+`--admin_password` option (or configure the equivalent container command)
+to choose its initial password; otherwise a random password is generated and
+written to the server log. Change it from the personal page after signing in.
 The *admin* user can change some global settings and also grant super cow powers to any other user.
 
 For the notes, you can use the [Markdown](https://daringfireball.net/projects/markdown/) syntax.
@@ -114,4 +117,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
