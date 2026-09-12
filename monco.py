@@ -57,10 +57,7 @@ def convert(seq):
         d = {}
         for key, item in seq.items():
             if key in _force_conversion:
-                try:
-                    d[key] = _force_conversion[key](item)
-                except (TypeError, ValueError):
-                    d[key] = item
+                d[key] = convert_obj(item)
             else:
                 d[key] = convert(item)
         return d
