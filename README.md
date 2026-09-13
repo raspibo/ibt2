@@ -9,7 +9,7 @@ Typical workflow:
 - Select an existing group or enter the name of a new one.
 - Add your name and, optionally, a note.
 
-Only an entry's owner or an administrator can edit or delete it. On first startup, ibt2 creates an `admin` account. Pass `--admin_password` (or the same container argument) to choose its initial password. Otherwise, a random password is written to the server log. Change it from the personal page after signing in.
+Only an entry's owner or an administrator can edit or delete it. On first startup, ibt2 creates an `admin` account with the password `admin`. Pass `--admin_password` (or the same container argument) to choose a different initial password. Change the default password from the personal page after signing in.
 
 Notes support [Markdown](https://daringfireball.net/projects/markdown/).
 

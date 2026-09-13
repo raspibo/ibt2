@@ -159,7 +159,7 @@ class Ibt2Tests(unittest.TestCase):
         r = s.put(BASE_URL + 'users/' + id2_, json={'email': 'test@example.com'})
         self.assertRaises(requests.exceptions.HTTPError, r.raise_for_status)
         r.connection.close()
-        s = self.login('admin', 'ibt2')
+        s = self.login('admin', 'admin')
         r = s.put(BASE_URL + 'users/' + id_, json={'email': 'test2@example.com'})
         r.raise_for_status()
         self.assertEqual(r.json().get('email'), 'test2@example.com')
@@ -182,7 +182,7 @@ class Ibt2Tests(unittest.TestCase):
         r = s.delete(BASE_URL + 'users/' + id2_)
         self.assertRaises(requests.exceptions.HTTPError, r.raise_for_status)
         r.connection.close()
-        s = self.login('admin', 'ibt2')
+        s = self.login('admin', 'admin')
         r = s.delete(BASE_URL + 'users/' + id2_)
         r.raise_for_status()
         r.connection.close()
@@ -201,7 +201,7 @@ class Ibt2Tests(unittest.TestCase):
         return s
 
     def test_created_by(self):
-        s = self.login('admin', 'ibt2')
+        s = self.login('admin', 'admin')
         r = s.get(BASE_URL + 'users/current')
         r.raise_for_status()
         user_id = r.json()['_id']
@@ -240,7 +240,7 @@ class Ibt2Tests(unittest.TestCase):
 
     def test_delete_group(self):
         self.add_attendee({'day': '2017-01-16', 'name': 'A new name', 'group': 'A group'})
-        s = self.login('admin', 'ibt2')
+        s = self.login('admin', 'admin')
         r = s.delete(BASE_URL + 'days/2017-01-16/groups/A group', params={'day': '2017-01-16', 'group': 'A group'})
         r.raise_for_status()
         rj = r.json()
@@ -260,7 +260,7 @@ class Ibt2Tests(unittest.TestCase):
         settings = {'key1': 'value1', 'key2': 'value2'}
         r = requests.post(BASE_URL + 'settings', json=settings)
         self.assertRaises(requests.exceptions.HTTPError, r.raise_for_status)
-        s = self.login('admin', 'ibt2')
+        s = self.login('admin', 'admin')
         r = s.post(BASE_URL + 'settings', json=settings)
         r.raise_for_status()
         rj = r.json()

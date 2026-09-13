@@ -20,7 +20,6 @@ import os
 import time
 import logging
 import datetime
-import secrets
 from operator import itemgetter
 import itertools
 
@@ -35,6 +34,7 @@ import utils
 import monco
 
 API_VERSION = '1.1'
+DEFAULT_ADMIN_PASSWORD = 'admin'
 
 
 class BaseException(Exception):
@@ -643,8 +643,9 @@ def run():
     define("db_name", default='ibt2',
             help="Name of the MongoDB database to use", type=str)
     define("debug", default=False, help="run in debug mode")
-    define("admin_password", default=None,
-            help="initial admin password (only used when creating admin)", type=str)
+    define("admin_password", default=DEFAULT_ADMIN_PASSWORD,
+            help="initial admin password (default: admin; only used when creating admin)",
+            type=str)
     define("config", help="read configuration file",
             callback=lambda path: tornado.options.parse_config_file(path, final=False))
     tornado.options.parse_command_line()
@@ -679,15 +680,11 @@ def run():
 
     # If not present, create the initial administrator account.
     if not db_connector.query('users', {'username': 'admin'}):
-        admin_password = options.admin_password or secrets.token_urlsafe(18)
+        admin_password = options.admin_password or DEFAULT_ADMIN_PASSWORD
         db_connector.add('users',
                 {'username': 'admin', 'password': utils.hash_password(admin_password),
                  'isAdmin': True})
-        if options.admin_password:
-            logger.info('created admin user using the configured password')
-        else:
-            logger.warning('created admin user with generated password: %s',
-                           admin_password)
+        logger.warning('created admin user; change its initial password after signing in')
 
     # If present, use the cookie_secret stored into the database.
     cookie_secret = db_connector.get('server_settings', 'server_cookie_secret')

@@ -20,7 +20,9 @@ The MongoDB data is stored in the Compose `data` volume (named `ibt2_data` by de
 
 ## Initial administrator password
 
-Before the first start, set the `--admin_password` argument in the `ibt2` service's `command` in `docker-compose.yml`. For example:
+On first start, ibt2 creates the `admin` user with the password `admin`. Change it from the personal page after signing in.
+
+To use a different password from the beginning, set the `--admin_password` argument in the `ibt2` service's `command` in `docker-compose.yml` before the first start. For example:
 
 ```yaml
 services:
@@ -30,7 +32,7 @@ services:
 
 The image already supplies the server command, so Compose passes this value as an argument to ibt2. Remove the command after the administrator account has been created; changing it later does not change an existing password.
 
-If no password is supplied, ibt2 generates one and writes it to the server logs on first start. Retrieve it with `docker compose logs ibt2`.
+If no password is supplied, the initial password is `admin`.
 
 ## Database maintenance
 
