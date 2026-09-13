@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """I'll Be There, 2 (ibt2) - an oversimplified attendees registration system.
 
-Copyright 2016-2019 Davide Alberani <da@erlug.linux.it>
+Copyright 2016-2026 Davide Alberani <da@mimante.net>
                     RaspiBO <info@raspibo.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -204,9 +204,7 @@ class BaseHandler(tornado.web.RequestHandler):
         return True
 
     def logout(self):
-        """Remove the secure cookie used fro authentication."""
-        if self.current_user in self._users_cache:
-            del self._users_cache[self.current_user]
+        """Remove the secure cookie used for authentication."""
         self.clear_cookie("user")
 
     def add_access_info(self, doc):

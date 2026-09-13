@@ -231,15 +231,18 @@ export default {
 <style scoped>
 
 #main-attendees {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    font-family: 'Avenir', 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #2c3e50;
-    margin-top: 0px;
+    color: #1f2937;
+    margin-top: 0;
+    padding: 24px 20px 36px;
 }
 
 #datepicker-column {
     min-width: 320px;
+    max-width: 360px;
+    gap: 18px;
 }
 
 @media screen and (min-width: 945px) {
@@ -250,28 +253,54 @@ export default {
 
 .vdp-datepicker {
     padding: 10px;
+    background: rgba(255, 255, 255, 0.88);
+    border-radius: 22px;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+#panel {
+    gap: 12px;
 }
 
 #panel .md-layout {
     flex: initial;
+    gap: 16px;
 }
 
 #day-info {
-    margin: 10px;
-    width: 300px;
+    margin: 0;
+    width: 100%;
     min-height: 200px;
+    border-radius: 22px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
 }
 
 .day-info-title {
     flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
 }
 
 .day-info-header {
-    background-color: #f8bbd0;
+    background: linear-gradient(135deg, #fbcfe8 0%, #ddd6fe 100%);
+    padding: 16px 20px;
 }
 
 #day-notes {
-    color: rgba(0, 0, 0, 0.54);
+    color: #475569;
+    line-height: 1.6;
+    padding: 12px 18px 18px;
+}
+
+#day-notes p {
+    margin: 0;
 }
 
 .day-icon {
@@ -281,12 +310,51 @@ export default {
 </style>
 <style>
 
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at top left, rgba(191, 219, 254, 0.8), transparent 25%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    color: #1f2937;
+}
+
+#app {
+    min-height: 100vh;
+}
+
+.md-card,
+.md-toolbar,
+.md-list,
+.md-input-container,
+.md-btn,
+.md-button {
+    border-radius: 18px !important;
+}
+
 .vdp-datepicker__calendar > header > span {
-    background-color: #f8bbd0;
+    background: linear-gradient(135deg, #f9a8d4 0%, #c4b5fd 100%);
+    color: #111827;
 }
 
 .vdp-datepicker__calendar > header > span:hover {
-    background-color: #f06292 !important;
+    background: linear-gradient(135deg, #f472b6 0%, #8b5cf6 100%) !important;
+    color: white !important;
+}
+
+.vdp-datepicker__calendar {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+}
+
+.vdp-datepicker__calendar .cell {
+    border-radius: 10px;
+}
+
+.vdp-datepicker__calendar .cell.selected {
+    background: linear-gradient(135deg, #f472b6 0%, #8b5cf6 100%);
+    color: white;
 }
 
 </style>

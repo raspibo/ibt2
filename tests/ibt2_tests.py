@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """I'll Be There, 2 (ibt2) - tests
 
-Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>
+Copyright 2016-2017 Davide Alberani <da@mimante.net>
                     RaspiBO <info@raspibo.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -126,6 +126,20 @@ class Ibt2Tests(unittest.TestCase):
         s = self.login('newuser', 'ibt2')
         r = s.get(BASE_URL + 'users/current')
         r.raise_for_status()
+        r.connection.close()
+
+    def test_logout(self):
+        r = requests.post(BASE_URL + 'users', json={'username': 'newuser', 'password': 'ibt2'})
+        r.raise_for_status()
+        r.connection.close()
+        s = self.login('newuser', 'ibt2')
+        r = s.get(BASE_URL + 'logout')
+        r.raise_for_status()
+        self.assertFalse(r.json().get('error'))
+        r.connection.close()
+        r = s.get(BASE_URL + 'users/current')
+        r.raise_for_status()
+        self.assertEqual(r.json(), {})
         r.connection.close()
 
     def test_update_user(self):

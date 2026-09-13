@@ -119,6 +119,7 @@ export default {
 
 .attendee-list-item {
     min-width: 250px;
+    margin-bottom: 8px;
 }
 
 .attendee-notes {
@@ -126,13 +127,13 @@ export default {
 }
 
 .notes-editor-list-item {
-    margin-bottom: 0px !important;
+    margin-bottom: 0 !important;
     padding-left: 16px;
 }
 
 .notes-editor-list-item ul {
-    padding-top: 0px !important;
-    padding-bottom: 0px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }
 
 .notes-editor-list-item .md-theme-default.md-list {
@@ -145,14 +146,13 @@ export default {
 }
 
 .attendee-notes > p {
-    margin: 0px;
+    margin: 0;
     font-style: italic;
-    margin: 0px;
     text-overflow: ellipsis;
     max-width: 400px;
     overflow: hidden;
     white-space: nowrap;
-    color: rgba(0, 0, 0, 0.54);
+    color: rgba(15, 23, 42, 0.62);
 }
 
 </style>
@@ -160,11 +160,14 @@ export default {
 
 .md-list-item .md-list-item-holder>.md-icon:first-child {
     margin-right: 16px;
+    color: #4f46e5;
 }
 
 .attendee-list-item .md-list-item-container {
-    padding-left: 0px;
-    padding-right: 0px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 </style>

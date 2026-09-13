@@ -196,35 +196,60 @@ export default {
 
 #toolbar-title {
     flex: 1;
+    min-width: 120px;
+}
+
+#toolbar {
+    display: flex;
+    align-items: center;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #1e293b 0%, #312e81 28%, #4338ca 100%);
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+#toolbar .md-button {
+    border-radius: 12px;
+}
+
+#toolbar .md-icon-button .md-icon {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+#login-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .login-input {
-    width: 200px;
-    margin: 0px 0px 0px;
-    padding-top: 0px;
-    padding-left: 4px;
+    width: 180px;
+    margin: 0;
+    padding: 0 2px;
     min-height: 24px;
-    line-height: 0px;
+    line-height: 0;
 }
 
 #login-label {
     margin-top: 8px;
+    color: white;
+    font-weight: 600;
+}
+
+#username-input,
+#password-block {
+    display: flex;
+    align-items: center;
 }
 
 #username-input {
-    display: flex;
-    float: left;
-    margin-right: 20px;
-}
-
-#password-input {
-    display: inline;
-    float: left;
+    margin-right: 12px;
 }
 
 #password-block {
-    display: inline;
-    float: right;
+    gap: 8px;
 }
 
 #login-button {
@@ -232,25 +257,24 @@ export default {
 }
 
 #logged-in-icon {
-    margin-right: 0px;
-    padding-right: 0px;
+    margin-right: 0;
+    padding-right: 0;
     color: #f6f72f;
 }
 
 #logged-in {
     position: relative;
-    top: 10px;
-
+    top: 8px;
 }
 
 #logout-icon {
-    margin-left: 0px;
-    padding-left: 0px;
+    margin-left: 0;
+    padding-left: 0;
 }
 
 .username-link {
-    font-weight: bold;
-    color: #f6f72f !important;
+    font-weight: 700;
+    color: #fef3c7 !important;
 }
 
 .button-spacer {
@@ -258,20 +282,43 @@ export default {
 }
 
 .home-link {
-    font-weight: bold;
+    font-weight: 800;
+    letter-spacing: 0.06em;
     color: white !important;
+}
+
+#toolbar .md-input-container {
+    min-height: 28px;
+}
+
+#toolbar .md-input-container input,
+#toolbar .md-input-container label {
+    color: white !important;
+}
+
+#toolbar .md-input-container:after,
+#toolbar .md-input-container:before {
+    background-color: rgba(255, 255, 255, 0.55) !important;
 }
 
 </style>
 <style>
 
+.motd {
+    margin: 0 18px 18px;
+    padding: 12px 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(252, 231, 243, 0.96), rgba(224, 231, 255, 0.96));
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
 .motd p {
-    margin-top: 0px;
-    margin-bottom: 0px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    margin: 0;
+    padding: 4px 0;
     text-align: center;
-    background-color: #ffcdd2;
+    color: #334155;
+    line-height: 1.5;
 }
 
 </style>

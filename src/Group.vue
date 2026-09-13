@@ -277,30 +277,46 @@ export default {
 
 .group-layout {
     padding: 10px;
+    min-width: 280px;
+    flex: 1 1 320px;
+}
+
+.group-layout > .md-card {
+    width: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
 }
 
 .new-group-header {
-    background-color: lightsteelblue;
-    padding-top: 0px;
-    padding-bottom: 0px;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .group-title {
     flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #1f2937;
 }
 
 .new-group-header .group-title {
-    margin-top: 0px !important;
+    margin-top: 0 !important;
 }
 
 .group-header {
-    background-color: lightblue;
+    background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+    padding: 16px 18px 12px;
 }
 
 .group-icon {
     vertical-align: text-top;
 }
-
 
 .new-group {
     min-width: 250px;
@@ -311,21 +327,19 @@ export default {
 }
 
 .counter {
-    margin-left: 4px;
-    position: relative;
-    bottom: 12px;
-    background-color: #eee;
-    color: #666;
-    padding: 2px 5px;
-    border-radius: 20px;
+    margin-left: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    color: #334155;
+    padding: 4px 8px;
+    border-radius: 999px;
     font-size: 12px;
-    font-weight: 200;
+    font-weight: 700;
     line-height: 1;
 }
 
 .new-attendee {
     width: 50px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
 .attendee-notes-container {
@@ -334,7 +348,7 @@ export default {
 }
 
 .group-card {
-    padding-right: 8px;
+    padding: 10px 14px 14px;
 }
 
 .new-group-label {
@@ -342,7 +356,7 @@ export default {
 }
 
 .group-add-name {
-    margin-left: 0px !important;
+    margin-left: 0 !important;
 }
 
 </style>
@@ -351,23 +365,29 @@ export default {
 .group-notes > p, .attendee-notes > p {
     font-style: italic;
     padding-left: 30px;
-    margin: 0px;
-    padding: 0px 4px 0px 0px;
+    margin: 0;
+    padding: 0 4px 0 0;
     text-overflow: ellipsis;
     max-width: 400px;
     overflow: hidden;
     white-space: nowrap;
-    color: rgba(0, 0, 0, 0.54);
+    color: rgba(15, 23, 42, 0.7);
 }
 
 .attendee-add .md-icon {
-    transition: color 0.5s ease;
+    transition: color 0.2s ease;
+    color: #4338ca;
 }
 
 .attendee-add .md-list-item-container {
-    padding-left: 0px !important;
-    margin-left: 0px;
+    padding-left: 0 !important;
+    margin-left: 0;
     max-width: 300px;
+    border-radius: 12px;
+}
+
+.md-list-item-container {
+    border-radius: 12px;
 }
 
 </style>

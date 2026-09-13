@@ -1,6 +1,6 @@
 FROM alpine
 LABEL \
-	maintainer="Davide Alberani <da@erlug.linux.it>" \
+	maintainer="Davide Alberani <da@mimante.net>" \
 	vendor="RaspiBO"
 
 EXPOSE 3000

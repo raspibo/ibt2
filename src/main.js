@@ -1,7 +1,7 @@
 /*
  * I'll be there, 2. An oversimplified application to register attendees at a conference or event.
  *
- *  Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>, RaspiBO <info@raspibo.org>
+ *  Copyright 2016-2017 Davide Alberani <da@mimante.net>, RaspiBO <info@raspibo.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

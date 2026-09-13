@@ -3,7 +3,7 @@
 
 Classes and functions used to issue queries to a MongoDB database.
 
-Copyright 2016-2017 Davide Alberani <da@erlug.linux.it>
+Copyright 2016-2026 Davide Alberani <da@mimante.net>
                     RaspiBO <info@raspibo.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
