@@ -61,7 +61,7 @@
 </template>
 <script>
 
-import VueMarkdown from 'vue-markdown';
+import VueMarkdown from './VueMarkdown.vue';
 import IbtDialog from './IbtDialog.vue';
 import IbtSnackbar from './IbtSnackbar.vue';
 

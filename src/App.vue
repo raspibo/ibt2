@@ -51,7 +51,7 @@
 import Datepicker from 'vuejs-datepicker';
 import Group from './Group';
 import IbtDialog from './IbtDialog.vue';
-import VueMarkdown from 'vue-markdown';
+import VueMarkdown from './VueMarkdown.vue';
 
 export default {
     data() {

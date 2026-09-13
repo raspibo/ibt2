@@ -38,7 +38,7 @@
 <script>
 
 import IbtDialog from './IbtDialog.vue';
-import VueMarkdown from 'vue-markdown';
+import VueMarkdown from './VueMarkdown.vue';
 
 export default {
     props: {attendee: {default: {}}},
@@ -99,13 +99,17 @@ export default {
         },
 
         toggleNotes() {
+            var el = this.$refs.attendeeNotes && this.$refs.attendeeNotes.$el;
+            if (!el) return;
+            var p = el.querySelector('p');
+            if (!p) return;
             if (!this.expandedNote) {
-                $(this.$refs.attendeeNotes.$el).find('p').css('text-overflow', 'initial');
-                $(this.$refs.attendeeNotes.$el).find('p').css('white-space', 'initial');
+                p.style.textOverflow = 'initial';
+                p.style.whiteSpace = 'initial';
                 this.expandedNote = true;
             } else {
-                $(this.$refs.attendeeNotes.$el).find('p').css('text-overflow', 'ellipsis');
-                $(this.$refs.attendeeNotes.$el).find('p').css('white-space', 'nowrap');
+                p.style.textOverflow = 'ellipsis';
+                p.style.whiteSpace = 'nowrap';
                 this.expandedNote = false;
             }
         }

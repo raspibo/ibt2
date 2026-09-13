@@ -65,16 +65,16 @@ The code is so divided:
 
     +- ibt2.py - the Tornado Web server
     +- index.html - the html page that will be injected with the webApp
+    +- vite.config.js - Vite build tool configuration
     +- monco.py - backend to connect to a MongoDB instance
     +- utils.py - various utilities
-    +- build/ - webpack and node configuration
     +- dist/ - output of the build command will be put here
     +- src/ - webApp sources
        |
        +- main.js - kickoff the VueJS webApp
        +- App.vue - main component of the webApp
        +- *.vue - other webApp components
-       +- state.js - shared state of the webApp
+       +- store.js - shared state of the webApp
 
 
 Coding style and conventions
@@ -96,10 +96,10 @@ not-so-FAQs
 
 
 - **Q:** *.vue* files? What's that?
-- **A:** Vue [single-file components](https://vuejs.org/v2/guide/single-file-components.html); a [webpack](https://webpack.js.org/) plugin will take care of translating them into stuff that can be digested by a browser.
+- **A:** Vue [single-file components](https://vuejs.org/v2/guide/single-file-components.html); [Vite](https://vitejs.dev/) will take care of translating them into stuff that can be digested by a browser.
 
 - **Q:** I've added a new path to the backend, and now the hot reload server is not working!!1!!
-- **A:** that's not even a question.  Anyway, add the path to dev.proxyTable in *config/index.js*
+- **A:** that's not even a question.  Anyway, add the path to server.proxy in *vite.config.js*
 
 
 - **Q:** will it be integrated with Slack?

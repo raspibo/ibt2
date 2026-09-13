@@ -731,7 +731,8 @@ def run():
             (r'/v%s/logout' % API_VERSION, LogoutHandler),
             (r'/?(.*)', tornado.web.StaticFileHandler, {"path": "dist"})
         ],
-        static_path=os.path.join(os.path.dirname(__file__), "dist/static"),
+        static_path=os.path.join(os.path.dirname(__file__), "dist/assets"),
+        static_url_prefix="/assets/",
         cookie_secret=cookie_secret,
         login_url='/login',
         debug=options.debug)

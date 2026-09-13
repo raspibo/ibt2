@@ -108,7 +108,7 @@
 
 import Attendee from './Attendee';
 import IbtDialog from './IbtDialog.vue';
-import VueMarkdown from 'vue-markdown';
+import VueMarkdown from './VueMarkdown.vue';
 
 export default {
     props: {group: {}, day: {}, addNewGroup: {default: false}},
@@ -217,13 +217,17 @@ export default {
         },
 
         toggleNotes() {
+            var el = this.$refs.groupNotes && this.$refs.groupNotes.$el;
+            if (!el) return;
+            var p = el.querySelector('p');
+            if (!p) return;
             if (!this.expandedNote) {
-                $(this.$refs.groupNotes.$el).find('p').css('text-overflow', 'initial');
-                $(this.$refs.groupNotes.$el).find('p').css('white-space', 'initial');
+                p.style.textOverflow = 'initial';
+                p.style.whiteSpace = 'initial';
                 this.expandedNote = true;
             } else {
-                $(this.$refs.groupNotes.$el).find('p').css('text-overflow', 'ellipsis');
-                $(this.$refs.groupNotes.$el).find('p').css('white-space', 'nowrap');
+                p.style.textOverflow = 'ellipsis';
+                p.style.whiteSpace = 'nowrap';
                 this.expandedNote = false;
             }
         },

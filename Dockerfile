@@ -20,7 +20,7 @@ WORKDIR /ibt2/
 
 RUN \
 	npm install && \
-	node build/build.js && \
+	npm run build && \
 	rm -rf node_modules
 
 ENTRYPOINT ["/opt/venv/bin/python", "./ibt2.py", "--mongo_url=mongodb://mongo"]
