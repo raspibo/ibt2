@@ -1,7 +1,9 @@
 <template>
     <md-snackbar md-position="top center" ref="snackbar">
         <span>{{ snackbackMessage }}</span>
-        <md-button @click.native="$refs.snackbar.close()" class="snackbar-close">[x]</md-button>
+        <md-button class="md-icon-button snackbar-close" @click.native="$refs.snackbar.close()">
+            <md-icon>close</md-icon>
+        </md-button>
     </md-snackbar>
 </template>
 <script>
