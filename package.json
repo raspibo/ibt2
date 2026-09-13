@@ -1,6 +1,6 @@
 {
   "name": "ibt2",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "I'll be there, 2: an oversimplified application to register attendees at a conference or event",
   "author": "Davide Alberani <da@mimante.net>",
   "license": "Apache-2.0",
@@ -23,7 +23,7 @@
     "marked": "^15.0.7",
     "material-design-icons": "^3.0.1",
     "roboto-fontface": "^0.8.0",
-    "vue": "^2.7.16",
+    "vue": "^3.5.42",
     "vue-material": "^0.7.5",
     "vue-resource": "^1.3.4",
     "vue-router": "^2.7.0",
@@ -31,10 +31,13 @@
     "vuex": "^2.4.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue2": "^2.3.4",
-    "vite": "^5.4.14"
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/compat": "^3.5.42",
+    "@vue/compiler-sfc": "^3.5.42",
+    "esbuild": "0.25.0",
+    "vite": "8.3.0"
   },
   "engines": {
-    "node": ">= 18.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

@@ -1,13 +1,20 @@
 import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue2';
-import path from 'path';
+import vue from '@vitejs/plugin-vue';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
-  plugins: [vue()],
+  // Vue Material and the other Vue 2 plugins still require compat templates.
+  plugins: [vue({
+    template: {
+      compilerOptions: {
+        compatConfig: { MODE: 2 },
+      },
+    },
+  })],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      'vue': 'vue/dist/vue.esm.js',
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      vue: '@vue/compat',
     },
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },

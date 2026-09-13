@@ -11,30 +11,30 @@
                         <md-button class="md-icon-button" md-menu-trigger>
                             <md-icon>more_vert</md-icon>
                         </md-button>
-                        <md-menu-content>
-                            <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupNotes" @click="openNotesDialog()">
+                        <ibt-menu-content>
+                            <ibt-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupNotes" @click="openNotesDialog()">
                                 <span>edit notes</span>
                                 <md-icon>edit</md-icon>
-                            </md-menu-item>
-                            <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupName" @click="openRenameGroupDialog()">
+                            </ibt-menu-item>
+                            <ibt-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupName" @click="openRenameGroupDialog()">
                                 <span>rename group</span>
                                 <md-icon>label</md-icon>
-                            </md-menu-item>
-                            <md-menu-item v-if="loggedInUser.isAdmin" @click="openDeleteGroupDialog()">
+                            </ibt-menu-item>
+                            <ibt-menu-item v-if="loggedInUser.isAdmin" @click="openDeleteGroupDialog()">
                                 <span>delete group</span>
                                 <md-icon>delete</md-icon>
-                            </md-menu-item>
-                        </md-menu-content>
+                            </ibt-menu-item>
+                        </ibt-menu-content>
                     </md-menu>
                 </md-layout>
                 <md-layout v-if="group.notes" md-row>
                     <md-tooltip md-direction="top">click to expande/collapse notes</md-tooltip>
-                    <vue-markdown ref="groupNotes" @click.native="toggleNotes()" class="group-notes" :source="group.notes" :break="false"></vue-markdown>
+                    <vue-markdown ref="groupNotes" @click="toggleNotes()" class="group-notes" :source="group.notes" :break="false"></vue-markdown>
                 </md-layout>
             </md-card-header>
             <md-card-content class="group-card">
                 <md-list md-dense>
-                    <attendee v-for="attendee in group.attendees || []" :attendee="attendee" :key="attendee.name" @updated="reload" />
+                    <attendee v-for="attendee in group.attendees || []" :attendee="attendee" :key="attendee._id" @updated="reload" />
                     <md-list-item class="attendee-add">
                         <md-icon @click.native="addAttendee(group.group)" :class="{'md-primary': hasFocus}">person_add</md-icon>
                         <md-input-container class="new-attendee">
@@ -54,8 +54,9 @@
             <md-card-header ref="currentGroup" class="new-group-header">
                 <div class="md-title group-title">
                     <md-input-container class="new-group">
-                        <label class="new-group-label"><i>new group</i></label>
-                        <md-icon>create_new_folder</md-icon>&nbsp;&nbsp;<md-input ref="newGroup" v-model="newGroup" @keyup.enter.native="focusToNewAttendee()" class="group-add-name" />
+                        <md-icon>create_new_folder</md-icon>
+                        <label><i>new group</i></label>
+                        <md-input @keyup.enter.native="focusToNewAttendee()" ref="newGroup" v-model="newGroup" class="group-add-name" />
                     </md-input-container>
                 </div>
             </md-card-header>
@@ -108,6 +109,8 @@
 
 import Attendee from './Attendee';
 import IbtDialog from './IbtDialog.vue';
+import IbtMenuItem from './IbtMenuItem.vue';
+import IbtMenuContent from './IbtMenuContent.vue';
 import VueMarkdown from './VueMarkdown.vue';
 
 export default {
@@ -273,7 +276,7 @@ export default {
         }
     },
 
-    components: { Attendee, IbtDialog, VueMarkdown }
+    components: { IbtMenuContent, IbtMenuItem, Attendee, IbtDialog, VueMarkdown }
 };
 
 </script>
@@ -281,8 +284,10 @@ export default {
 
 .group-layout {
     padding: 10px;
-    min-width: 280px;
+    min-width: 0;
+    max-width: 100%;
     flex: 1 1 320px;
+    align-self: flex-start;
 }
 
 .group-layout > .md-card {
@@ -319,11 +324,12 @@ export default {
 }
 
 .group-icon {
+    margin: 0;
     vertical-align: text-top;
 }
 
 .new-group {
-    min-width: 250px;
+    min-width: 0;
 }
 
 .new-group-header i:after {
@@ -342,25 +348,18 @@ export default {
 }
 
 .new-attendee {
-    width: 50px;
+    flex: 1;
+    min-width: 0;
     margin-bottom: 0;
 }
 
 .attendee-notes-container {
-    max-width: 170px;
-    margin-left: 60px;
+    width: calc(100% - 40px);
+    margin-left: 40px;
 }
 
 .group-card {
     padding: 10px 14px 14px;
-}
-
-.new-group-label {
-    left: 30px;
-}
-
-.group-add-name {
-    margin-left: 0 !important;
 }
 
 </style>
@@ -378,15 +377,20 @@ export default {
     color: rgba(15, 23, 42, 0.7);
 }
 
+.attendee-add .md-list-item-container > .md-icon:first-child {
+    margin-right: 16px;
+    cursor: pointer;
+}
+
 .attendee-add .md-icon {
     transition: color 0.2s ease;
     color: #4338ca;
 }
 
 .attendee-add .md-list-item-container {
-    padding-left: 0 !important;
+    padding: 0 !important;
     margin-left: 0;
-    max-width: 300px;
+    width: 100%;
     border-radius: 12px;
 }
 

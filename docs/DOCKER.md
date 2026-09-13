@@ -1,14 +1,51 @@
-# Docker container
+# Docker Compose
 
-ibt2 requires MongoDB to run.
+ibt2 requires MongoDB. The repository's `docker-compose.yml` defines both services and a persistent MongoDB volume.
 
-You can use docker-compose.yml to have a complete environment. Run: `docker-compose up --build`
+## Start and stop
 
-The data is stored in the *ibt2_data* volume: do not cancel it.
+From the repository root, build and start the stack:
 
-In the *docker-tools* directory there is a set of tools to build and run another container to dump and restore the database; you need the docker-compose running, to execute them. From that directory you can:
+```sh
+docker compose up --build
+```
 
-- **dump.sh**: dump the current database in a file like *ibt2-dump-2017-11-28T21:57:43.tgz*
-- **restore.sh**: *ibt2-dump-2017-11-28T21:57:43.tgz*: restore the given dump. Notice that the current database is completely removed, so DO NOT restore a dump if you don't have a backup of the current data
-- **shell.sh**: open a shell for the database
+Open [http://localhost:3000/](http://localhost:3000/). Add `-d` to run the services in the background, view logs with `docker compose logs -f`, and stop the services with:
 
+```sh
+docker compose down
+```
+
+The MongoDB data is stored in the Compose `data` volume (named `ibt2_data` by default). Do not run `docker compose down --volumes` unless you intentionally want to delete all stored attendance data.
+
+## Initial administrator password
+
+Before the first start, set the `--admin_password` argument in the `ibt2` service's `command` in `docker-compose.yml`. For example:
+
+```yaml
+services:
+  ibt2:
+    command: ["--admin_password=choose-a-strong-password"]
+```
+
+The image already supplies the server command, so Compose passes this value as an argument to ibt2. Remove the command after the administrator account has been created; changing it later does not change an existing password.
+
+If no password is supplied, ibt2 generates one and writes it to the server logs on first start. Retrieve it with `docker compose logs ibt2`.
+
+## Database maintenance
+
+The scripts in `docker-tools/` are legacy helpers that assume old Compose-generated network and container names. Use the running `mongo` service instead.
+
+Create an archive backup from the repository root:
+
+```sh
+docker compose exec -T mongo mongodump --archive --db=ibt2 > ibt2-backup.archive
+```
+
+Restore that archive with:
+
+```sh
+docker compose exec -T mongo mongorestore --archive --drop --db=ibt2 < ibt2-backup.archive
+```
+
+Restoring replaces the current `ibt2` database. Always create and verify a backup before restoring it.

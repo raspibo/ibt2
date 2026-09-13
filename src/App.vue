@@ -13,12 +13,12 @@
                                 <md-button class="md-icon-button" md-menu-trigger>
                                     <md-icon>more_vert</md-icon>
                                 </md-button>
-                                <md-menu-content>
-                                    <md-menu-item v-if="loggedInUser.isAdmin || !settings.protectDayNotes" @click="openNotesDialog()">
+                                <ibt-menu-content>
+                                    <ibt-menu-item v-if="loggedInUser.isAdmin || !settings.protectDayNotes" @click="openNotesDialog()">
                                         <span>edit notes</span>
                                         <md-icon>edit</md-icon>
-                                    </md-menu-item>
-                                </md-menu-content>
+                                    </ibt-menu-item>
+                                </ibt-menu-content>
                             </md-menu>
                         </md-layout>
                     </md-card-header>
@@ -30,7 +30,7 @@
             <md-layout id="panel" md-column>
                 <md-layout md-row>
                     <group v-for="group in day.groups || []" :group="group" :day="day.day" :key="group.group" new-attendee="" @updated="reload" />
-                    <group :add-new-group="true" :day="day.day" new-attendee="" new-group="" @updated="reload" />
+                    <group key="__new_group__" :add-new-group="true" :day="day.day" new-attendee="" new-group="" @updated="reload" />
                 </md-layout>
             </md-layout>
         </md-layout>
@@ -51,6 +51,8 @@
 import Datepicker from 'vuejs-datepicker';
 import Group from './Group';
 import IbtDialog from './IbtDialog.vue';
+import IbtMenuItem from './IbtMenuItem.vue';
+import IbtMenuContent from './IbtMenuContent.vue';
 import VueMarkdown from './VueMarkdown.vue';
 
 export default {
@@ -224,7 +226,7 @@ export default {
         }
     },
 
-    components: { Datepicker, Group, IbtDialog, VueMarkdown }
+    components: { IbtMenuContent, IbtMenuItem, Datepicker, Group, IbtDialog, VueMarkdown }
 }
 
 </script>
@@ -240,7 +242,8 @@ export default {
 }
 
 #datepicker-column {
-    min-width: 320px;
+    min-width: 0;
+    flex: 0 0 320px;
     max-width: 360px;
     gap: 18px;
 }
@@ -260,11 +263,13 @@ export default {
 }
 
 #panel {
+    min-width: 0;
     gap: 12px;
 }
 
-#panel .md-layout {
+#panel > .md-layout {
     flex: initial;
+    align-items: flex-start;
     gap: 16px;
 }
 
@@ -304,7 +309,31 @@ export default {
 }
 
 .day-icon {
+    margin: 0;
     vertical-align: text-top;
+}
+
+@media screen and (max-width: 944px) {
+    #datepicker-column {
+        flex: 1 1 100%;
+        max-width: none;
+        margin-bottom: 18px;
+        justify-content: center;
+    }
+
+    #panel {
+        flex: 1 1 100%;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    #main-attendees {
+        padding: 18px 10px 24px;
+    }
+
+    .vdp-datepicker {
+        padding: 5px;
+    }
 }
 
 </style>

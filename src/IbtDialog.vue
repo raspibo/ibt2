@@ -1,5 +1,6 @@
 <template>
-    <md-dialog-alert :md-content="dialog.text" :md-ok-text="dialog.ok" ref="ibtDialogObj" />
+    <!-- Material moves the dialog to document.body; keep a stable Vue 3 anchor. -->
+    <span><md-dialog-alert :md-content="dialog.text" :md-ok-text="dialog.ok" ref="ibtDialogObj" /></span>
 </template>
 <script>
 

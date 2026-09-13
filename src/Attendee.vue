@@ -3,9 +3,9 @@
         <md-icon>person</md-icon>
         <div v-if="!edit" class="md-list-text-container">
             <span>{{ attendee.name }}</span>
-            <vue-markdown v-if="attendee.notes" ref="attendeeNotes" @click.native="toggleNotes()" class="attendee-notes" :source="attendee.notes" :break="false"></vue-markdown>
+            <vue-markdown v-if="attendee.notes" ref="attendeeNotes" @click="toggleNotes()" class="attendee-notes" :source="attendee.notes" :break="false"></vue-markdown>
         </div>
-        <div v-if="edit">
+        <div v-if="edit" class="attendee-editor">
             <md-input-container md-inline>
                 <md-input @keyup.enter.native="updateAttendee()" @keydown.esc.native="edit = false" v-model="attendee.name" ref="updateAttendeeName" />
             </md-input-container>
@@ -21,16 +21,16 @@
             <md-button class="md-icon-button" md-menu-trigger>
                 <md-icon>more_vert</md-icon>
             </md-button>
-            <md-menu-content>
-                <md-menu-item @click.native="editAttendee()">
+            <ibt-menu-content>
+                <ibt-menu-item @click="editAttendee()">
                     <span>edit</span>
                     <md-icon>edit</md-icon>
-                </md-menu-item>
-                <md-menu-item @click.native="deleteAttendee()">
+                </ibt-menu-item>
+                <ibt-menu-item @click="deleteAttendee()">
                     <span>delete</span>
                     <md-icon>delete</md-icon>
-                </md-menu-item>
-            </md-menu-content>
+                </ibt-menu-item>
+            </ibt-menu-content>
         </md-menu>
         <ibt-dialog ref="dialogObj" />
     </md-list-item>
@@ -38,6 +38,8 @@
 <script>
 
 import IbtDialog from './IbtDialog.vue';
+import IbtMenuItem from './IbtMenuItem.vue';
+import IbtMenuContent from './IbtMenuContent.vue';
 import VueMarkdown from './VueMarkdown.vue';
 
 export default {
@@ -70,11 +72,7 @@ export default {
 
         editAttendee() {
             this.edit = true;
-            // FIXME: it's so wrong it hurts, but any other attempt to set the focus
-            // failed, being called too early.  Also, I don't know how I can access
-            // Vue.nextTick from here.
-            var that = this;
-            setTimeout(function() { that.$refs.updateAttendeeName.$el.focus(); }, 400);
+            this.$nextTick(() => this.$refs.updateAttendeeName.$el.focus());
         },
 
         updateAttendee() {
@@ -115,15 +113,20 @@ export default {
         }
     },
 
-    components: { IbtDialog, VueMarkdown }
+    components: { IbtMenuContent, IbtMenuItem, IbtDialog, VueMarkdown }
 };
 
 </script>
 <style scoped>
 
 .attendee-list-item {
-    min-width: 250px;
+    min-width: 0;
     margin-bottom: 8px;
+}
+
+.attendee-editor {
+    flex: 1;
+    min-width: 0;
 }
 
 .attendee-notes {
@@ -132,7 +135,7 @@ export default {
 
 .notes-editor-list-item {
     margin-bottom: 0 !important;
-    padding-left: 16px;
+    padding-left: 0;
 }
 
 .notes-editor-list-item ul {

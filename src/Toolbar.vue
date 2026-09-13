@@ -202,6 +202,7 @@ export default {
 #toolbar {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     padding: 10px 18px;
     background: linear-gradient(135deg, #1e293b 0%, #312e81 28%, #4338ca 100%);
     box-shadow: 0 12px 28px rgba(79, 70, 229, 0.2);
@@ -212,7 +213,7 @@ export default {
     border-radius: 12px;
 }
 
-#toolbar .md-icon-button .md-icon {
+#toolbar .md-icon-button :deep(.md-icon) {
     color: rgba(255, 255, 255, 0.9);
 }
 
@@ -291,14 +292,32 @@ export default {
     min-height: 28px;
 }
 
-#toolbar .md-input-container input,
-#toolbar .md-input-container label {
+#toolbar .md-input-container :deep(input),
+#toolbar .md-input-container :deep(label) {
     color: white !important;
 }
 
 #toolbar .md-input-container:after,
 #toolbar .md-input-container:before {
     background-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+#toolbar .md-has-password :deep(input) {
+    padding-right: 40px;
+}
+
+@media screen and (max-width: 600px) {
+    .button-spacer {
+        display: none;
+    }
+
+    #toolbar-title {
+        min-width: 80px;
+    }
+
+    #login-form {
+        padding-bottom: 8px;
+    }
 }
 
 </style>

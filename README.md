@@ -1,119 +1,92 @@
-# ibt2 - I'll be there, 2
+# ibt2 — I'll Be There, 2
 
-**I'll be there, 2** is an oversimplified application to register attendees at a conference or event.
+**I'll Be There, 2** is a deliberately simple application for registering attendance at a conference or other event.
 
-Basic workflow:
-- if you want (not mandatory), login with your user; to create a new user, simply choose a username and a password. Benefit of logging in: only you or admins can edit/delete your entries.
-- pick a date
-- choose the group you want to join or the name of a new group
-- write your name and, optionally, a note
-- rinse and repeat
+Typical workflow:
 
-On first startup, ibt2 creates an administrator account. Set the
-`--admin_password` option (or configure the equivalent container command)
-to choose its initial password; otherwise a random password is generated and
-written to the server log. Change it from the personal page after signing in.
-The *admin* user can change some global settings and also grant super cow powers to any other user.
+- Sign in if you want to protect the entries you create. Enter a new username and password to create an account.
+- Choose a date.
+- Select an existing group or enter the name of a new one.
+- Add your name and, optionally, a note.
 
-For the notes, you can use the [Markdown](https://daringfireball.net/projects/markdown/) syntax.
+Only an entry's owner or an administrator can edit or delete it. On first startup, ibt2 creates an `admin` account. Pass `--admin_password` (or the same container argument) to choose its initial password. Otherwise, a random password is written to the server log. Change it from the personal page after signing in.
 
+Notes support [Markdown](https://daringfireball.net/projects/markdown/).
 
-## Install, run, develop and debug
+## Run with Docker Compose
 
-## Docker
+Docker Compose is the recommended way to run ibt2. It starts ibt2 and MongoDB with persistent storage:
 
-Just run:
+```sh
+docker compose up --build
+```
 
-    docker-compose up
+Open [http://localhost:3000/](http://localhost:3000/). Stop the stack with `docker compose down`. The MongoDB data is stored in the `data` volume; do not remove that volume unless you intend to delete all attendance data.
 
+See [the Docker guide](docs/DOCKER.md) for backup, restore, and administrator-password instructions.
 
-## Old-fashioned installation
+## Run without Docker
 
-To install it:
-``` bash
-wget https://bootstrap.pypa.io/get-pip.py
-sudo python3 get-pip.py
-# if you want to install these modules for an unprivileged user, add --user and remove "sudo";
-# if you want to upgrade the versions already present in the system, also add --upgrade
-sudo pip3 install tornado
-sudo pip3 install pymongo
-git clone https://github.com/raspibo/ibt2
+You need Node.js 20.19+ (or 22.12+), Python 3, and a reachable MongoDB instance. Create a virtual environment and install the Python dependencies:
+
+```sh
+git clone https://github.com/raspibo/ibt2.git
 cd ibt2
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install tornado pymongo
+npm ci --legacy-peer-deps
 ```
 
-Installation of [Node.js](https://nodejs.org/en/download/) and npm is left as an exercise to the reader.
+Build the frontend and start the server:
 
-To run it:
-``` bash
-# install dependencies (one time only, or every time the dependencies in package.json change)
-npm install
-
-# build for production with minification (each time the sources changes)
+```sh
 npm run build
-
-# run the Python webserver at localhost:3000
-npm run server
+python ibt2.py --mongo_url=mongodb://localhost
 ```
 
-Now you can **point your browser to [http://localhost:3000/](http://localhost:3000/)** (that's the server for production)
+Then open [http://localhost:3000/](http://localhost:3000/). To enable HTTPS, place `ibt2_key.pem` and `ibt2_cert.pem` in the `ssl/` directory before starting the server.
 
-If you want, you can **share a link to a specific day**, specifying it in the *yyyy-mm-dd* format, like: http://localhost:3000/#/day/2017-01-20
+## Development
 
-You can also **run the server in https**, putting in the *ssl* directory two files named *ibt2_key.pem* and *ibt2_cert.pem*
+Install dependencies as above, then start the backend and Vite development server in separate terminals:
 
+```sh
+# Terminal 1: use the test database
+npm run devserver
+```
 
-## Run a development environment
-
-``` bash
-# install dependencies (one time only)
-npm install
-
-# run the Python web server using a testing database
-npm run devserver &
-
-# serve with hot reload at localhost:8080
+```sh
+# Terminal 2: Vite dev server at http://localhost:8080/
 npm run dev
-
-# only when the devserver is running, you can also run the testsuite
-python3 ./tests/ibt2_tests.py
 ```
 
-Your browser will automatically open [http://localhost:8080/](http://localhost:8080/) (that's the server for development)
+Run the backend tests while the development backend is running:
 
+```sh
+python3 tests/ibt2_tests.py
+```
 
-# Development
+See [the development guide](docs/DEVELOPMENT.md) and [the frontend regression-check guide](docs/UI-TESTING.md) for details.
 
-See the *docs/DEVELOPMENT.md* file for more information about how to contribute.
+## Technology
 
+- [Vue 3](https://vuejs.org/) with the Vue 2 compatibility build during the migration
+- [Vue Material](https://vuematerial.github.io/) UI components
+- [vuejs-datepicker](https://github.com/charliekassel/vuejs-datepicker)
+- [marked](https://www.npmjs.com/package/marked) for Markdown rendering
+- [Tornado](https://www.tornadoweb.org/) web server
+- [MongoDB](https://www.mongodb.com/) data store
 
-## Technological stack
+## Other projects
 
-- [VueJS](https://vuejs.org/) 2 for the webApp
-- [Vue Material](https://vuematerial.github.io/) for the UI components
-- [Vue Datepicker](https://github.com/charliekassel/vuejs-datepicker) for the datepicker
-- [Vue Markdown](https://www.npmjs.com/package/vue-markdown) for parsing the Markdown syntax
-- [Tornado web](http://www.tornadoweb.org/) as web server
-- [MongoDB](https://www.mongodb.org/) to store the data
-- [Python 3](https://www.python.org/) is required
+For a more complete event-management application with ticket support, see [EventMan(ager)](https://github.com/raspibo/eventman).
 
-The web part is incuded; you need to install Node.js, Tornado, MongoDB and the pymongo module on your system (no configuration needed).
+## License and copyright
 
+Copyright 2016–2026 Davide Alberani <da@mimante.net>, RaspiBO <info@raspibo.org>
 
-# Other projects
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
 
-Need something more sophisticated, that allows you to manage tickets to an event?  Try [EventMan(ager)](https://github.com/raspibo/eventman)
-
-
-# License and copyright
-
-Copyright 2016-2026 Davide Alberani <da@mimante.net>, RaspiBO <info@raspibo.org>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.

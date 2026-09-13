@@ -1,106 +1,77 @@
-ibt2 development
-================
+# ibt2 development
 
-Paths
-=====
+## Routes
 
-Webapp
-------
+The frontend uses hash-based client-side routing. Navigation does not make an HTTP request unless the page fetches or changes data.
 
-These are the paths you see in the browser (VueJS does client-side routing: no request is issued to the web server, during navigation, if not for fetching data and issuing commands):
+| Route | Purpose |
+| --- | --- |
+| `/#/` | Home page; redirects to the current day. |
+| `/#/day/:day` | Groups for a date in `yyyy-mm-dd` format. |
+| `/#/user/` | User list; administrators only. |
+| `/#/user/:id` | Settings for one user. |
+| `/#/settings/` | Global settings; administrators only. |
 
-- / - home; will redirect to the entry for today
-- /#/day/:day - show groups for the given date (in yyyy-mm-dd format)
-- /#/user/ - list of all users (only visible by admins)
-- /#/user/:id - show setting for the give user ID
-- /#/settings - global setting (only visible by admins)
+## HTTP API
 
-Web server
-----------
+| Endpoint | Methods | Purpose |
+| --- | --- | --- |
+| `/attendees` | `GET`, `POST` | List or create attendees. |
+| `/attendees/:id` | `GET`, `PUT`, `DELETE` | Read, update, or delete one attendee. |
+| `/days` | `GET` | List entries grouped by day and group. |
+| `/days/:day` | `GET` | Read one day's entries, grouped by group. |
+| `/days/:day/info` | `PUT` | Create or update a day's information. |
+| `/days/:day/groups/:group` | `PUT`, `DELETE` | Rename or delete a group. `PUT` accepts `newName`. |
+| `/days/:day/groups/:group/info` | `PUT` | Create or update group information. |
+| `/users` | `GET`, `POST` | List or create users. |
+| `/users/:id` | `GET`, `PUT` | Read or update a user. |
+| `/users/current` | `GET` | Read the currently signed-in user. |
+| `/settings` | `GET`, `POST`, `PUT` | Read, create, or update global settings. |
+| `/login` | `POST` | Sign in. |
+| `/logout` | `GET` | Sign out. |
 
-- /attendees GET - the list of all entries
-- /attendees POST - write a new entry
-- /attendees/:id GET - a single entry
-- /attendees/:id PUT - update an entry
-- /attendees/:id DELETE - delete an entry
-- /days GET - all entries, grouped by day and by group
-- /days/:day GET - a single day entries, grouped by group (yyyy-mm-dd format)
-- /days/:day/info PUT - write or update information about a day
-- /days/:day/groups/:group PUT - used to rename a group (with the newName key)
-- /days/:day/groups/:group DELETE - delete a group
-- /days/:day/groups/:group/info PUT - write or update information about a group (the :group key is its name)
-- /users GET - list of all users
-- /users POST - create a new user
-- /users/:id GET - a single user
-- /users/:id PUT - update a user
-- /users/current GET - information about the currently logged in user
-- /settings GET - get all global settings
-- /settings POST and PUT - add one or more new settings, or update existing ones
-- /login POST - login of a user
-- /logout GET - log the current user out
+Example attendee response:
 
-Example of */attendees/:id*:
-``` json
-{"day": "2017-01-20", "name": "Attendee Name", "group": "Group Name", "updated_by": "587a7c79dff0d71c89211dc4", "created_at": "2017-01-20 13:57:26.029000", "updated_at": "2017-01-20 13:57:26.029000", "created_by": "587a7c79dff0d71c89211dc4", "_id": "58820936dff0d740dee647a4"}
+```json
+{"day":"2017-01-20","name":"Attendee Name","group":"Group Name","updated_by":"587a7c79dff0d71c89211dc4","created_at":"2017-01-20 13:57:26.029000","updated_at":"2017-01-20 13:57:26.029000","created_by":"587a7c79dff0d71c89211dc4","_id":"58820936dff0d740dee647a4"}
 ```
 
-Example of */days/:day*:
-``` json
-{"day": "2017-01-20", "groups": [{"group": "Group Name", "attendees": [{"day": "2017-01-20", "name": "Attendee Name", "group": "Group Name", "updated_by": "587a7c79dff0d71c89211dc4", "created_at": "2017-01-20 13:57:26.029000", "updated_at": "2017-01-20 13:57:26.029000", "created_by": "587a7c79dff0d71c89211dc4", "_id": "58820936dff0d740dee647a4"}]}]}
+Example day response:
+
+```json
+{"day":"2017-01-20","groups":[{"group":"Group Name","attendees":[{"day":"2017-01-20","name":"Attendee Name","group":"Group Name","updated_by":"587a7c79dff0d71c89211dc4","created_at":"2017-01-20 13:57:26.029000","updated_at":"2017-01-20 13:57:26.029000","created_by":"587a7c79dff0d71c89211dc4","_id":"58820936dff0d740dee647a4"}]}]}
 ```
 
+## Project layout
 
-Database layout
-===============
+```text
+ibt2.py          Tornado web server
+index.html       HTML entry point
+vite.config.mjs  Vite configuration
+monco.py         MongoDB connector
+utils.py         Shared utilities
+dist/            Production build output
+src/             Frontend source
+  main.js        Frontend entry point
+  App.vue        Main component
+  *.vue          Other frontend components
+  store.js       Shared frontend state
+```
 
-Information are stored in MongoDB.  The *_id* key values are converted into native ObjectId.
+## Style
 
-The main information are stored in the *attendees* collection.
+Follow the style of the file you are changing. Use four spaces rather than tabs for Python (required), JavaScript, HTML, and CSS. Python docstrings use [Sphinx](https://www.sphinx-doc.org/) field-list syntax.
 
+## FAQ
 
-Code layout
-===========
+**Why is the backend not written in Node.js?**
 
-The code is so divided:
+Because the original Tornado backend already existed and remains a good fit for this small service.
 
-    +- ibt2.py - the Tornado Web server
-    +- index.html - the html page that will be injected with the webApp
-    +- vite.config.js - Vite build tool configuration
-    +- monco.py - backend to connect to a MongoDB instance
-    +- utils.py - various utilities
-    +- dist/ - output of the build command will be put here
-    +- src/ - webApp sources
-       |
-       +- main.js - kickoff the VueJS webApp
-       +- App.vue - main component of the webApp
-       +- *.vue - other webApp components
-       +- store.js - shared state of the webApp
+**What are `.vue` files?**
 
+They are [Vue single-file components](https://vuejs.org/guide/scaling-up/sfc.html). Vite compiles them for the browser.
 
-Coding style and conventions
-----------------------------
+**I added a backend route and the Vite development server cannot reach it.**
 
-It's enough to be consistent within the document you're editing.
-
-I suggest four spaces instead of tabs for all the code: Python (**mandatory**), JavaScript, HTML and CSS.
-
-Python code documented following the [Sphinx](http://sphinx-doc.org/) syntax.
-
-
-not-so-FAQs
-===========
-
-
-- **Q:** why the backend is not in Node.js? Why?! WHYYY!?!!?!
-- **A:** because science! (but mostly because I already had most of it ready from other projects)
-
-
-- **Q:** *.vue* files? What's that?
-- **A:** Vue [single-file components](https://vuejs.org/v2/guide/single-file-components.html); [Vite](https://vitejs.dev/) will take care of translating them into stuff that can be digested by a browser.
-
-- **Q:** I've added a new path to the backend, and now the hot reload server is not working!!1!!
-- **A:** that's not even a question.  Anyway, add the path to server.proxy in *vite.config.js*
-
-
-- **Q:** will it be integrated with Slack?
-- **A:** hell, no.
+Add the route to `server.proxy` in `vite.config.mjs`.
