@@ -278,7 +278,7 @@ export default {
     padding: 10px;
     min-width: 0;
     max-width: 100%;
-    flex: 1 1 320px;
+    flex: 0 1 320px;
     align-self: flex-start;
 }
 

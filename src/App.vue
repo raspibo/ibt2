@@ -227,6 +227,10 @@ export default {
     padding: 24px 20px 36px;
 }
 
+#main-attendees > .ibt-layout {
+    align-items: flex-start;
+}
+
 #datepicker-column {
     min-width: 0;
     flex: 0 0 320px;
@@ -242,6 +246,7 @@ export default {
 
 #panel {
     min-width: 0;
+    flex: 1 1 0;
     gap: 12px;
 }
 
