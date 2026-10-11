@@ -2,6 +2,17 @@
 
 ibt2 requires MongoDB. The repository's `docker-compose.yml` defines both services and a persistent MongoDB volume.
 
+The Dockerfile builds the frontend in a Node.js stage and copies its production
+assets into a Python 3.11 runtime image. The final image contains the backend,
+locked Python dependencies, and built frontend; Node.js, npm, and frontend source
+remain in the build stage. Rebuild the image after changing application code or
+dependency locks.
+
+For HTTPS, mount your certificate and key into `/ibt2/ssl/ibt2_cert.pem` and
+`/ibt2/ssl/ibt2_key.pem`, respectively, using read-only bind mounts. Certificates
+and keys are not copied into the image. The `--ssl_cert` and `--ssl_key` arguments
+can select other mounted paths.
+
 ## Start and stop
 
 From the repository root, build and start the stack:
