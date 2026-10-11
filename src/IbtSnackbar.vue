@@ -1,32 +1,18 @@
 <template>
-    <md-snackbar md-position="top center" ref="snackbar">
-        <span>{{ snackbackMessage }}</span>
-        <md-button class="md-icon-button snackbar-close" @click="$refs.snackbar.close()">
-            <md-icon>close</md-icon>
-        </md-button>
-    </md-snackbar>
+    <Teleport to="body">
+        <Message v-if="visible" :key="serial" class="ibt-snackbar" closable severity="success"
+                 :life="4000" @close="visible = false" @life-end="visible = false">
+            {{ message }}
+        </Message>
+    </Teleport>
 </template>
 <script>
-
+import Message from 'primevue/message';
 export default {
-    data: function() {
-        return {snackbackMessage: 'something happened'};
-    },
-
+    components: { Message },
+    data: () => ({ visible: false, message: '', serial: 0 }),
     methods: {
-        show(message) {
-            this.snackbackMessage = message || snackbackMessage;
-            this.$refs.snackbar.open();
-        }
-    }
-}
-
+        show(message = 'Something happened') { this.message = message; this.serial++; this.visible = true; },
+    },
+};
 </script>
-<style scoped>
-
-.snackbar-close {
-    font-weight: bold;
-    color: #f6f72f;
-}
-
-</style>

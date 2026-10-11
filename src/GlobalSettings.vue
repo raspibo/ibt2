@@ -1,50 +1,51 @@
 <template>
     <div id="settings">
-        <md-card>
-            <md-card-header>
-                <span class="md-title">Settings</span>
-            </md-card-header>
-            <md-card-content v-if="loggedInUser.isAdmin">
-                <div class="md-headline">
+        <article class="ibt-card">
+            <header class="ibt-card-header">
+                <span class="ibt-title">Settings</span>
+            </header>
+            <div v-if="loggedInUser.isAdmin" class="ibt-card-content">
+                <div class="ibt-headline">
                     Prevent modifications from unregistered users:
                 </div>
                 <div class="protection-sect">
-                    <md-switch v-model="shownSettings.protectUnregistered" class="md-warn">unregistered attendees (modify and delete)</md-switch>
+                    <label class="setting-switch"><ToggleSwitch v-model="shownSettings.protectUnregistered" /><span>unregistered attendees (modify and delete)</span></label>
 
                     <br />
-                    <md-switch v-model="shownSettings.protectGroupNotes" class="md-warn">group notes</md-switch>
+                    <label class="setting-switch"><ToggleSwitch v-model="shownSettings.protectGroupNotes" /><span>group notes</span></label>
 
                     <br />
-                    <md-switch v-model="shownSettings.protectGroupName" class="md-warn">group name</md-switch>
+                    <label class="setting-switch"><ToggleSwitch v-model="shownSettings.protectGroupName" /><span>group name</span></label>
 
                     <br />
-                    <md-switch v-model="shownSettings.protectDayNotes" class="md-warn">day notes</md-switch>
+                    <label class="setting-switch"><ToggleSwitch v-model="shownSettings.protectDayNotes" /><span>day notes</span></label>
 
                 </div>
 
                 <br />
-                <div class="md-headline">
+                <div class="ibt-headline">
                     Message of the day
                 </div>
-                <md-switch v-model="shownSettings.showMotd" class="md-warn">show motd</md-switch>
+                <label class="setting-switch"><ToggleSwitch v-model="shownSettings.showMotd" /><span>show motd</span></label>
 
-                <md-input-container v-if="shownSettings.showMotd">
-                    <label>message</label>
-                    <md-textarea v-model="shownSettings.motd"></md-textarea>
-                </md-input-container>
+                <label v-if="shownSettings.showMotd" class="ibt-input-container">
+                    <span class="field-label">message</span>
+                    <Textarea v-model="shownSettings.motd"></Textarea>
+                </label>
 
                 <br />
-                <md-button id="save-button" class="md-raised md-primary" @click="save()">Save</md-button>
-            </md-card-content>
-            <md-card-content v-else>
+                <Button id="save-button" class="ibt-raised ibt-primary" @click="save()">Save</Button>
+            </div>
+            <div v-else class="ibt-card-content">
                 Only admin are allowed to change global settings.
-            </md-card-content>
-        </md-card>
+            </div>
+        </article>
         <ibt-dialog ref="dialogObj" />
         <ibt-snackbar ref="snackbarObj" />
     </div>
 </template>
 <script>
+import { resource } from './api.js';
 
 import IbtDialog from './IbtDialog.vue';
 import IbtSnackbar from './IbtSnackbar.vue';
@@ -62,7 +63,7 @@ export default {
     },
 
     beforeCreate: function() {
-        this.settingsUrl = this.$resource('settings');
+        this.settingsUrl = resource('settings');
     },
 
     mounted: function() {
@@ -75,22 +76,20 @@ export default {
             // near the store.
             this.settingsUrl.get().then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to fetch settings'});
             }).then((json) => {
                 if (!json || json.error) {
                     this.$refs.dialogObj.show({text: 'unable to fetch settings: ' + ((json && json.message) || '')});
                 } else {
                     this.$store.commit('updateSettings', json);
                 }
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to fetch settings'});
             });
         },
 
         save() {
             this.settingsUrl.save(this.shownSettings).then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to update settings'});
             }).then((json) => {
                 if (!json || json.error) {
                     this.$refs.dialogObj.show({text: 'unable to update settings: ' + (json && json.message) || ''});
@@ -98,6 +97,8 @@ export default {
                     this.fetchSettings();
                     this.$refs.snackbarObj.show('settings saved');
                 }
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to update settings'});
             });
         }
     },

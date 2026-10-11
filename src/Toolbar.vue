@@ -1,65 +1,66 @@
 <template>
     <div>
-        <md-toolbar id="toolbar" class="md-dense">
+        <div id="toolbar" class="ibt-toolbar ibt-dense">
             <span v-if="currentPath != 'home' && currentPath != 'day' && currentPath != 'days'">
-                <md-button class="md-icon-button" @click="goBack()">
-                    <md-tooltip md-direction="right">back</md-tooltip>
-                    <md-icon>backspace</md-icon>&nbsp;
-                </md-button>
+                <Button text aria-label="Back" class="ibt-icon-button" @click="goBack()">
+
+                    <i class="ibt-icon pi pi-arrow-left" aria-hidden="true"></i>&nbsp;
+                </Button>
             </span>
             <span v-else class="button-spacer">&nbsp;</span>
-            <h2 id="toolbar-title" class="md-title">
+            <h2 id="toolbar-title" class="ibt-title">
                 <router-link :to="{name: 'home'}" class="home-link">ibt2</router-link>
             </h2>
             <span v-if="loggedInUser.username">
-                <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toSettingsPage()">
-                    <md-tooltip md-direction="left">global settings</md-tooltip>
-                    <md-icon>settings</md-icon>
-                </md-button>
-                <md-button v-if="loggedInUser.isAdmin" id="users-icon" class="md-icon-button" @click="toUsersPage()">
-                    <md-tooltip md-direction="left">list of users</md-tooltip>
-                    <md-icon>people_outline</md-icon>
-                </md-button>
-                <md-button id="logged-in-icon" class="md-icon-button" @click="toUserPage()">
-                    <md-tooltip md-direction="left">personal page</md-tooltip>
-                    <md-icon>person_pin</md-icon>
-                </md-button>
-                <span id="logged-in" class="md-subheading">
+                <Button text v-if="loggedInUser.isAdmin" id="settings-icon" aria-label="Global settings" class="ibt-icon-button" @click="toSettingsPage()">
+
+                    <i class="ibt-icon pi pi-cog" aria-hidden="true"></i>
+                </Button>
+                <Button text v-if="loggedInUser.isAdmin" id="users-icon" aria-label="Users" class="ibt-icon-button" @click="toUsersPage()">
+
+                    <i class="ibt-icon pi pi-users" aria-hidden="true"></i>
+                </Button>
+                <Button text id="logged-in-icon" aria-label="Personal page" class="ibt-icon-button" @click="toUserPage()">
+
+                    <i class="ibt-icon pi pi-user" aria-hidden="true"></i>
+                </Button>
+                <span id="logged-in" class="ibt-subheading">
                     <router-link :to="userUrl" class="username-link">{{ loggedInUser.username }}</router-link>
                 </span>
-                <md-button id="logout-icon" class="md-icon-button" @click="logout()">
-                    <md-tooltip md-direction="left">logout</md-tooltip>
-                    <md-icon>exit_to_app</md-icon>
-                </md-button>
+                <Button text id="logout-icon" aria-label="Logout" class="ibt-icon-button" @click="logout()">
+
+                    <i class="ibt-icon pi pi-sign-out" aria-hidden="true"></i>
+                </Button>
             </span>
             <span v-else>
                 <span id="login-form">
                     <span id="username-input">
                         <strong id="login-label">Login:</strong>&nbsp;
-                        <md-input-container id="username-input-container" class="login-input" md-inline>
-                            <md-tooltip md-direction="bottom">login name or create a new user if it doesn't exist</md-tooltip>
-                            <md-input ref="usernameInput" @keyup.enter.native="focusToPassword()" v-model="username" placeholder="username" md-inline  autocorrect="off" autocapitalize="none" />
-                        </md-input-container>&nbsp;
+                        <label id="username-input-container" class="ibt-input-container login-input">
+
+                            <InputText ref="usernameInput" aria-label="Username" @keyup.enter="focusToPassword()" v-model="username" placeholder="username"  autocorrect="off" autocapitalize="none" />
+                        </label>&nbsp;
                     </span>
                     <span id="password-block">
-                        <md-input-container id="password-input" class="login-input" md-has-password md-inline>
-                        <md-tooltip md-direction="bottom">login password or create a new user if it doesn't exist</md-tooltip>
-                            <md-input ref="passwordInput" @keyup.enter.native="login()" v-model="password" placeholder="password" type="password" md-line />
-                        </md-input-container>
-                        <md-button id="login-button" class="md-icon-button" @click="login()">
-                            <md-tooltip md-direction="left">login or create a new user if it doesn't exist</md-tooltip>
-                            <md-icon>play_circle_outline</md-icon>
-                        </md-button>
+                        <label id="password-input" class="ibt-input-container login-input">
+
+                            <Password ref="passwordInput" aria-label="Password" :input-props="{ onKeyup: passwordKeyup }" v-model="password" placeholder="password" toggle-mask :feedback="false" />
+                        </label>
+                        <Button text id="login-button" aria-label="Login" class="ibt-icon-button" @click="login()">
+
+                            <i class="ibt-icon pi pi-sign-in" aria-hidden="true"></i>
+                        </Button>
                     </span>
                 </span>
             </span>
             <ibt-snackbar ref="snackbarObj" />
             <ibt-dialog ref="dialogObj" />
-        </md-toolbar>
+        </div>
         <vue-markdown v-if="settings.showMotd && settings.motd" class="motd" :source="settings.motd"></vue-markdown>
     </div>
 </template>
 <script>
+import { resource } from './api.js';
 
 import VueMarkdown from './VueMarkdown.vue';
 import IbtDialog from './IbtDialog.vue';
@@ -100,10 +101,10 @@ export default {
     },
 
     beforeCreate: function() {
-        this.usersUrl = this.$resource('users');
-        this.currentUserUrl = this.$resource('users/current');
-        this.loginUrl = this.$resource('login');
-        this.logoutUrl = this.$resource('logout');
+        this.usersUrl = resource('users');
+        this.currentUserUrl = resource('users/current');
+        this.loginUrl = resource('login');
+        this.logoutUrl = resource('logout');
     },
 
     mounted: function() {
@@ -128,7 +129,11 @@ export default {
         },
 
         focusToPassword() {
-            this.$refs.passwordInput.$el.focus();
+            this.$refs.passwordInput.$el.querySelector('input').focus();
+        },
+
+        passwordKeyup(event) {
+            if (event.key === 'Enter') this.login();
         },
 
         login(opt) {
@@ -136,7 +141,9 @@ export default {
             var user_data = {username: this.username, password: this.password};
             this.loginUrl.save(user_data).then((response) => {
                 return response.json();
-            }, (response) => {
+            }).then((data) => {
+                this.getUserInfo();
+            }).catch((response) => {
                 // Unable to login? Let's try to create the user!
                 if (response.status == 401) {
                     if (opt.stopHere) {
@@ -144,20 +151,22 @@ export default {
                     } else {
                         this.createUser(user_data);
                     }
+                } else {
+                    this.$refs.dialogObj.show({text: 'unable to sign in'});
                 }
-            }).then((data) => {
-                this.getUserInfo();
             });
         },
 
         logout() {
             this.logoutUrl.get().then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'failed to logout'});
             }).then((json) => {
                 this.$store.commit('clearLoggedInUser');
+                this.username = '';
+                this.password = '';
                 this.$refs.snackbarObj.show('logged out');
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'failed to logout'});
             });
         },
 
@@ -166,9 +175,10 @@ export default {
             user_data.password = user_data.password || this.password;
             this.usersUrl.save(user_data).then((response) => {
                 return response.json();
-            }, (response) => {
             }).then((json) => {
                 this.login({stopHere: true});
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to create the user'});
             });
 
         },
@@ -176,14 +186,14 @@ export default {
         getUserInfo(callback) {
             this.currentUserUrl.get().then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to get user info'});
             }).then((data) => {
                 data = data || {};
                 this.$store.commit('setLoggedInUser', data);
                 if (callback) {
                     callback(data);
                 }
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to get user info'});
             });
         }
     },
@@ -209,11 +219,11 @@ export default {
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-#toolbar .md-button {
+#toolbar .ibt-button {
     border-radius: 12px;
 }
 
-#toolbar .md-icon-button :deep(.md-icon) {
+#toolbar .ibt-icon-button :deep(.ibt-icon) {
     color: rgba(255, 255, 255, 0.9);
 }
 
@@ -288,22 +298,8 @@ export default {
     color: white !important;
 }
 
-#toolbar .md-input-container {
+#toolbar .ibt-input-container {
     min-height: 28px;
-}
-
-#toolbar .md-input-container :deep(input),
-#toolbar .md-input-container :deep(label) {
-    color: white !important;
-}
-
-#toolbar .md-input-container:after,
-#toolbar .md-input-container:before {
-    background-color: rgba(255, 255, 255, 0.55) !important;
-}
-
-#toolbar .md-has-password :deep(input) {
-    padding-right: 40px;
 }
 
 @media screen and (max-width: 600px) {

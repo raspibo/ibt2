@@ -1,120 +1,105 @@
 <template>
     <!-- XXX: too much duplication in this template -->
-    <md-layout class="group-layout" md-col gutter="120" md-align="start">
-        <md-card v-if="!addNewGroup" md-with-hover @mouseenter.native="focusToNewAttendee()" @mouseleave.native="hasFocus = false">
-            <md-card-header ref="currentGroup" class="group-header">
-                <md-layout md-row>
-                    <div class="md-title group-title">
-                        <md-icon class="group-icon">folder_open</md-icon>&nbsp;{{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
+    <div class="ibt-layout layout-column group-layout">
+        <article v-if="!addNewGroup" @mouseenter="focusToNewAttendee()" @mouseleave="hasFocus = false" class="ibt-card">
+            <header ref="currentGroup" class="ibt-card-header group-header">
+                <div class="ibt-layout layout-row">
+                    <div class="ibt-title group-title">
+                        <i class="ibt-icon pi pi-folder-open group-icon" aria-hidden="true"></i>&nbsp;{{ group.group }}&nbsp;<span class="counter">{{ counter }}</span>
                     </div>
-                    <md-menu v-if="loggedInUser.isAdmin || !settings.protectGroupNotes || !settings.protectGroupName" md-align-trigger>
-                        <md-button class="md-icon-button" md-menu-trigger>
-                            <md-icon>more_vert</md-icon>
-                        </md-button>
-                        <ibt-menu-content>
-                            <ibt-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupNotes" @click="openNotesDialog()">
-                                <span>edit notes</span>
-                                <md-icon>edit</md-icon>
-                            </ibt-menu-item>
-                            <ibt-menu-item v-if="loggedInUser.isAdmin || !settings.protectGroupName" @click="openRenameGroupDialog()">
-                                <span>rename group</span>
-                                <md-icon>label</md-icon>
-                            </ibt-menu-item>
-                            <ibt-menu-item v-if="loggedInUser.isAdmin" @click="openDeleteGroupDialog()">
-                                <span>delete group</span>
-                                <md-icon>delete</md-icon>
-                            </ibt-menu-item>
-                        </ibt-menu-content>
-                    </md-menu>
-                </md-layout>
-                <md-layout v-if="group.notes" md-row>
-                    <md-tooltip md-direction="top">click to expande/collapse notes</md-tooltip>
-                    <vue-markdown ref="groupNotes" @click="toggleNotes()" class="group-notes" :source="group.notes" :break="false"></vue-markdown>
-                </md-layout>
-            </md-card-header>
-            <md-card-content class="group-card">
-                <md-list md-dense>
-                    <attendee v-for="attendee in group.attendees || []" :attendee="attendee" :key="attendee._id" @updated="reload" />
-                    <md-list-item class="attendee-add">
-                        <md-icon @click.native="addAttendee(group.group)" :class="{'md-primary': hasFocus}">person_add</md-icon>
-                        <md-input-container class="new-attendee">
-                            <label><i>new attendee</i></label>
-                            <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendee" />
-                        </md-input-container>
-
-                    </md-list-item>
-                    <md-input-container ref="newAttendeeNotes" class="attendee-notes-container">
-                        <label><i>notes</i></label>
-                        <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(group.group)" v-model="newAttendeeNotes" />
-                    </md-input-container>
-                </md-list>
-            </md-card-content>
-        </md-card>
-        <md-card v-if="addNewGroup" md-with-hover @mouseenter.native="focusToNewGroup()" @mouseleave.native="hasFocus = false" md-align="start">
-            <md-card-header ref="currentGroup" class="new-group-header">
-                <div class="md-title group-title">
-                    <md-input-container class="new-group">
-                        <md-icon>create_new_folder</md-icon>
-                        <label><i>new group</i></label>
-                        <md-input @keyup.enter.native="focusToNewAttendee()" ref="newGroup" v-model="newGroup" class="group-add-name" />
-                    </md-input-container>
+                    <ibt-menu v-if="loggedInUser.isAdmin || !settings.protectGroupNotes || !settings.protectGroupName" :items="menuItems" />
                 </div>
-            </md-card-header>
-            <md-card-content>
-                <md-list v-show="newGroup" md-dense>
-                    <md-list-item class="attendee-add">
-                        <md-icon @click.native="addAttendee(newGroup)" :class="{'md-primary': hasFocus}">person_add</md-icon>
-                        <md-input-container class="new-attendee">
-                            <label><i>new attendee</i></label>
-                            <md-input ref="newAttendeeInput" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendee" />
-                        </md-input-container>
-                    </md-list-item>
-                    <md-input-container ref="newAttendeeNotes" class="attendee-notes-container">
-                        <label><i>notes</i></label>
-                        <md-input class="new-attendee-notes" @keyup.enter.native="addAttendee(newGroup)" v-model="newAttendeeNotes" />
-                    </md-input-container>
-                </md-list>
-            </md-card-content>
-        </md-card>
+                <div v-if="group.notes" class="ibt-layout layout-row">
+
+                    <vue-markdown ref="groupNotes" @click="toggleNotes()" class="group-notes" :source="group.notes" :break="false"></vue-markdown>
+                </div>
+            </header>
+            <div class="ibt-card-content group-card">
+                <div class="ibt-list">
+                    <attendee v-for="attendee in group.attendees || []" :attendee="attendee" :key="attendee._id" @updated="reload" />
+                    <div class="ibt-list-item-container attendee-add">
+                        <Button text rounded icon="pi pi-user-plus" aria-label="Add attendee"
+                                @click="addAttendee(group.group)" :class="{'ibt-primary': hasFocus}" />
+                        <label class="ibt-input-container new-attendee">
+                            <span class="field-label"><i>new attendee</i></span>
+                            <InputText ref="newAttendeeInput" @keyup.enter="addAttendee(group.group)" v-model="newAttendee" />
+                        </label>
+
+                    </div>
+                    <label ref="newAttendeeNotes" class="ibt-input-container attendee-notes-container">
+                        <span class="field-label"><i>notes</i></span>
+                        <InputText class="new-attendee-notes" @keyup.enter="addAttendee(group.group)" v-model="newAttendeeNotes" />
+                    </label>
+                </div>
+            </div>
+        </article>
+        <article v-if="addNewGroup" @mouseenter="focusToNewGroup()" @mouseleave="hasFocus = false" class="ibt-card">
+            <header ref="currentGroup" class="ibt-card-header new-group-header">
+                <div class="ibt-title group-title">
+                    <label class="ibt-input-container new-group">
+                        <i class="ibt-icon pi pi-folder-plus" aria-hidden="true"></i>
+                        <span class="field-label"><i>new group</i></span>
+                        <InputText @keyup.enter="focusToNewAttendee()" ref="newGroup" v-model="newGroup" class="group-add-name" />
+                    </label>
+                </div>
+            </header>
+            <div class="ibt-card-content">
+                <div v-show="newGroup" class="ibt-list">
+                    <div class="ibt-list-item-container attendee-add">
+                        <Button text rounded icon="pi pi-user-plus" aria-label="Add attendee"
+                                @click="addAttendee(newGroup)" :class="{'ibt-primary': hasFocus}" />
+                        <label class="ibt-input-container new-attendee">
+                            <span class="field-label"><i>new attendee</i></span>
+                            <InputText ref="newAttendeeInput" @keyup.enter="addAttendee(newGroup)" v-model="newAttendee" />
+                        </label>
+                    </div>
+                    <label ref="newAttendeeNotes" class="ibt-input-container attendee-notes-container">
+                        <span class="field-label"><i>notes</i></span>
+                        <InputText class="new-attendee-notes" @keyup.enter="addAttendee(newGroup)" v-model="newAttendeeNotes" />
+                    </label>
+                </div>
+            </div>
+        </article>
         <ibt-dialog ref="dialogObj" />
-        <md-dialog-prompt
+        <IbtPrompt
                     v-model="groupNotes"
                     @open="dialogGroupNotesOpen"
                     @close="dialogGroupNotesClose"
-                    :md-title="noteDialog.title"
-                    :md-ok-text="noteDialog.ok"
-                    :md-cancel-text="noteDialog.cancel"
+                    :title="noteDialog.title"
+                    :ok-text="noteDialog.ok"
+                    :cancel-text="noteDialog.cancel"
                     ref="dialogGroupNotes">
-        </md-dialog-prompt>
-        <md-dialog-prompt
+        </IbtPrompt>
+        <IbtPrompt
                     v-model="groupNewName"
                     @open="dialogRenameGroupOpen"
                     @close="dialogRenameGroupClose"
-                    :md-title="renameDialog.title"
-                    :md-ok-text="renameDialog.ok"
-                    :md-cancel-text="renameDialog.cancel"
+                    :title="renameDialog.title"
+                    :ok-text="renameDialog.ok"
+                    :cancel-text="renameDialog.cancel"
                     ref="dialogRenameGroup">
-        </md-dialog-prompt>
-        <md-dialog-confirm
+        </IbtPrompt>
+        <IbtPrompt confirmation
                     @close="dialogDeleteGroupClose"
-                    :md-title="deleteDialog.title"
-                    :md-content="deleteDialog.content"
-                    :md-ok-text="deleteDialog.ok"
-                    :md-cancel-text="deleteDialog.cancel"
+                    :title="deleteDialog.title"
+                    :content="deleteDialog.content"
+                    :ok-text="deleteDialog.ok"
+                    :cancel-text="deleteDialog.cancel"
                     ref="dialogDeleteGroup">
-        </md-dialog-confirm>
-    </md-layout>
+        </IbtPrompt>
+    </div>
 </template>
 <script>
+import { resource } from './api.js';
 
 import Attendee from './Attendee';
 import IbtDialog from './IbtDialog.vue';
-import IbtMenuItem from './IbtMenuItem.vue';
-import IbtMenuContent from './IbtMenuContent.vue';
+import IbtMenu from './IbtMenu.vue';
 import VueMarkdown from './VueMarkdown.vue';
 
 export default {
     props: {group: {}, day: {}, addNewGroup: {default: false}},
+    emits: ['updated'],
 
     data: function () {
         return {
@@ -132,6 +117,13 @@ export default {
     },
 
     computed: {
+        menuItems() {
+            return [
+                { label: 'edit notes', icon: 'pi pi-pencil', visible: this.loggedInUser.isAdmin || !this.settings.protectGroupNotes, command: () => this.openNotesDialog() },
+                { label: 'rename group', icon: 'pi pi-tag', visible: this.loggedInUser.isAdmin || !this.settings.protectGroupName, command: () => this.openRenameGroupDialog() },
+                { label: 'delete group', icon: 'pi pi-trash', visible: !!this.loggedInUser.isAdmin, command: () => this.openDeleteGroupDialog() },
+            ];
+        },
         counter: function() {
             return (this.group.attendees || []).length;
         },
@@ -144,9 +136,9 @@ export default {
     },
 
     beforeCreate: function() {
-        this.groupsUrl = this.$resource('days{/day}/groups{/group}');
-        this.groupsInfoUrl = this.$resource('days{/day}/groups{/group}/info');
-        this.attendeesUrl = this.$resource('attendees{/id}');
+        this.groupsUrl = resource('days{/day}/groups{/group}');
+        this.groupsInfoUrl = resource('days{/day}/groups{/group}/info');
+        this.attendeesUrl = resource('attendees{/id}');
     },
 
     methods: {
@@ -185,12 +177,12 @@ export default {
             };
             this.attendeesUrl.save(attendee).then((response) => {
                 return response.json();
-            }, (response) => {
-                var msg = (response && response.body && response.body.message) || '';
-                this.$refs.dialogObj.show({text: 'unable to add the attendee: ' + msg});
             }).then((json) => {
                 this.reset();
                 this.$emit('updated');
+            }).catch((response) => {
+                var msg = (response && response.body && response.body.message) || '';
+                this.$refs.dialogObj.show({text: 'unable to add the attendee: ' + msg});
             });
         },
 
@@ -210,12 +202,12 @@ export default {
                     {day: this.day, group: this.group.group},
                     {notes: this.groupNotes}).then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to edit group notes'});
             }).then((json) => {
                 this.group.notes = json.notes;
                 this.reset();
                 this.$emit('updated');
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to edit group notes'});
             });
         },
 
@@ -245,10 +237,10 @@ export default {
             }
             this.groupsUrl.delete({day: this.day, group: this.group.group}).then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to delete this group'});
             }).then((json) => {
                 this.$emit('updated');
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to delete this group'});
             });
         },
 
@@ -268,15 +260,15 @@ export default {
                     {day: this.day, group: this.group.group},
                     {newName: this.groupNewName}).then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to rename this group'});
             }).then((json) => {
                 this.$emit('updated');
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to rename this group'});
             });
         }
     },
 
-    components: { IbtMenuContent, IbtMenuItem, Attendee, IbtDialog, VueMarkdown }
+    components: { IbtMenu, Attendee, IbtDialog, VueMarkdown }
 };
 
 </script>
@@ -290,7 +282,7 @@ export default {
     align-self: flex-start;
 }
 
-.group-layout > .md-card {
+.group-layout > .ibt-card {
     width: 100%;
     border-radius: 22px;
     overflow: hidden;
@@ -377,24 +369,14 @@ export default {
     color: rgba(15, 23, 42, 0.7);
 }
 
-.attendee-add .md-list-item-container > .md-icon:first-child {
-    margin-right: 16px;
-    cursor: pointer;
-}
-
-.attendee-add .md-icon {
-    transition: color 0.2s ease;
-    color: #4338ca;
-}
-
-.attendee-add .md-list-item-container {
+.ibt-list-item-container {
     padding: 0 !important;
     margin-left: 0;
     width: 100%;
     border-radius: 12px;
 }
 
-.md-list-item-container {
+.ibt-list-item-container {
     border-radius: 12px;
 }
 

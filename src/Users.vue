@@ -1,46 +1,47 @@
 <template>
     <div id="users">
-        <md-card>
-            <md-card-header>
-                <span class="md-title">Users</span>
-            </md-card-header>
-            <md-card-content>
-                <md-table>
-                    <md-table-header>
-                        <md-table-row>
-                            <md-table-head>Username</md-table-head>
-                            <md-table-head class="center-content">Email</md-table-head>
-                            <md-table-head class="center-content">Admin</md-table-head>
-                            <md-table-head v-if="loggedInUser.isAdmin" class="center-content">Delete</md-table-head>
-                        </md-table-row>
-                    </md-table-header>
-                    <md-table-body>
-                        <md-table-row v-for="(user, index) in users" :key="user._id">
-                            <md-table-cell>
-                                <router-link :to="userLink(user._id)" class="md-raised md-primary">
+        <article class="ibt-card">
+            <header class="ibt-card-header">
+                <span class="ibt-title">Users</span>
+            </header>
+            <div class="ibt-card-content">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th class="center-content">Email</th>
+                            <th class="center-content">Admin</th>
+                            <th v-if="loggedInUser.isAdmin" class="center-content">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(user, index) in users" :key="user._id">
+                            <td>
+                                <router-link :to="userLink(user._id)" class="ibt-raised ibt-primary">
                                     {{user.username}}
                                 </router-link>
-                            </md-table-cell>
-                            <md-table-cell class="center-content">
+                            </td>
+                            <td class="center-content">
                                 {{user.email}}
-                            </md-table-cell>
-                            <md-table-cell class="center-content">
-                                <md-icon v-if="user.isAdmin">done</md-icon>
-                            </md-table-cell>
-                            <md-table-cell v-if="loggedInUser.isAdmin" class="center-content">
-                                <md-button class="md-icon-button" @click="deleteUser(user._id)">
-                                    <md-icon>delete</md-icon>
-                                </md-button>
-                            </md-table-cell>
-                        </md-table-row>
-                    </md-table-body>
-                </md-table>
-            </md-card-content>
-        </md-card>
+                            </td>
+                            <td class="center-content">
+                                <i v-if="user.isAdmin" class="ibt-icon pi pi-check" aria-hidden="true"></i>
+                            </td>
+                            <td v-if="loggedInUser.isAdmin" class="center-content">
+                                <Button text aria-label="Delete user" class="ibt-icon-button" @click="deleteUser(user._id)">
+                                    <i class="ibt-icon pi pi-trash" aria-hidden="true"></i>
+                                </Button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
         <ibt-dialog ref="dialogObj" />
     </div>
 </template>
 <script>
+import { resource } from './api.js';
 
 import IbtDialog from './IbtDialog.vue';
 
@@ -58,7 +59,7 @@ export default {
     },
 
     beforeCreate: function() {
-        this.usersUrl = this.$resource('users{/id}');
+        this.usersUrl = resource('users{/id}');
     },
 
     mounted: function() {
@@ -73,20 +74,20 @@ export default {
         getUsers() {
             this.usersUrl.get().then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to get the list of users'});
             }).then((data) => {
                 this.users = data.users || [];
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to get the list of users'});
             });
         },
 
         deleteUser(userId) {
             this.usersUrl.delete({id: userId}).then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to delete the user: ' + response.body.message});
             }).then((data) => {
                 this.getUsers();
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to delete the user: ' + response.body.message});
             });
         }
     },
@@ -99,18 +100,6 @@ export default {
 
 #users {
     padding: 10px;
-}
-
-</style>
-<style>
-
-.center-content > .md-table-head-container {
-    text-align: center;
-}
-
-.center-content > .md-table-cell-container {
-    text-align: center;
-    display: block !important;
 }
 
 </style>

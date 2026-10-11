@@ -48,6 +48,8 @@ Example day response:
 ibt2.py          Tornado web server
 index.html       HTML entry point
 vite.config.mjs  Vite configuration
+src/api.js       Browser Fetch helpers for the REST API
+src/style.css    Application layout and shared styles
 monco.py         MongoDB connector
 utils.py         Shared utilities
 dist/            Production build output
@@ -92,6 +94,13 @@ depends on the Python version and operating system.
 
 Use npm 10 or newer for dependency installation, matching the Node 22 Docker
 build and CI environment.
+
+The frontend runs native Vue 3 with Router 4 and Vuex 4. Interactive controls use
+the MIT-licensed PrimeVue 4 line; its theme and icon packages are also external
+npm dependencies. Route components are loaded on demand. Roboto imports include
+only the Latin subset at weights 400, 500, and 700. HTTP failures reject before
+successful-update callbacks, preserving drafts when a write fails. Markdown HTML
+is sanitized with DOMPurify before rendering.
 
 `npm run test:ui` starts a production preview and runs the browser smoke checks;
 first build the frontend and install Chromium as described in [UI testing](UI-TESTING.md).

@@ -1,24 +1,13 @@
 # Frontend regression check
 
-The app uses Vite with Vue 3's migration runtime. Vue Material 0.7, Vue Router 2,
-Vuex 2, and the date picker still require Vue 2 compatibility. Both the runtime
-alias and `template.compilerOptions.compatConfig.MODE: 2` in `vite.config.mjs`
-are intentional. This is not yet a complete migration to native Vue 3 components.
-See the [Vue migration build guide](https://v3-migration.vuejs.org/migration-build.html).
+The frontend uses native Vue 3, Vue Router 4, Vuex 4, and PrimeVue 4. There is
+no Vue 2 compatibility runtime. PrimeVue supplies the calendar, inputs, switches,
+menus, dialogs, and messages; page layouts use ordinary HTML and application CSS.
 
-Keep inputs and leading icons directly inside Material input containers. Extra
-`span` wrappers change flex sizing and break icon and label sibling selectors.
-Native keyboard listeners on legacy inputs use `.native` with the compatibility
-compiler.
-The wrapper in `IbtDialog.vue` keeps a stable DOM anchor when Material moves its
-dialog root to `document.body`; otherwise Vue 3 can fail when inserting the
-attendee editor beside it.
-
-`IbtMenuItem.vue` replaces the legacy menu item's functional list renderer, which
-relies on Vue 2's `data.on` to decide whether a row is clickable.
-`IbtMenuContent.vue` provides arrow-key navigation using the rendered buttons.
-Menu actions activate on keyup so the Enter used to open an editor does not also
-submit the newly focused input.
+`IbtMenu.vue` and `IbtPrompt.vue` configure external PrimeVue controls for the
+application's actions and note editors. HTTP requests use browser Fetch through
+`src/api.js`, with encoded path parameters and explicit rejection of failed HTTP
+responses. Markdown is rendered with marked and sanitized with DOMPurify.
 
 Run the production build:
 
@@ -28,15 +17,17 @@ npm run build
 
 The browser smoke test intercepts API requests and uses in-memory fixtures. It
 needs no Python server, database, or real credentials. It verifies input geometry,
-keyboard login, password visibility, adding/editing attendees, creating a group,
-day-note dialogs, settings switches, profile saving, logout, and responsive layout
-at desktop, tablet, and phone widths. It also fails on browser runtime errors.
+keyboard login, password visibility, adding/editing attendees, failed API writes,
+group creation/renaming/deletion and notes, day-note dialogs, calendar navigation,
+browser history, settings switches, user navigation, profile saving, sanitized
+Markdown, logout, and responsive layout at desktop, tablet, and phone widths.
+It also fails on browser runtime errors and Vue component warnings.
 
 Playwright is pinned in the project's development dependencies and lockfile.
 Install the dependencies and matching Chromium browser:
 
 ```sh
-npm ci --legacy-peer-deps
+npm ci
 npx --no-install playwright-core install chromium
 ```
 

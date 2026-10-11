@@ -1,7 +1,7 @@
 <template>
-    <md-toolbar id="footer" class="md-dense">
+    <div id="footer" class="ibt-toolbar ibt-dense">
         <span><a href="https://github.com/raspibo/ibt2">ibt2</a> &copy; <a href="http://www.raspibo.org/">RaspiBO</a></span>
-    </md-toolbar>
+    </div>
 </template>
 <script>
 

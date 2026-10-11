@@ -36,7 +36,7 @@ python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install --require-hashes -r requirements.txt
-npm ci --legacy-peer-deps
+npm ci
 ```
 
 Build the frontend and start the server:
@@ -74,10 +74,9 @@ See [the development guide](docs/DEVELOPMENT.md) and [the frontend regression-ch
 
 ## Technology
 
-- [Vue 3](https://vuejs.org/) with the Vue 2 compatibility build during the migration
-- [Vue Material](https://vuematerial.github.io/) UI components
-- [vuejs-datepicker](https://github.com/charliekassel/vuejs-datepicker)
-- [marked](https://www.npmjs.com/package/marked) for Markdown rendering
+- [Vue 3](https://vuejs.org/), Vue Router 4, and Vuex 4
+- [PrimeVue](https://primevue.org/) UI components and date picker
+- [marked](https://www.npmjs.com/package/marked) and DOMPurify for sanitized Markdown
 - [Tornado](https://www.tornadoweb.org/) web server
 - [MongoDB](https://www.mongodb.com/) data store
 

@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-import Vue from 'vue';
-import Vuex from 'vuex';
-import VueRouter from 'vue-router';
-import VueResource from 'vue-resource';
-import VueMaterial from 'vue-material';
-import 'vue-material/dist/vue-material.css';
-import 'roboto-fontface/css/roboto/roboto-fontface.css';
-import 'material-design-icons/iconfont/material-icons.css';
+import { createApp, h } from 'vue';
+import { createStore } from 'vuex';
+import { createRouter, createWebHashHistory, RouterView } from 'vue-router';
+import PrimeVue from 'primevue/config';
+import Aura from '@primeuix/themes/aura';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Textarea from 'primevue/textarea';
+import ToggleSwitch from 'primevue/toggleswitch';
+import Dialog from 'primevue/dialog';
+import IbtPrompt from './IbtPrompt.vue';
+import '@fontsource/roboto/latin-400.css';
+import '@fontsource/roboto/latin-500.css';
+import '@fontsource/roboto/latin-700.css';
+import 'primeicons/primeicons.css';
+import './style.css';
 import store_data from './store.js';
-import App from './App';
-import User from './User';
-import Users from './Users';
-import GlobalSettings from './GlobalSettings';
 import Toolbar from './Toolbar';
 import IbtFooter from './IbtFooter';
 
-Vue.use(Vuex);
-Vue.use(VueRouter);
-Vue.use(VueResource);
-Vue.use(VueMaterial);
-// disable ink ripple.
-Vue.material.inkRipple = false;
-
-var routes = [
+const App = () => import('./App.vue');
+const User = () => import('./User.vue');
+const Users = () => import('./Users.vue');
+const GlobalSettings = () => import('./GlobalSettings.vue');
+const routes = [
     {path: '/', name: 'home', component: App},
     {path: '/day/', name: 'days', component: App},
     {path: '/day/:day', name: 'day', component: App},
@@ -46,13 +48,16 @@ var routes = [
     {path: '/settings/', name: 'settings', component: GlobalSettings},
 ];
 
-const store = new Vuex.Store(store_data);
-const router = new VueRouter({routes});
-
-var vue = new Vue({
-    el: '#app',
-    store: store,
-    template: '<div id="app"><toolbar /><router-view class="view"></router-view><ibt-footer /></div>',
-    router: router,
-    components: { App, Toolbar, IbtFooter, Users, User, GlobalSettings }
+const store = createStore(store_data);
+const router = createRouter({ history: createWebHashHistory(), routes });
+const app = createApp({
+    render: () => h('div', [h(Toolbar), h(RouterView, { class: 'view' }), h(IbtFooter)]),
 });
+app.use(store).use(router).use(PrimeVue, {
+    theme: { preset: Aura, options: { darkModeSelector: false } },
+    locale: { firstDayOfWeek: 1 },
+});
+for (const [name, component] of Object.entries({ Button, InputText, Password, Textarea, ToggleSwitch, Dialog, IbtPrompt })) {
+    app.component(name, component);
+}
+router.isReady().then(() => app.mount('#app'));

@@ -1,0 +1,59 @@
+/* Application layout; interactive controls are supplied by PrimeVue. */
+* { box-sizing: border-box; }
+body { font-family: Roboto, 'Segoe UI', sans-serif; line-height: 1.5; }
+button, input, textarea { font: inherit; }
+a { color: #4338ca; }
+.ibt-layout { display: flex; min-width: 0; gap: 16px; }
+.layout-row { flex-flow: row wrap; align-items: center; }
+.layout-column { flex-direction: column; }
+.ibt-card { background: white; border-radius: 18px; }
+.ibt-card-header, .ibt-card-content { padding: 16px; }
+.ibt-title { font-size: 1.2rem; font-weight: 700; }
+.ibt-headline { font-size: 1.2rem; }
+.ibt-list-item-container { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.ibt-list-text-container { flex: 1; min-width: 0; }
+.ibt-input-container { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; min-width: 0; }
+.ibt-input-container input, .ibt-input-container textarea, .p-password { width: 100%; min-width: 0; }
+.field-label { font-size: 0.85rem; color: #475569; }
+.new-group { width: 100%; }
+.attendee-add > .p-button { flex: 0 0 24px; width: 24px; padding: 0; }
+.attendee-list-item { padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
+.attendee-editor { min-width: 0; }
+.setting-switch { display: inline-flex; align-items: center; gap: 12px; margin: 8px 0; }
+.users-table { width: 100%; border-collapse: collapse; }
+.users-table th, .users-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+.users-table .center-content { text-align: center; }
+#users .ibt-card-content { overflow-x: auto; }
+.ibt-snackbar { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 1200; max-width: calc(100vw - 2rem); }
+#toolbar .p-button { color: white; }
+#toolbar .p-inputtext { color: #1f2937 !important; }
+#datepicker { width: 100%; }
+.p-datepicker-panel { max-width: 100%; }
+.event-date { font-weight: 700; text-decoration: underline; text-decoration-color: #7c3aed; text-decoration-thickness: 3px; }
+@media (max-width: 400px) {
+    .p-datepicker-panel { padding: 6px !important; }
+    .p-datepicker-day { width: 2rem !important; height: 2rem !important; }
+    .protection-sect { padding-left: 0 !important; }
+}
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at top left, rgba(191, 219, 254, 0.8), transparent 25%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    color: #1f2937;
+}
+
+#app {
+    min-height: 100vh;
+}
+
+.ibt-card,
+.ibt-toolbar,
+.ibt-list,
+.ibt-input-container,
+.ibt-btn,
+.ibt-button {
+    border-radius: 18px !important;
+}
+

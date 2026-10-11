@@ -1,58 +1,53 @@
 <template>
     <div id="main-attendees">
-        <md-layout md-gutter md-row>
-            <md-layout id="datepicker-column" md-flex="20" md-flex-small="100" md-gutter>
-                <datepicker id="datepicker" ref="datepicker" :value="date" :inline="true" :highlighted="highlightedDates" :monday-first="true" @selected="getDay" @changedMonth="changeMonth"></datepicker>
-                <md-card id="day-info">
-                    <md-card-header class="day-info-header">
-                        <md-layout md-row>
-                            <div class="md-title day-info-title">
-                                <md-icon class="day-icon">today</md-icon>&nbsp;{{ day.day }}
+        <div class="ibt-layout layout-row">
+            <div id="datepicker-column" class="ibt-layout layout-row">
+                <DatePicker id="datepicker" :model-value="date" inline @date-select="getDay"
+                            @month-change="changeMonth" @year-change="changeMonth">
+                    <template #date="slotProps">
+                        <span :class="{'event-date': isEventDate(slotProps.date)}">{{ slotProps.date.day }}</span>
+                    </template>
+                </DatePicker>
+                <article id="day-info" class="ibt-card">
+                    <header class="ibt-card-header day-info-header">
+                        <div class="ibt-layout layout-row">
+                            <div class="ibt-title day-info-title">
+                                <i class="ibt-icon pi pi-calendar day-icon" aria-hidden="true"></i>&nbsp;{{ day.day }}
                             </div>
-                            <md-menu v-if="loggedInUser.isAdmin || !settings.protectDayNotes" md-align-trigger>
-                                <md-button class="md-icon-button" md-menu-trigger>
-                                    <md-icon>more_vert</md-icon>
-                                </md-button>
-                                <ibt-menu-content>
-                                    <ibt-menu-item v-if="loggedInUser.isAdmin || !settings.protectDayNotes" @click="openNotesDialog()">
-                                        <span>edit notes</span>
-                                        <md-icon>edit</md-icon>
-                                    </ibt-menu-item>
-                                </ibt-menu-content>
-                            </md-menu>
-                        </md-layout>
-                    </md-card-header>
-                    <md-card-content>
+                            <ibt-menu v-if="loggedInUser.isAdmin || !settings.protectDayNotes" :items="menuItems" />
+                        </div>
+                    </header>
+                    <div class="ibt-card-content">
                         <div id="day-notes"><vue-markdown :source="day.notes"></vue-markdown></div>
-                    </md-card-content>
-                </md-card>
-            </md-layout>
-            <md-layout id="panel" md-column>
-                <md-layout md-row>
+                    </div>
+                </article>
+            </div>
+            <div id="panel" class="ibt-layout layout-column">
+                <div class="ibt-layout layout-row">
                     <group v-for="group in day.groups || []" :group="group" :day="day.day" :key="group.group" new-attendee="" @updated="reload" />
                     <group key="__new_group__" :add-new-group="true" :day="day.day" new-attendee="" new-group="" @updated="reload" />
-                </md-layout>
-            </md-layout>
-        </md-layout>
+                </div>
+            </div>
+        </div>
         <ibt-dialog ref="dialogObj" />
-        <md-dialog-prompt
+        <IbtPrompt
                     v-model="dayNotes"
                     @open="dialogDayNotesOpen"
                     @close="dialogDayNotesClose"
-                    :md-title="noteDialog.title"
-                    :md-ok-text="noteDialog.ok"
-                    :md-cancel-text="noteDialog.cancel"
+                    :title="noteDialog.title"
+                    :ok-text="noteDialog.ok"
+                    :cancel-text="noteDialog.cancel"
                     ref="dialogDayNotes">
-        </md-dialog-prompt>
+        </IbtPrompt>
     </div>
 </template>
 <script>
+import { resource } from './api.js';
 
-import Datepicker from 'vuejs-datepicker';
+import DatePicker from 'primevue/datepicker';
 import Group from './Group';
 import IbtDialog from './IbtDialog.vue';
-import IbtMenuItem from './IbtMenuItem.vue';
-import IbtMenuContent from './IbtMenuContent.vue';
+import IbtMenu from './IbtMenu.vue';
 import VueMarkdown from './VueMarkdown.vue';
 
 export default {
@@ -67,24 +62,9 @@ export default {
     },
 
     computed: {
-        highlightedDates() {
-            var ds = this.daysSummary.days || [];
-            var datesWithGroups = [];
-            for (var i=0; i < ds.length; i++) {
-                var [year, month, day] = ds[i].day.split('-');
-                year = parseInt(year);
-                month = parseInt(month) - 1;
-                day = parseInt(day);
-                if (isNaN(year) || isNaN(month) || isNaN(day)) {
-                    continue;
-                }
-                datesWithGroups.push(new Date(year, month, day));
-            }
-            return {
-                dates: datesWithGroups
-            };
+        menuItems() {
+            return [{ label: 'edit notes', icon: 'pi pi-pencil', command: () => this.openNotesDialog() }];
         },
-
         loggedInUser() {
             return this.$store.state.loggedInUser;
         },
@@ -95,13 +75,19 @@ export default {
     },
 
     beforeCreate: function() {
-        this.daysUrl = this.$resource('days{/day}');
-        this.daysInfoUrl = this.$resource('days{/day}/info');
-        this.settingsUrl = this.$resource('settings');
+        this.daysUrl = resource('days{/day}');
+        this.daysInfoUrl = resource('days{/day}/info');
+        this.settingsUrl = resource('settings');
     },
 
     mounted: function() {
         this.fetchSettings(this.initialize);
+    },
+
+    watch: {
+        '$route.params.day'(day) {
+            if (!this.date || day !== this.dateToString(this.date)) this.initialize();
+        },
     },
 
     methods: {
@@ -113,7 +99,7 @@ export default {
             if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
                 this.date = new Date(year, month, day);
             }
-            if (!(this.date && !isNaN(this.date.getTime()))) {
+            if (!this.$route.params.day || !(this.date && !isNaN(this.date.getTime()))) {
                 this.date = new Date();
             }
             this.reload();
@@ -126,14 +112,14 @@ export default {
         },
 
         changeMonth(newDate) {
-            if (newDate.timestamp) {
-                newDate = new Date(newDate.timestamp);
-            }
-            var day = new Date();
-            day.setTime(newDate instanceof Date ? newDate.getTime() : newDate);
+            const day = new Date(newDate.year, newDate.month - 1, 1);
             var ym = this.dateToString(day, true);
             this.getSummary({start: ym, end: ym});
-            this.getDay(day);
+        },
+
+        isEventDate(date) {
+            const value = this.dateToString(new Date(date.year, date.month, date.day));
+            return (this.daysSummary.days || []).some(day => day.day === value);
         },
 
         dateToString(date, excludeDay) {
@@ -156,10 +142,10 @@ export default {
             params['summary'] = true;
             this.daysUrl.query(params).then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to get the monthly summary'});
             }).then((json) => {
                 this.daysSummary = json;
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to get the monthly summary'});
             });
         },
 
@@ -174,16 +160,16 @@ export default {
                 day = this.dateToString(today);
                 this.date = today;
             }
-            this.$router.push('/day/' + day);
+            if (this.$route.params.day !== day) this.$router.push('/day/' + day);
             this.daysUrl.get({day: day}).then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to get information about this day'});
             }).then((dayData) => {
                 if (!(dayData && dayData.day)) {
                     dayData.day = day;
                 }
                 this.day = dayData;
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to get information about this day'});
             });
         },
 
@@ -202,19 +188,17 @@ export default {
             var data = {day: this.day.day, notes: this.dayNotes};
             this.daysInfoUrl.update({day: this.day.day}, data).then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to edit day notes'});
             }).then((json) => {
                 this.day.notes = json.notes;
                 this.reload();
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to edit day notes'});
             });
         },
 
         fetchSettings(cb) {
             this.settingsUrl.get().then((response) => {
                 return response.json();
-            }, (response) => {
-                this.$refs.dialogObj.show({text: 'unable to fetch settings'});
             }).then((json) => {
                 if (!json || json.error) {
                     this.$refs.dialogObj.show({text: 'unable to fetch settings: ' + ((json && json.message) || '')});
@@ -222,11 +206,13 @@ export default {
                     this.$store.commit('updateSettings', json);
                 }
                 cb();
+            }).catch((response) => {
+                this.$refs.dialogObj.show({text: 'unable to fetch settings'});
             });
         }
     },
 
-    components: { IbtMenuContent, IbtMenuItem, Datepicker, Group, IbtDialog, VueMarkdown }
+    components: { IbtMenu, DatePicker, Group, IbtDialog, VueMarkdown }
 }
 
 </script>
@@ -254,20 +240,12 @@ export default {
     }
 }
 
-.vdp-datepicker {
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.88);
-    border-radius: 22px;
-    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
-    border: 1px solid rgba(148, 163, 184, 0.25);
-}
-
 #panel {
     min-width: 0;
     gap: 12px;
 }
 
-#panel > .md-layout {
+#panel > .ibt-layout {
     flex: initial;
     align-items: flex-start;
     gap: 16px;
@@ -331,59 +309,6 @@ export default {
         padding: 18px 10px 24px;
     }
 
-    .vdp-datepicker {
-        padding: 5px;
-    }
-}
-
-</style>
-<style>
-
-body {
-    margin: 0;
-    background:
-        radial-gradient(circle at top left, rgba(191, 219, 254, 0.8), transparent 25%),
-        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-    color: #1f2937;
-}
-
-#app {
-    min-height: 100vh;
-}
-
-.md-card,
-.md-toolbar,
-.md-list,
-.md-input-container,
-.md-btn,
-.md-button {
-    border-radius: 18px !important;
-}
-
-.vdp-datepicker__calendar > header > span {
-    background: linear-gradient(135deg, #f9a8d4 0%, #c4b5fd 100%);
-    color: #111827;
-}
-
-.vdp-datepicker__calendar > header > span:hover {
-    background: linear-gradient(135deg, #f472b6 0%, #8b5cf6 100%) !important;
-    color: white !important;
-}
-
-.vdp-datepicker__calendar {
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 18px !important;
-    overflow: hidden;
-}
-
-.vdp-datepicker__calendar .cell {
-    border-radius: 10px;
-}
-
-.vdp-datepicker__calendar .cell.selected {
-    background: linear-gradient(135deg, #f472b6 0%, #8b5cf6 100%);
-    color: white;
 }
 
 </style>

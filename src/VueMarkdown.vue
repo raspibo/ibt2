@@ -4,6 +4,7 @@
 
 <script>
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 // Configure marked with sensible defaults
 marked.setOptions({
@@ -26,9 +27,9 @@ export default {
     computed: {
         compiledMarkdown() {
             if (!this.source) return '';
-            return marked.parse(this.source, {
+            return DOMPurify.sanitize(marked.parse(this.source, {
                 breaks: this.breaks
-            });
+            }));
         }
     }
 };

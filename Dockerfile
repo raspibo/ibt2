@@ -3,7 +3,7 @@ FROM node:22-bookworm-slim AS frontend
 WORKDIR /build
 
 COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci
 
 COPY index.html vite.config.mjs ./
 COPY src/ ./src/
