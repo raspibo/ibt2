@@ -9,11 +9,12 @@ RUN \
 	apt-get update && \
 	apt-get install --no-install-recommends -y \
 		python3-pip \
-		python3-tornado \
 		python3-venv && \
 	rm -rf /var/lib/apt/lists/* && \
-	python3 -m venv --system-site-packages /opt/venv && \
-	/opt/venv/bin/pip install --no-cache-dir pymongo
+	python3 -m venv /opt/venv
+
+COPY requirements.txt /tmp/ibt2-requirements.txt
+RUN /opt/venv/bin/pip install --no-cache-dir --require-hashes -r /tmp/ibt2-requirements.txt
 
 COPY . /ibt2
 

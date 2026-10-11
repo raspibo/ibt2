@@ -58,6 +58,36 @@ src/             Frontend source
   store.js       Shared frontend state
 ```
 
+## Python dependencies
+
+`requirements.in` declares supported runtime dependency ranges. The generated
+`requirements.txt` pins runtime dependencies, including transitive dependencies,
+with artifact hashes. Local installation and Docker use this same lock.
+`requirements-dev.in` adds backend test dependencies and constrains runtime
+versions to the runtime lock; `requirements-dev.txt` locks the combined environment.
+Install it with:
+
+```sh
+python -m pip install --require-hashes -r requirements-dev.txt
+```
+
+`monco.py` is an internal module maintained here. The `bson` module is provided by
+PyMongo; do not install the separate `bson` distribution.
+
+To update the locks, use a separate tooling virtual environment:
+
+```sh
+python3 -m venv /tmp/ibt2-lock-tools
+/tmp/ibt2-lock-tools/bin/python -m pip install pip-tools==7.6.2
+/tmp/ibt2-lock-tools/bin/pip-compile --upgrade --generate-hashes --strip-extras --no-emit-index-url --no-emit-trusted-host --output-file=requirements.txt requirements.in
+/tmp/ibt2-lock-tools/bin/pip-compile --upgrade --generate-hashes --strip-extras --no-emit-index-url --no-emit-trusted-host --output-file=requirements-dev.txt requirements-dev.in
+```
+
+Regenerate runtime first, then development. Review both diffs and verify clean
+installations on the supported Python versions before committing an update.
+Locks cover the default dependencies; platform-specific wheel selection still
+depends on the Python version and operating system.
+
 ## Style
 
 Follow the style of the file you are changing. Use four spaces rather than tabs for Python (required), JavaScript, HTML, and CSS. Python docstrings use [Sphinx](https://www.sphinx-doc.org/) field-list syntax.

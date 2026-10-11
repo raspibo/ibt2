@@ -27,7 +27,7 @@ See [the Docker guide](docs/DOCKER.md) for backup, restore, and administrator-pa
 
 ## Run without Docker
 
-You need Node.js 20.19+ (or 22.12+), Python 3, and a reachable MongoDB instance. Create a virtual environment and install the Python dependencies:
+You need Node.js 20.19+ (or 22.12+), Python 3.11 or newer, and a reachable MongoDB instance. Create a virtual environment and install the Python dependencies:
 
 ```sh
 git clone https://github.com/raspibo/ibt2.git
@@ -35,7 +35,7 @@ cd ibt2
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install tornado pymongo
+python -m pip install --require-hashes -r requirements.txt
 npm ci --legacy-peer-deps
 ```
 
@@ -62,9 +62,10 @@ npm run devserver
 npm run dev
 ```
 
-Run the backend tests while the development backend is running:
+Install the backend test dependencies and run the tests while the development backend is running:
 
 ```sh
+python -m pip install --require-hashes -r requirements-dev.txt
 python3 tests/ibt2_tests.py
 ```
 
