@@ -36,6 +36,24 @@ docker compose down
 
 The MongoDB data is stored in the Compose `data` volume (named `ibt2_data` by default). Do not run `docker compose down --volumes` unless you intentionally want to delete all stored attendance data.
 
+## Versioned container releases
+
+The GitHub Actions workflow includes publication to `ghcr.io/<owner>/<repository>`
+on pushes of stable `vX.Y.Z` tags, after browser, backend, and Docker checks pass.
+The tag must match the version in `package.json` and both package-lock version
+fields. The image receives the `X.Y.Z` tag and source, revision, and version labels;
+there is no moving `latest` tag. Published images currently target Linux amd64.
+
+Publication uses the repository's `GITHUB_TOKEN` with package write permission,
+so no Docker Hub credentials are required. This is configured automation; an
+image is available only after the workflow runs successfully on GitHub. Package
+visibility and organization policies may require configuration on GitHub before
+other users can pull it.
+
+To use a published image in Compose, replace `build: .` in the `ibt2` service with
+`image: ghcr.io/<owner>/<repository>:X.Y.Z`, using your repository name and released
+version. MongoDB and its persistent volume remain defined by Compose.
+
 ## Initial administrator password
 
 On first start, ibt2 creates the `admin` user with the password `admin`. Change it from the personal page after signing in.

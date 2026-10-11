@@ -1,0 +1,117 @@
+name: Tests and packaging
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm run build
+      - run: npx --no-install playwright-core install --with-deps chromium
+      - run: npm run test:ui
+
+  backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.14']
+    services:
+      mongo:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping: 1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: python -m pip install --require-hashes -r requirements-dev.txt
+      - run: python -m pip check
+      - run: python tests/run-backend.py
+
+  docker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - run: docker compose config --quiet
+      - run: docker build -t ibt2:ci .
+      - run: docker run --rm --network none --read-only --entrypoint python ibt2:ci -m pip check
+      - name: Check packaged application
+        run: |
+          docker run --rm --network none --read-only --entrypoint python ibt2:ci -B -c '
+          import ibt2, monco, utils, shutil
+          from pathlib import Path
+          assert Path("dist/index.html").is_file()
+          assert list(Path("dist/assets").glob("*.js"))
+          assert not shutil.which("node")
+          assert not shutil.which("npm")
+          assert not Path("src").exists()
+          assert not Path(".git").exists()
+          '
+      - run: docker run --rm --network none --read-only ibt2:ci --help
+
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [frontend, backend, docker]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Verify release version and determine image name
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          version = json.loads(Path('package.json').read_text())['version']
+          lock = json.loads(Path('package-lock.json').read_text())
+          assert re.fullmatch(r'\d+\.\d+\.\d+', version), 'Use a stable X.Y.Z version'
+          assert os.environ['RELEASE_TAG'] == f'v{version}', 'Tag must match package.json'
+          assert lock['version'] == lock['packages']['']['version'] == version, 'Lock version mismatch'
+          image = 'ghcr.io/' + os.environ['GITHUB_REPOSITORY'].lower()
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'image={image}\nversion={version}\n')
+          PY
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish versioned image
+        env:
+          IMAGE: ${{ steps.release.outputs.image }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          docker build --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --label "org.opencontainers.image.version=$VERSION" \
+            -t "$IMAGE:$VERSION" .
+          docker push "$IMAGE:$VERSION"

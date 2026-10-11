@@ -32,23 +32,29 @@ keyboard login, password visibility, adding/editing attendees, creating a group,
 day-note dialogs, settings switches, profile saving, logout, and responsive layout
 at desktop, tablet, and phone widths. It also fails on browser runtime errors.
 
-Install the browser test tools separately from application dependencies:
+Playwright is pinned in the project's development dependencies and lockfile.
+Install the dependencies and matching Chromium browser:
 
 ```sh
-npm install --prefix /tmp/ibt2-ui-tools playwright-core
-/tmp/ibt2-ui-tools/node_modules/.bin/playwright-core install chromium
+npm ci --legacy-peer-deps
+npx --no-install playwright-core install chromium
 ```
 
-Start Vite in one terminal, then run the check in another:
+Build the frontend and run the automated check. The runner starts and stops a
+local Vite preview of the production build:
 
 ```sh
-npm run dev -- --host 127.0.0.1 --port 8081
+npm run build
+npm run test:ui
 ```
 
 ```sh
-NODE_PATH=/tmp/ibt2-ui-tools/node_modules node tests/ui-smoke.cjs
+IBT2_UI_URL=http://127.0.0.1:8080 node tests/ui-smoke.cjs
 ```
 
-Set `IBT2_UI_URL` to test another local port or a Vite preview of the production
-build. These checks validate frontend behavior against the mocked API contract;
+The command above runs the smoke test directly against an already running server.
+Set `IBT2_UI_PORT` to change the automated preview's port (default 8081).
+On Linux, use `npx --no-install playwright-core install --with-deps chromium`
+if browser system libraries are missing; CI uses this command.
+These checks validate frontend behavior against the mocked API contract;
 they do not replace backend integration tests.

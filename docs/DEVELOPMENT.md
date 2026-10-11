@@ -88,6 +88,36 @@ installations on the supported Python versions before committing an update.
 Locks cover the default dependencies; platform-specific wheel selection still
 depends on the Python version and operating system.
 
+## Automated checks
+
+Use npm 10 or newer for dependency installation, matching the Node 22 Docker
+build and CI environment.
+
+`npm run test:ui` starts a production preview and runs the browser smoke checks;
+first build the frontend and install Chromium as described in [UI testing](UI-TESTING.md).
+
+`npm run test:backend` starts a backend on port 3001, runs the existing integration
+tests, and stops the backend. It requires `requirements-dev.txt` and a reachable
+MongoDB instance. The tests delete collections in `ibt2_test`; use a disposable
+database instance. For example, in separate terminals:
+
+```sh
+docker run --rm --name ibt2-test-mongo -p 127.0.0.1:27018:27017 mongo:7.0
+```
+
+```sh
+IBT2_TEST_MONGO_URL=mongodb://127.0.0.1:27018 npm run test:backend
+```
+
+Stop the MongoDB container with `docker stop ibt2-test-mongo` when finished. It
+has no persistent volume. Set `IBT2_TEST_PORT` to change the backend runner port.
+The test database name remains `ibt2_test`.
+
+GitHub Actions runs production browser checks, backend tests on Python 3.11 and
+3.14 with fresh MongoDB service containers, and Docker build and packaging checks
+on pushes and pull requests. Actions are pinned to commit hashes. A successful
+version-tag run can publish the container as described in [Docker](DOCKER.md).
+
 ## Style
 
 Follow the style of the file you are changing. Use four spaces rather than tabs for Python (required), JavaScript, HTML, and CSS. Python docstrings use [Sphinx](https://www.sphinx-doc.org/) field-list syntax.

@@ -16,10 +16,11 @@ limitations under the License.
 """
 
 import unittest
+import os
 import requests
 import monco
 
-BASE_URL = 'http://localhost:3000/v1.1/'
+BASE_URL = os.environ.get('IBT2_TEST_BASE_URL', 'http://localhost:3000/v1.1/')
 DB_NAME = 'ibt2_test'
 
 def dictInDict(d, dContainer):
@@ -33,7 +34,8 @@ def dictInDict(d, dContainer):
 
 class Ibt2Tests(unittest.TestCase):
     def setUp(self):
-        self.monco_conn = monco.Monco(dbName=DB_NAME)
+        self.monco_conn = monco.Monco(dbName=DB_NAME,
+                                    url=os.environ.get('IBT2_TEST_MONGO_URL'))
         self.connection = self.monco_conn.connection
         self.db = self.monco_conn.db
         self.db['attendees'].drop()

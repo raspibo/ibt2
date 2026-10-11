@@ -17,7 +17,9 @@
     "dev": "vite",
     "devserver": "python3 ibt2.py --debug --db_name=ibt2_test",
     "server": "python3 ibt2.py --debug",
-    "build": "vite build"
+    "build": "vite build",
+    "test:ui": "node tests/run-ui.cjs",
+    "test:backend": "python3 tests/run-backend.py"
   },
   "dependencies": {
     "marked": "^15.0.7",
@@ -35,9 +37,11 @@
     "@vue/compat": "^3.5.42",
     "@vue/compiler-sfc": "^3.5.42",
     "esbuild": "0.25.0",
+    "playwright-core": "1.64.0",
     "vite": "8.3.0"
   },
   "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+    "node": "^20.19.0 || >=22.12.0",
+    "npm": ">=10"
   }
 }

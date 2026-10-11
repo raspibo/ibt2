@@ -27,7 +27,7 @@ See [the Docker guide](docs/DOCKER.md) for backup, restore, and administrator-pa
 
 ## Run without Docker
 
-You need Node.js 20.19+ (or 22.12+), Python 3.11 or newer, and a reachable MongoDB instance. Create a virtual environment and install the Python dependencies:
+You need Node.js 20.19+ (or 22.12+) with npm 10 or newer, Python 3.11 or newer, and a reachable MongoDB instance. Create a virtual environment and install the Python dependencies:
 
 ```sh
 git clone https://github.com/raspibo/ibt2.git
@@ -62,11 +62,12 @@ npm run devserver
 npm run dev
 ```
 
-Install the backend test dependencies and run the tests while the development backend is running:
+Install the backend test dependencies and run the integration tests against a
+disposable MongoDB instance. The runner starts and stops its own backend server:
 
 ```sh
 python -m pip install --require-hashes -r requirements-dev.txt
-python3 tests/ibt2_tests.py
+npm run test:backend
 ```
 
 See [the development guide](docs/DEVELOPMENT.md) and [the frontend regression-check guide](docs/UI-TESTING.md) for details.
