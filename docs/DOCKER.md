@@ -8,6 +8,13 @@ locked Python dependencies, and built frontend; Node.js, npm, and frontend sourc
 remain in the build stage. Rebuild the image after changing application code or
 dependency locks.
 
+`.dockerignore` allows only the inputs used by the application Dockerfile into
+the build context. Repository metadata, virtual environments, existing `dist/`
+output, tests, documentation, and the `ssl/` directory are excluded. Local
+environment files, keys, and certificates are also excluded from the allowed
+source directories. When adding a new Dockerfile build input, update the
+allowlist as well.
+
 For HTTPS, mount your certificate and key into `/ibt2/ssl/ibt2_cert.pem` and
 `/ibt2/ssl/ibt2_key.pem`, respectively, using read-only bind mounts. Certificates
 and keys are not copied into the image. The `--ssl_cert` and `--ssl_key` arguments

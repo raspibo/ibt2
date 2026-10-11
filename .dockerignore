@@ -1,7 +1,31 @@
-.DS_Store
-node_modules/
-__pycache__
-npm-debug*.log
-*.py[cod]
-*.so
-.editorconfig
+# Only send inputs consumed by the application Dockerfile.
+# Add new build inputs here when adding COPY instructions to that Dockerfile.
+**
+!Dockerfile
+!.dockerignore
+!package.json
+!package-lock.json
+!requirements.txt
+!index.html
+!vite.config.mjs
+!ibt2.py
+!monco.py
+!utils.py
+!LICENSE.txt
+!src/
+!src/**
+!static/
+!static/**
+
+# Keep local files out even when nested inside an allowed source directory.
+**/.git
+**/node_modules
+**/__pycache__
+**/.DS_Store
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.py[cod]
+**/*.so
+**/npm-debug*.log
