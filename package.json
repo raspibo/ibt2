@@ -24,7 +24,7 @@
   "dependencies": {
     "@fontsource/roboto": "^5.3.0",
     "@primeuix/themes": "^1.2.5",
-    "dompurify": "^3.4.16",
+    "dompurify": "^3.4.17",
     "marked": "^18.1.0",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.5",
