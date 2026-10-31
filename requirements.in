@@ -1,3 +1,3 @@
 # Runtime dependencies. monco.py is an internal module, not a distribution.
-tornado>=6.5,<7
+tornado>=6.6,<7
 pymongo>=4.10,<5
